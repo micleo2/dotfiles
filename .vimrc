@@ -33,6 +33,12 @@ Plugin 'scrooloose/syntastic'
 Plugin 'SirVer/ultisnips'
 Plugin 'honza/vim-snippets'
 
+" for react
+Plugin 'pangloss/vim-javascript'
+Plugin 'mxw/vim-jsx'
+" React code snippets
+Plugin 'epilande/vim-react-snippets'
+
 " textobjects
 Plugin 'kana/vim-textobj-user'
 Plugin 'kana/vim-textobj-line'
@@ -40,7 +46,6 @@ Plugin 'kana/vim-textobj-indent'
 Plugin 'kana/vim-textobj-entire'
 Plugin 'kana/vim-textobj-underscore'
 Plugin 'sgur/vim-textobj-parameter'
-
 
 " Themes
 Plugin 'ryanoasis/vim-devicons'
@@ -68,8 +73,18 @@ set shiftwidth=2
 set smarttab
 set expandtab
 
+" for easier :find completion
+set path=$PWD/**
+
+" to enable autocompletion from macros, keybindings etc.
+set wildcharm=<C-z>
+
+" change buffers without saving
+set hidden
+
 " Tagbar
 let g:tabgar_autofocus=1
+let g:tagbar_show_linenumbers = -1
 
 " Always display the status line
 set laststatus=2
@@ -93,7 +108,17 @@ map <C-g> :GitGutterAll<CR>
 map <C-m> :set relativenumber!<CR>
 map <C-m> :set relativenumber!<CR>
 nnoremap <leader>c :!ctags -R<CR>
-nnoremap <leader>p ysiw)<CR>
+nnoremap <leader>j :tjump /
+nnoremap <leader>m :CtrlPTag<CR>
+
+" this is for easy buffer access
+nnoremap gb :ls<CR>:b<Space>
+nnoremap <Leader>b :buffer <C-z><S-Tab>
+
+" for ease of buffer completion
+set wildmenu
+set wildmode=longest:full,full
+set wildignore=*.swp,*.bak
 
 " Snytastic stuff
 function! ToggleErrors()
@@ -131,6 +156,7 @@ let g:UltiSnipsJumpBackwardTrigger="<c-z>"
 
 " If you want :UltiSnipsEdit to split your window.
 let g:UltiSnipsEditSplit="vertical"
+let g:UltiSnipsListSnippets="<Ctrl-l>"
 
 " for devicons
 set encoding=UTF-8
@@ -138,50 +164,3 @@ set guifont=Ubuntu\ Mono\ Nerd\ Font\ 11
 
 colorscheme gruvbox
 set bg=dark
-
-set updatetime=100
-
-if exists("+showtabline")
-  function! MyTabLine()
-    let s = ''
-    let wn = ''
-    let t = tabpagenr()
-    let i = 1
-    while i <= tabpagenr('$')
-      let buflist = tabpagebuflist(i)
-      let winnr = tabpagewinnr(i)
-      let s .= '%' . i . 'T'
-      let s .= (i == t ? '%1*' : '%2*')
-      let s .= ' '
-      let wn = tabpagewinnr(i,'$')
-
-      let s .= '%#TabNum#'
-      let s .= i
-      " let s .= '%*'
-      let s .= (i == t ? '%#TabLineSel#' : '%#TabLine#')
-      let bufnr = buflist[winnr - 1]
-      let file = bufname(bufnr)
-      let buftype = getbufvar(bufnr, 'buftype')
-      if buftype == 'nofile'
-        if file =~ '\/.'
-          let file = substitute(file, '.*\/\ze.', '', '')
-        endif
-      else
-        let file = fnamemodify(file, ':p:t')
-      endif
-      if file == ''
-        let file = '[No Name]'
-      endif
-      let s .= ' ' . file . ' '
-      let i = i + 1
-    endwhile
-    let s .= '%T%#TabLineFill#%='
-    let s .= (tabpagenr('$') > 1 ? '%999XX' : 'X')
-    return s
-  endfunction
-  set stal=2
-  set tabline=%!MyTabLine()
-  set showtabline=1
-  highlight link TabNum Special
-endif
-
