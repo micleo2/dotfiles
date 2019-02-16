@@ -36,6 +36,7 @@ Plugin 'honza/vim-snippets'
 " for react
 Plugin 'pangloss/vim-javascript'
 Plugin 'mxw/vim-jsx'
+
 " React code snippets
 Plugin 'epilande/vim-react-snippets'
 
@@ -85,11 +86,16 @@ set hidden
 " Tagbar
 let g:tabgar_autofocus=1
 let g:tagbar_show_linenumbers = -1
+"
+" enable line numbers
+let NERDTreeShowLineNumbers=1
+" make sure relative line numbers are used
+autocmd FileType nerdtree setlocal relativenumber
 
 " Always display the status line
 set laststatus=2
-
-"No ARRRROWWS!!!!
+"
+" No ARRRROWWS!!!!
 nnoremap <Up>    :resize +2<CR>
 nnoremap <Down>  :resize -2<CR>
 nnoremap <Left>  :vertical resize +2<CR>
@@ -105,8 +111,6 @@ set cursorline
 map <C-f> :NERDTreeToggle<CR>
 map <C-t> :TagbarToggle<CR>
 map <C-g> :GitGutterAll<CR>
-map <C-m> :set relativenumber!<CR>
-map <C-m> :set relativenumber!<CR>
 nnoremap <leader>c :!ctags -R<CR>
 nnoremap <leader>j :tjump /
 nnoremap <leader>m :CtrlPTag<CR>
@@ -144,8 +148,6 @@ let g:syntastic_always_populate_loc_list = 1
 let g:syntastic_auto_loc_list = 1
 let g:syntastic_check_on_open = 1
 let g:syntastic_check_on_wq = 0
-
-" snippet stuff
 
 " Trigger configuration. Do not use <tab> if you use https://github.com/Valloric/YouCompleteMe.
 let g:UltiSnipsUsePythonVersion = 3
