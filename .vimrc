@@ -103,7 +103,7 @@ augroup end
 " Mappings configurationn
 """""""""""""""""""""""""""""""""""""
 augroup mappings
-  map <C-f> :NERDTreeToggle<CR>
+  map <C-x> :NERDTreeToggle<CR>
   map <C-t> :TagbarToggle<CR>
   map <C-g> :GitGutterAll<CR>
   nnoremap <leader>c :!ctags -R<CR>
