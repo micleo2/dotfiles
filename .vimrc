@@ -24,7 +24,6 @@ Plugin 'scrooloose/nerdtree'
 Plugin 'tpope/vim-surround'
 Plugin 'morhetz/gruvbox'
 Plugin 'vim-airline/vim-airline'
-Plugin 'vim-airline/vim-airline-themes'
 Plugin 'airblade/vim-gitgutter'
 Plugin 'majutsushi/tagbar'
 Plugin 'universal-ctags/ctags'
@@ -32,6 +31,7 @@ Plugin 'tomtom/tcomment_vim'
 Plugin 'scrooloose/syntastic'
 Plugin 'SirVer/ultisnips'
 Plugin 'honza/vim-snippets'
+Plugin 'bergercookie/vim-debugstring'
 
 " for react
 Plugin 'pangloss/vim-javascript'
@@ -42,87 +42,116 @@ Plugin 'epilande/vim-react-snippets'
 
 " textobjects
 Plugin 'kana/vim-textobj-user'
-Plugin 'kana/vim-textobj-line'
 Plugin 'kana/vim-textobj-indent'
-Plugin 'kana/vim-textobj-entire'
-Plugin 'kana/vim-textobj-underscore'
-Plugin 'sgur/vim-textobj-parameter'
 
 " Themes
 Plugin 'ryanoasis/vim-devicons'
 
 call vundle#end()            " required
+filetype plugin on    " required
 filetype plugin indent on    " required
 """" END Vundle Configuration
+
 
 """""""""""""""""""""""""""""""""""""
 " Configuration Section
 """""""""""""""""""""""""""""""""""""
+augroup basic_settings
+  " set space as leader!!
+  map <space> <leader>
 
-" Show linenumbers
-set number
-set relativenumber
-set ruler
+  " Show linenumbers
+  set number
+  set relativenumber
+  set ruler
 
-" highlight/searching
-set incsearch
-set hls
+  " highlight/searching
+  set incsearch
+  set hls
 
-" Set Proper Tabs
-set tabstop=2
-set shiftwidth=2
-set smarttab
-set expandtab
+  " Set Proper Tabs
+  set tabstop=2
+  set shiftwidth=2
+  set smarttab
+  set expandtab
 
-" for easier :find completion
-set path=$PWD/**
+  " change buffers without saving
+  set hidden
 
-" to enable autocompletion from macros, keybindings etc.
-set wildcharm=<C-z>
+  " Always display the status line
+  set laststatus=2
 
-" change buffers without saving
-set hidden
+  " Enable highlighting of the current line
+  set cursorline
 
-" Tagbar
-let g:tabgar_autofocus=1
-let g:tagbar_show_linenumbers = -1
-"
-" enable line numbers
-let NERDTreeShowLineNumbers=1
-" make sure relative line numbers are used
-autocmd FileType nerdtree setlocal relativenumber
+  " react snippets are also available in .js files
+  let g:jsx_ext_required = 0
+augroup end
 
-" Always display the status line
-set laststatus=2
-"
-" No ARRRROWWS!!!!
-nnoremap <Up>    :resize +2<CR>
-nnoremap <Down>  :resize -2<CR>
-nnoremap <Left>  :vertical resize +2<CR>
-nnoremap <Right> :vertical resize -2<CR>
-
-" Enable highlighting of the current line
-set cursorline
-
+" activate relative numbers in windows spawned by plugins
+augroup rel_numbers
+  " Tagbar
+  let g:tabgar_autofocus=1
+  let g:tagbar_show_linenumbers = -1
+  "
+  " enable line numbers
+  let NERDTreeShowLineNumbers=1
+  autocmd FileType nerdtree setlocal relativenumber
+augroup end
 
 """""""""""""""""""""""""""""""""""""
 " Mappings configurationn
 """""""""""""""""""""""""""""""""""""
-map <C-f> :NERDTreeToggle<CR>
-map <C-t> :TagbarToggle<CR>
-map <C-g> :GitGutterAll<CR>
-nnoremap <leader>c :!ctags -R<CR>
-nnoremap <leader>j :tjump /
-nnoremap <leader>m :CtrlPTag<CR>
+augroup mappings
+  map <C-f> :NERDTreeToggle<CR>
+  map <C-t> :TagbarToggle<CR>
+  map <C-g> :GitGutterAll<CR>
+  nnoremap <leader>c :!ctags -R<CR>
+  nnoremap <leader>j :tjump /
+  nnoremap <leader>m :CtrlPTag<CR>
 
-" this is for easy buffer access
-nnoremap gb :ls<CR>:b<Space>
-nnoremap <Leader>b :buffer <C-z><S-Tab>
+  " No ARRRROWWS!!!!
+  nnoremap <Up>    :resize +2<CR>
+  nnoremap <Down>  :resize -2<CR>
+  nnoremap <Left>  :vertical resize +2<CR>
+  nnoremap <Right> :vertical resize -2<CR>
 
-" for ease of buffer completion
-set wildmenu
-set wildmode=longest:full,full
-set wildignore=*.swp,*.bak
+  "
+  " print helper in insert mode
+  inoremap <C-l> <ESC>yiwea=#{<C-r>"}
+
+  " set b/l to go to begin or end of line
+  nnoremap <leader>b ^
+  nnoremap <leader>l $
+  "
+  " make o turn off highlight
+  nnoremap <leader>o <ESC>:noh<CR>
+
+  " this is for easy buffer access
+  nnoremap gb :ls<CR>:b<Space>
+
+  " Syntastic toggle
+  nnoremap <leader>e :<C-u>call ToggleErrors()<CR>
+augroup end
+
+augroup pending
+  " operator pending movements
+  " make in( behave like the text object i"
+  onoremap in( :<c-u>normal! f(vi(<cr>
+  " operate inside last pair of parenthesis
+  onoremap il( :<c-u>normal! F)vi(<cr>
+  " textobject for underscore
+  onoremap i_ :<c-u>execute "normal! /_\\\|)\\\|\\s\rhv?_\\\|(\\\|\\s\rl" \| set nohlsearch<cr>
+augroup end
+
+augroup styling
+  " for devicons
+  set encoding=UTF-8
+  set guifont=Ubuntu\ Mono\ Nerd\ Font\ 11
+
+  colorscheme gruvbox
+  set bg=dark
+augroup end
 
 " Snytastic stuff
 function! ToggleErrors()
@@ -134,35 +163,11 @@ function! ToggleErrors()
     endif
 endfunction
 
-" syntastic stuff
-nnoremap <leader>e :<C-u>call ToggleErrors()<CR>
-nnoremap <leader>l :lnext<CR>
-nnoremap <leader>h :lprev<CR>
-set statusline+=%#warningmsg#
-set statusline+=%{SyntasticStatuslineFlag()}
-set statusline+=%*
 let g:syntastic_c_checkers = ["make"]
-let g:syntastic_py_checkers = ["python3"]
+let g:syntastic_python_checkers = ["python3"]
+let g:syntastic_javascript_checkers = ['eslint']
 let g:syntastic_cpp_checkers = ["make"]
 let g:syntastic_always_populate_loc_list = 1
 let g:syntastic_auto_loc_list = 1
 let g:syntastic_check_on_open = 1
 let g:syntastic_check_on_wq = 0
-
-" Trigger configuration. Do not use <tab> if you use https://github.com/Valloric/YouCompleteMe.
-let g:UltiSnipsUsePythonVersion = 3
-let g:UltiSnipsExpandTrigger="<tab>"
-let g:UltiSnipsListSnippets="<c-tab>"
-let g:UltiSnipsJumpForwardTrigger="<c-b>"
-let g:UltiSnipsJumpBackwardTrigger="<c-z>"
-
-" If you want :UltiSnipsEdit to split your window.
-let g:UltiSnipsEditSplit="vertical"
-let g:UltiSnipsListSnippets="<Ctrl-l>"
-
-" for devicons
-set encoding=UTF-8
-set guifont=Ubuntu\ Mono\ Nerd\ Font\ 11
-
-colorscheme gruvbox
-set bg=dark
