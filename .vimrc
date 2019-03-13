@@ -1,5 +1,5 @@
 """""""""""""""""""""""""""""""""""""
-" Allan MacGregor Vimrc configuration
+" Michael Leon Vimrc configuration
 """""""""""""""""""""""""""""""""""""
 set nocompatible
 syntax on
@@ -86,6 +86,9 @@ augroup basic_settings
 
   " react snippets are also available in .js files
   let g:jsx_ext_required = 0
+
+  " left moves past newline
+  set whichwrap+=<,>,h,l,[,]
 augroup end
 
 " activate relative numbers in windows spawned by plugins
@@ -141,7 +144,8 @@ augroup pending
   " operate inside last pair of parenthesis
   onoremap il( :<c-u>normal! F)vi(<cr>
   " textobject for underscore
-  onoremap i_ :<c-u>execute "normal! /_\\\|)\\\|\\s\rhv?_\\\|(\\\|\\s\rl" \| set nohlsearch<cr>
+  onoremap i_ :<c-u>execute "normal! /_\\\|)\\\|,\\\|\\s\rhvNl" \| set nohlsearch<cr>
+  onoremap a_ :<c-u>execute "normal! /_\\\|)\\\|,\\\|\\s\rhvN" \| set nohlsearch<cr>
 augroup end
 
 augroup styling
