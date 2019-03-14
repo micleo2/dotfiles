@@ -126,6 +126,9 @@ augroup mappings
   " set b/l to go to begin or end of line
   nnoremap <leader>b ^
   nnoremap <leader>l $
+
+  " source current file easily
+  nnoremap <leader>s <ESC>:source<Space>%<CR>
   "
   " make o turn off highlight
   nnoremap <leader>o <ESC>:noh<CR>
@@ -135,6 +138,14 @@ augroup mappings
 
   " Syntastic toggle
   nnoremap <leader>e :<C-u>call ToggleErrors()<CR>
+
+  " ctrl b gets caught by tmux, so use ctrl-h instead
+  nnoremap <C-h> <C-b>
+  nnoremap <C-b> <Nop>
+
+  " re-purpose pgup and pgdwn to more useful commands
+  nnoremap <PageUp> <ESC>:bnext<CR>
+  nnoremap <PageDown> <ESC>:bprev<CR>
 augroup end
 
 augroup pending
@@ -146,6 +157,10 @@ augroup pending
   " textobject for underscore
   onoremap i_ :<c-u>execute "normal! /_\\\|)\\\|,\\\|\\s\rhvNl" \| set nohlsearch<cr>
   onoremap a_ :<c-u>execute "normal! /_\\\|)\\\|,\\\|\\s\rhvN" \| set nohlsearch<cr>
+  O
+  " set b/l to go to begin or end of line
+  onoremap <leader>b ^
+  onoremap <leader>l $
 augroup end
 
 augroup styling
