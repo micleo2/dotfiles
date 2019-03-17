@@ -69,11 +69,14 @@ augroup basic_settings
   set incsearch
   set hls
 
-  " Set Proper Tabs
-  set tabstop=2
-  set shiftwidth=2
-  set smarttab
-  set expandtab
+  " tab settings
+  set smartindent   " Do smart autoindenting when starting a new line
+  set shiftwidth=2  " Set number of spaces per auto indentation
+  set expandtab     " When using <Tab>, put spaces instead of a <tab> character
+
+  " good to have for consistency
+  set tabstop=2   " Number of spaces that a <Tab> in the file counts for
+  set smarttab    " At <Tab> at beginning line inserts spaces set in shiftwidth
 
   " change buffers without saving
   set hidden
@@ -87,8 +90,11 @@ augroup basic_settings
   " react snippets are also available in .js files
   let g:jsx_ext_required = 0
 
-  " left moves past newline
+  " left/right moves past newline
   set whichwrap+=<,>,h,l,[,]
+
+  " folds
+  setlocal foldmethod=indent
 augroup end
 
 " activate relative numbers in windows spawned by plugins
@@ -141,11 +147,15 @@ augroup mappings
 
   " ctrl b gets caught by tmux, so use ctrl-h instead
   nnoremap <C-h> <C-b>
-  nnoremap <C-b> <Nop>
 
   " re-purpose pgup and pgdwn to more useful commands
   nnoremap <PageUp> <ESC>:bnext<CR>
   nnoremap <PageDown> <ESC>:bprev<CR>
+
+  " muscle memory training
+  nnoremap <C-b> <Nop>
+  nnoremap <Home> <Nop>
+  nnoremap <End> <Nop>
 augroup end
 
 augroup pending
@@ -157,7 +167,7 @@ augroup pending
   " textobject for underscore
   onoremap i_ :<c-u>execute "normal! /_\\\|)\\\|,\\\|\\s\rhvNl" \| set nohlsearch<cr>
   onoremap a_ :<c-u>execute "normal! /_\\\|)\\\|,\\\|\\s\rhvN" \| set nohlsearch<cr>
-  O
+  
   " set b/l to go to begin or end of line
   onoremap <leader>b ^
   onoremap <leader>l $
