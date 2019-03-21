@@ -146,7 +146,7 @@ augroup mappings
   nnoremap <leader>e :<C-u>call ToggleErrors()<CR>
 
   " ctrl b gets caught by tmux, so use ctrl-h instead
-  nnoremap <C-h> <C-b>
+  nnoremap <C-k> <C-b>
 
   " re-purpose pgup and pgdwn to more useful commands
   nnoremap <PageUp> <ESC>:bnext<CR>
@@ -156,6 +156,19 @@ augroup mappings
   nnoremap <C-b> <Nop>
   nnoremap <Home> <Nop>
   nnoremap <End> <Nop>
+augroup end
+
+augroup tmux
+  " rerun the last command in the rightmost pane
+  nnoremap <Leader>ts :silent !tmux send-keys -t right "Up" C-m <CR> <C-l>
+  " kill the program running in the last active tmux pane
+  nnoremap <Leader>tc :silent !tmux send-keys -t \\! C-c <CR> <C-l>
+  " send current line to last active pane -- VERY BUGGY
+  nnoremap <Leader>tp :exe "!tmux send-keys -t \\! \"" . getline(".") . "\" C-m" <CR> <C-l>
+  " send selected visual area to last active tmux pane -- VERY BUGGY
+  vnoremap <Leader>tp <ESC>:exe "!tmux send-keys -t \\! \"" . @* . "\" C-m" <CR> <C-l>
+  " Launch a python shell interpreter in last active pane
+  nnoremap <Leader>ti :silent !tmux send-keys -t \\! "python3.6" C-m "import numpy as np" C-m<CR> <C-l> :silent !tmux select-pane -t \\!<CR>
 augroup end
 
 augroup pending
