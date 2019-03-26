@@ -125,7 +125,9 @@ augroup mappings
   nnoremap <Left>  :vertical resize +2<CR>
   nnoremap <Right> :vertical resize -2<CR>
 
-  "
+  " search in visual mode
+  vnoremap // y/<C-R>"<CR>
+
   " print helper in insert mode
   inoremap <C-l> <ESC>yiwea=#{<C-r>"}
 
@@ -160,13 +162,23 @@ augroup end
 
 augroup tmux
   " rerun the last command in the rightmost pane
-  nnoremap <Leader>ts :silent !tmux send-keys -t right "Up" C-m <CR> <C-l>
+  nnoremap <Leader>tR :silent !tmux send-keys -t right "Up" C-m <CR> <C-l>
+  " rerun the last command, leave fullscreen first
+  nnoremap <Leader>tr :silent !tmux resize-pane -Z<CR> :silent !tmux send-keys -t right "Up" C-m <CR> <C-l>
+
+  " rerun the last command in the rightmost pane, leave fullscreen and exit insert mode and save file
+  inoremap jk <ESC>:w<CR>:silent !tmux resize-pane -Z<CR> :silent !tmux send-keys -t right "Up" C-m <CR> <C-l>
+  " rerun the last command in the rightmost pane, and exit insert mode and save file
+  inoremap jK <ESC>:w<CR>:silent !tmux send-keys -t right "Up" C-m <CR> <C-l>
+
   " kill the program running in the last active tmux pane
   nnoremap <Leader>tc :silent !tmux send-keys -t \\! C-c <CR> <C-l>
+
   " send current line to last active pane -- VERY BUGGY
   nnoremap <Leader>tp :exe "!tmux send-keys -t \\! \"" . getline(".") . "\" C-m" <CR> <C-l>
   " send selected visual area to last active tmux pane -- VERY BUGGY
   vnoremap <Leader>tp <ESC>:exe "!tmux send-keys -t \\! \"" . @* . "\" C-m" <CR> <C-l>
+
   " Launch a python shell interpreter in last active pane
   nnoremap <Leader>ti :silent !tmux send-keys -t \\! "python3.6" C-m "import numpy as np" C-m<CR> <C-l> :silent !tmux select-pane -t \\!<CR>
 augroup end
@@ -175,6 +187,7 @@ augroup pending
   " operator pending movements
   " make in( behave like the text object i"
   onoremap in( :<c-u>normal! f(vi(<cr>
+  onoremap in[ :<c-u>normal! f[vi[<cr>
   " operate inside last pair of parenthesis
   onoremap il( :<c-u>normal! F)vi(<cr>
   " textobject for underscore
