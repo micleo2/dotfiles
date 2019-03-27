@@ -180,7 +180,11 @@ augroup tmux
   vnoremap <Leader>tp <ESC>:exe "!tmux send-keys -t \\! \"" . @* . "\" C-m" <CR> <C-l>
 
   " Launch a python shell interpreter in last active pane
-  nnoremap <Leader>ti :silent !tmux send-keys -t \\! "python3.6" C-m "import numpy as np" C-m<CR> <C-l> :silent !tmux select-pane -t \\!<CR>
+  nnoremap <Leader>tip :silent !tmux send-keys -t \\! "python3.6" C-m "import numpy as np" C-m<CR> <C-l> :silent !tmux select-pane -t \\!<CR>
+  " Launch a javascript shell interpreter in last active pane
+  nnoremap <Leader>tij :silent !tmux send-keys -t \\! "node" C-m <CR> <C-l> :silent !tmux select-pane -t \\!<CR>
+  " Launch a javascript shell interpreter in last active pane
+  nnoremap <Leader>tir :silent !tmux send-keys -t \\! "irb" C-m <CR> <C-l> :silent !tmux select-pane -t \\!<CR>
 augroup end
 
 augroup pending
