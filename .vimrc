@@ -92,9 +92,6 @@ augroup basic_settings
 
   " left/right moves past newline
   set whichwrap+=<,>,h,l,[,]
-
-  " folds
-  setlocal foldmethod=indent
 augroup end
 
 " activate relative numbers in windows spawned by plugins
@@ -134,6 +131,8 @@ augroup mappings
   " set b/l to go to begin or end of line
   nnoremap <leader>b ^
   nnoremap <leader>l $
+  vnoremap <leader>b ^
+  vnoremap <leader>l $
 
   " source current file easily
   nnoremap <leader>s <ESC>:source<Space>%<CR>
@@ -165,6 +164,10 @@ augroup tmux
   nnoremap <Leader>tR :silent !tmux send-keys -t right "Up" C-m <CR> <C-l>
   " rerun the last command, leave fullscreen first
   nnoremap <Leader>tr :silent !tmux resize-pane -Z<CR> :silent !tmux send-keys -t right "Up" C-m <CR> <C-l>
+  " like tr but a 'force run' -- run Ctrl-C first
+  nnoremap <Leader>tf :silent !tmux resize-pane -Z<CR> :silent !tmux send-keys -t right C-c<CR>:silent !tmux send-keys -t right "Up" C-m <CR> <C-l>
+  " like tR but a 'force run' -- run Ctrl-C first
+  nnoremap <Leader>tF :silent !tmux send-keys -t right C-c<CR>:silent !tmux send-keys -t right "Up" C-m <CR> <C-l>
 
   " rerun the last command in the rightmost pane, leave fullscreen and exit insert mode and save file
   inoremap jk <ESC>:w<CR>:silent !tmux resize-pane -Z<CR> :silent !tmux send-keys -t right "Up" C-m <CR> <C-l>
@@ -207,6 +210,7 @@ augroup styling
   " for devicons
   set encoding=UTF-8
   set guifont=Ubuntu\ Mono\ Nerd\ Font\ 11
+  let g:airline_powerline_fonts = 1
 
   colorscheme gruvbox
   set bg=dark
