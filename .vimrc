@@ -109,10 +109,11 @@ augroup end
 " Mappings configurationn
 """""""""""""""""""""""""""""""""""""
 augroup mappings
-  map <C-x> :NERDTreeToggle<CR>
-  map <C-t> :TagbarToggle<CR>
-  map <C-g> :GitGutterAll<CR>
+  nnoremap <C-x> :NERDTreeToggle<CR>
+  nnoremap <C-t> :TagbarToggle<CR>
+  nnoremap <C-g> :GitGutterAll<CR>
   nnoremap <leader>c :!ctags -R<CR>
+  nnoremap <leader>g :!gotags -R . > tags<CR>
   nnoremap <leader>j :tjump /
   nnoremap <leader>m :CtrlPTag<CR>
 
@@ -125,20 +126,25 @@ augroup mappings
   " search in visual mode
   vnoremap // y/<C-R>"<CR>
 
-  " print helper in insert mode
-  inoremap <C-l> <ESC>yiwea=#{<C-r>"}
-
   " set b/l to go to begin or end of line
   nnoremap <leader>b ^
   nnoremap <leader>l $
   vnoremap <leader>b ^
   vnoremap <leader>l $
 
+  " U reverts file to last save
+  nnoremap U :e!<CR>
+
+  " have Y mimic D and C etc
+  nnoremap Y y$
+
   " source current file easily
-  nnoremap <leader>s <ESC>:source<Space>%<CR>
-  "
+  nnoremap <leader>S <ESC>:source<Space>%<CR>
+
   " make o turn off highlight
   nnoremap <leader>o <ESC>:noh<CR>
+  " make O turn on highlight
+  nnoremap <leader>O <ESC>:set hls<CR>
 
   " this is for easy buffer access
   nnoremap gb :ls<CR>:b<Space>
@@ -146,19 +152,52 @@ augroup mappings
   " Syntastic toggle
   nnoremap <leader>e :<C-u>call ToggleErrors()<CR>
 
-  " ctrl b gets caught by tmux, so use ctrl-h instead
+  " ctrl b gets caught by tmux, so use ctrl-k instead
   nnoremap <C-k> <C-b>
+  vnoremap <C-k> <C-b>
+  
+  " ctrl f gets caught by tmux, so use ctrl-j instead
+  nnoremap <C-j> <C-f>
 
   " re-purpose pgup and pgdwn to more useful commands
   nnoremap <PageUp> <ESC>:bnext<CR>
   nnoremap <PageDown> <ESC>:bprev<CR>
 
-  " muscle memory training
-  nnoremap <C-b> <Nop>
-  nnoremap <Home> <Nop>
-  nnoremap <End> <Nop>
-augroup end
+  " make new lines while staying where you are
+  nnoremap <leader>i mlo<ESC>`l
+  nnoremap <leader>I mlO<ESC>`l
 
+  " surround current line with a newlines above and below
+  nnoremap <leader>s mlO<ESC>jo<ESC>`l
+
+  " Re-order lines
+  nnoremap J :let c=col(".")<CR>:execute "normal! ddp" . c . "\|"<CR>
+  nnoremap K :let c=col(".")<CR>:execute "normal! ddkP" . c . "\|"<CR>
+
+  " Re-order lines while staying in visual mode
+  vnoremap J <ESC>:execute "normal! gvdpV" . (line("'>") - line("'<")) ."j"<CR>
+  vnoremap K <ESC>:execute "normal! gvdkPV" . (line("'>") - line("'<")) ."j"<CR>
+  " using the move command is slower for some reason
+  " vnoremap J :m '>+1<CR>gv=gv
+
+  " Shift text around in character visual mode, only use with one line selection
+  " vnoremap L <ESC>:execute "normal! gvdpv" . (col("'>") - col("'<")) ."h"<CR>
+  " vnoremap H <ESC>:execute "normal! gvdhPv" . (col("'>") - col("'<")) ."h"<CR>
+
+  " swap ` and '
+  nnoremap ' `
+  nnoremap ` '
+
+  " search current word but not move your cursor position
+  nnoremap S ml*`l
+
+  " replace current word and leave dot more useful
+  nnoremap <leader>r ml*`lcgn
+  nnoremap <leader>R ml*`lcgN
+
+  nnoremap Q :q<CR>
+
+  nnoremap gy mlyyp`ljmlk:TComment<CR>`l
 augroup tmux
   " rerun the last command in the rightmost pane
   nnoremap <Leader>tR :silent !tmux send-keys -t right "Up" C-m <CR> <C-l>
@@ -226,6 +265,7 @@ function! ToggleErrors()
     endif
 endfunction
 
+let g:syntastic_go_checkers = ["govet"]
 let g:syntastic_c_checkers = ["make"]
 let g:syntastic_python_checkers = ["python3"]
 let g:syntastic_javascript_checkers = ['eslint']
