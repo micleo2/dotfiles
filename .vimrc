@@ -32,6 +32,7 @@ Plugin 'scrooloose/syntastic'
 Plugin 'SirVer/ultisnips'
 Plugin 'honza/vim-snippets'
 Plugin 'bergercookie/vim-debugstring'
+Plugin 'tpope/vim-fugitive'
 
 " for react
 Plugin 'pangloss/vim-javascript'
@@ -108,20 +109,30 @@ augroup end
 """""""""""""""""""""""""""""""""""""
 " Mappings configurationn
 """""""""""""""""""""""""""""""""""""
-augroup mappings
+augroup plugin-mappings
   nnoremap <C-x> :NERDTreeToggle<CR>
   nnoremap <C-t> :TagbarToggle<CR>
   nnoremap <C-g> :GitGutterAll<CR>
+  nnoremap <leader>m :CtrlPTag<CR>
+  nnoremap gs :Gstatus<CR>
+  
+  " Syntastic toggle
+  nnoremap <leader>e :<C-u>call ToggleErrors()<CR>
+
+  " generate ctags file
   nnoremap <leader>c :!ctags -R<CR>
   nnoremap <leader>g :!gotags -R . > tags<CR>
-  nnoremap <leader>j :tjump /
-  nnoremap <leader>m :CtrlPTag<CR>
 
+  nnoremap gy mlyyp`ljmlk:TComment<CR>`l
+augroup end
+
+" Note: the l marker/register is treated as scratch space for many mappings
+augroup vanilla-mappings
   " No ARRRROWWS!!!!
-  nnoremap <Up>    :resize +2<CR>
-  nnoremap <Down>  :resize -2<CR>
-  nnoremap <Left>  :vertical resize +2<CR>
-  nnoremap <Right> :vertical resize -2<CR>
+  nnoremap <Up>    :resize +4<CR>
+  nnoremap <Down>  :resize -4<CR>
+  nnoremap <Left>  :vertical resize +4<CR>
+  nnoremap <Right> :vertical resize -4<CR>
 
   " search in visual mode
   vnoremap // y/<C-R>"<CR>
@@ -149,16 +160,10 @@ augroup mappings
   " this is for easy buffer access
   nnoremap gb :ls<CR>:b<Space>
 
-  " Syntastic toggle
-  nnoremap <leader>e :<C-u>call ToggleErrors()<CR>
-
   " ctrl b gets caught by tmux, so use ctrl-k instead
   nnoremap <C-k> <C-b>
   vnoremap <C-k> <C-b>
   
-  " ctrl f gets caught by tmux, so use ctrl-j instead
-  nnoremap <C-j> <C-f>
-
   " re-purpose pgup and pgdwn to more useful commands
   nnoremap <PageUp> <ESC>:bnext<CR>
   nnoremap <PageDown> <ESC>:bprev<CR>
@@ -177,8 +182,6 @@ augroup mappings
   " Re-order lines while staying in visual mode
   vnoremap J <ESC>:execute "normal! gvdpV" . (line("'>") - line("'<")) ."j"<CR>
   vnoremap K <ESC>:execute "normal! gvdkPV" . (line("'>") - line("'<")) ."j"<CR>
-  " using the move command is slower for some reason
-  " vnoremap J :m '>+1<CR>gv=gv
 
   " Shift text around in character visual mode, only use with one line selection
   " vnoremap L <ESC>:execute "normal! gvdpv" . (col("'>") - col("'<")) ."h"<CR>
@@ -195,9 +198,13 @@ augroup mappings
   nnoremap <leader>r ml*`lcgn
   nnoremap <leader>R ml*`lcgN
 
+  " Q for easy quitting
   nnoremap Q :q<CR>
 
-  nnoremap gy mlyyp`ljmlk:TComment<CR>`l
+  " copy current line to next line and keep cursor on same column
+  nnoremap gh mlyyp`lj
+augroup end
+
 augroup tmux
   " rerun the last command in the rightmost pane
   nnoremap <Leader>tR :silent !tmux send-keys -t right "Up" C-m <CR> <C-l>
