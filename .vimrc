@@ -33,6 +33,7 @@ Plugin 'SirVer/ultisnips'
 Plugin 'honza/vim-snippets'
 Plugin 'bergercookie/vim-debugstring'
 Plugin 'tpope/vim-fugitive'
+Plugin 'tommcdo/vim-exchange'
 
 " for react
 Plugin 'pangloss/vim-javascript'
@@ -123,7 +124,7 @@ augroup plugin-mappings
   nnoremap <leader>c :!ctags -R<CR>
   nnoremap <leader>g :!gotags -R . > tags<CR>
 
-  nnoremap gy mlyyp`ljmlk:TComment<CR>`l
+  nnoremap gH mlyyp`ljmlk:TComment<CR>`l
 augroup end
 
 " Note: the l marker/register is treated as scratch space for many mappings
@@ -173,7 +174,7 @@ augroup vanilla-mappings
   nnoremap <leader>I mlO<ESC>`l
 
   " surround current line with a newlines above and below
-  nnoremap <leader>s mlO<ESC>jo<ESC>`l
+  nnoremap <leader>s mlO<ESC>jo<ESC>`li
 
   " Re-order lines
   nnoremap J :let c=col(".")<CR>:execute "normal! ddp" . c . "\|"<CR>
@@ -203,9 +204,23 @@ augroup vanilla-mappings
 
   " copy current line to next line and keep cursor on same column
   nnoremap gh mlyyp`lj
+
+  " get quick access to all unbinded keys
+  nnoremap <leader>n :norm! 
+
+  " have deletes that write into 0 register, so it's like 
+  " you're yanking what you're about to delete
+  nnoremap gy "0d
+  nnoremap gY "0D
+
+  inoremap jk <ESC>:w<CR>
 augroup end
 
 augroup tmux
+  " mainly for Haskell's ghci
+  nnoremap <Leader>tl :silent !tmux send-keys -t right "C-l" <CR> <C-l><C-l>
+  nnoremap <Leader>hr :silent !tmux send-keys -t right ":reload" C-m <CR> <C-l><C-l>
+
   " rerun the last command in the rightmost pane
   nnoremap <Leader>tR :silent !tmux send-keys -t right "Up" C-m <CR> <C-l>
   " rerun the last command, leave fullscreen first
@@ -215,10 +230,10 @@ augroup tmux
   " like tR but a 'force run' -- run Ctrl-C first
   nnoremap <Leader>tF :silent !tmux send-keys -t right C-c<CR>:silent !tmux send-keys -t right "Up" C-m <CR> <C-l>
 
-  " rerun the last command in the rightmost pane, leave fullscreen and exit insert mode and save file
-  inoremap jk <ESC>:w<CR>:silent !tmux resize-pane -Z<CR> :silent !tmux send-keys -t right "Up" C-m <CR> <C-l>
-  " rerun the last command in the rightmost pane, and exit insert mode and save file
-  inoremap jK <ESC>:w<CR>:silent !tmux send-keys -t right "Up" C-m <CR> <C-l>
+  " " rerun the last command in the rightmost pane, leave fullscreen and exit insert mode and save file
+  " inoremap jk <ESC>:w<CR>:silent !tmux resize-pane -Z<CR> :silent !tmux send-keys -t right "Up" C-m <CR> <C-l>
+  " " rerun the last command in the rightmost pane, and exit insert mode and save file
+  " inoremap jK <ESC>:w<CR>:silent !tmux send-keys -t right "Up" C-m <CR> <C-l>
 
   " kill the program running in the last active tmux pane
   nnoremap <Leader>tc :silent !tmux send-keys -t \\! C-c <CR> <C-l>
@@ -238,11 +253,12 @@ augroup end
 
 augroup pending
   " operator pending movements
-  " make in( behave like the text object i"
-  onoremap in( :<c-u>normal! f(vi(<cr>
-  onoremap in[ :<c-u>normal! f[vi[<cr>
-  " operate inside last pair of parenthesis
-  onoremap il( :<c-u>normal! F)vi(<cr>
+  " make i) etc behave like the text object i"
+  onoremap i) :<c-u>norm! f(vi(<cr>
+  onoremap i] :<c-u>norm! f[vi[<cr>
+  " complements of the above but backwards
+  onoremap I) :<c-u>norm! F)vi(<cr>
+  onoremap I] :<c-u>norm! F]vi[<cr>
   " textobject for underscore
   onoremap i_ :<c-u>execute "normal! /_\\\|)\\\|,\\\|\\s\rhvNl" \| set nohlsearch<cr>
   onoremap a_ :<c-u>execute "normal! /_\\\|)\\\|,\\\|\\s\rhvN" \| set nohlsearch<cr>
