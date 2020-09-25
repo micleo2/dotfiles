@@ -63,11 +63,10 @@ ZSH_THEME="spaceship"
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
-  git
+  # git
   zsh-autosuggestions
   z
   colored-man-pages
-  tmux
 )
 
 source $ZSH/oh-my-zsh.sh
@@ -101,10 +100,30 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 #
-alias ssh_241='ssh mal7@fa18-cs241-164.cs.illinois.edu'
+# alias ssh_241='ssh mal7@fa18-cs241-164.cs.illinois.edu'
+alias ssh_427='ssh mal7@fa20-cs427-125.cs.illinois.edu'
 alias pl='git pull'
 alias ph='git push'
-alias tg='sh ~/tmuxgo.sh'
+alias gs='git status'
+alias gr='git remote -v'
+alias tg='sh ~/development/dotfiles/tmuxgo.sh'
+alias tgr='sh ~/development/dotfiles/tmuxgo.sh irb'
+alias tgp='sh ~/development/dotfiles/tmuxgo.sh python3'
+alias tgh='sh ~/development/dotfiles/tmuxgo.sh ghci'
+alias tls='tmux ls'
+alias ta='tmux a -t '
+alias s='. ~/.zshrc'
+alias se='vim ~/.zshrc'
+alias gn='git checkout -b '
+alias gd='git diff'
+alias gc='git checkout '
+alias gf='git fetch'
+alias gl='git log'
+alias gcp='git checkout -'
+# alias sa='tmux send-keys "yarn start" C-m && tmux split-window && tmux send-keys -t down "yarn android"'
+alias sa='tmux send-keys "yarn start" C-m && tmux send-keys -t bottom "yarn android" C-m'
+alias ys='yarn start'
+alias ya='yarn android'
 
 function scottify(){
 	PS1='\[\e[32m>\]\[\e[0m\] '
@@ -120,3 +139,101 @@ function tsr {
   args=$@
   tmux send-keys -t right "$args" C-m
 }
+
+export GOROOT=/usr/local/go
+export GOPATH='/home/mike/go'
+export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+
+# give width and height of grid as parameters
+# start with window containing just a single pane
+function tgrid() {
+  for (( n = 1; n < $1; n++ )); do
+    tmux split-window -h -t $n
+  done
+  tmux select-layout even-horizontal
+
+  width=$(tmux display -p '#{window_width}')
+  height=$(tmux display -p '#{window_height}')
+  cell_width=$(($width/$1))
+  cell_height=$(($height/$2))
+
+  for (( tpane = 1; tpane <= $1 * ($2-1); tpane++ )); do
+    tmux split-window -v -t $tpane
+    tmux resize-pane -t $tpane -x $cell_width -y $cell_height
+  done
+}
+
+function grr(){
+  grep -R $@ ./* -n
+}
+
+function lcl(){
+  cat > "$1.py" <<- EOF
+# Definition for singly-linked list.
+class ListNode:
+    def __init__(self, x):
+        self.val = x
+        self.next = None
+def linked(ls):
+    if len(ls) == 0:
+        return None
+    head = ListNode(ls[0])
+    cur = head
+    for i in range(1, len(ls)):
+        cur.next = ListNode(ls[i])
+        cur = cur.next
+    return head
+def print_linked(head):
+    vals = []
+    while head is not None:
+        vals.append(str(head.val))
+        head = head.next
+    print("vals: ", vals)
+    print("->".join(vals))
+
+class Solution:
+    def $1(self, holder):
+      return holder
+
+obj = Solution()
+
+print(obj.$1(sample))
+EOF
+  vim "$1.py"
+}
+
+function lc(){
+  cat > "$1.py" <<- EOF
+class Solution:
+    def $1(self, holder):
+      return holder
+
+obj = Solution()
+
+print(obj.$1(sample))
+EOF
+  vim "$1.py"
+}
+
+
+export TORCH_ROOT=~/torch
+export JAVA_OPTS='-XX:+IgnoreUnrecognizedVMOptions --add-modules java.se.ee'
+
+
+. /home/mike/torch/install/bin/torch-activate
+
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/home/mike/anaconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/home/mike/anaconda3/etc/profile.d/conda.sh" ]; then
+        . "/home/mike/anaconda3/etc/profile.d/conda.sh"
+    else
+        export PATH="/home/mike/anaconda3/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+# <<< conda initialize <<<
+

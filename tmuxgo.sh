@@ -11,8 +11,7 @@ tmux send-keys "vim ." C-m
 tmux select-pane -t 2
 tmux send-keys "ls" C-m
 tmux split-window -v
-tmux send-keys "python3.6" C-m
-tmux send-keys "import numpy as np" C-m
+tmux send-keys $@ C-m
 
 # Set default window
 tmux select-window -t $SESSION:1

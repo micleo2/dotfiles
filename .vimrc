@@ -116,6 +116,7 @@ augroup plugin-mappings
   nnoremap <C-g> :GitGutterAll<CR>
   nnoremap <leader>m :CtrlPTag<CR>
   nnoremap gs :Gstatus<CR>
+  nnoremap <leader>d :Gdiff<CR>
   
   " Syntastic toggle
   nnoremap <leader>e :<C-u>call ToggleErrors()<CR>
@@ -252,6 +253,9 @@ augroup tmux
 augroup end
 
 augroup pending
+  " make I" move backwards
+  onoremap I" :<c-u>norm! F"vi"<cr>
+
   " operator pending movements
   " make i) etc behave like the text object i"
   onoremap i) :<c-u>norm! f(vi(<cr>
