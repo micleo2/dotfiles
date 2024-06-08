@@ -35,6 +35,7 @@ abbr --add ez 'nvim ~/.zshrc'
 abbr --add ef 'nvim ~/.config/fish/config.fish && source ~/.config/fish/config.fish'
 abbr --add et 'nvim ~/.tmux.conf'
 abbr --add ev 'nvim ~/.config/nvim/init.vim'
+abbr --add ea 'nvim ~/.aerospace.toml'
 abbr --add sf 'source ~/.config/fish/config.fish'
 
 # git
