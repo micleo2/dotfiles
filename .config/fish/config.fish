@@ -42,6 +42,7 @@ abbr --add sf 'source ~/.config/fish/config.fish'
 abbr --add gs 'git status'
 abbr --add ga 'git add .'
 abbr --add gc --set-cursor 'git commit -m "%"'
+abbr --add gd 'git diff'
 abbr --add diff 'git diff --no-index'
 
 # tmux
@@ -54,44 +55,6 @@ abbr --add rp 'realpath'
 
 export EDITOR='/Users/fbmal7/nvims/0.9.0-dev/bin/nvim'
 
-# # WORK STUFF -----------------------------------------------------------------------
-# # misc internal tools
-abbr --add s 'mosh -6 devvm12221.prn0.facebook.com'
-abbr --add af 'arc f'
-abbr --add u 'hg pull && hg co remote/master'
-
-# hg
-abbr --add hgd 'hg diff'
-abbr --add hga 'hg absorb'
-abbr --add hgs 'hg status .'
-abbr --add hgl 'hg log --limit 3'
-abbr --add hgll 'hg hg-sl-up'
-abbr --add hgr 'hg revert .'
-
-# common dirs
-abbr --add C 'cd ~/fbsource/xplat/hermes/'
-abbr --add c 'cd ~/fbsource/xplat/static_h/'
-abbr --add cdb 'cd ~/builds/shdebug/'
-abbr --add cdr 'cd ~/builds/shrelease/'
-abbr --add cdB 'cd ~/builds/debug/'
-abbr --add cdR 'cd ~/builds/release/'
-abbr --add cdt 'cd ~/tests/'
-abbr --add cdc 'cd ~/.config/'
-
-# common build invocations
-abbr --add n 'ninja hermes hermesvm shermes'
-abbr --add N 'ninja hermes'
-abbr --add nh 'ninja hermes && ./bin/hermes'
-abbr --add nH 'ninja hermesvm shermes && ./bin/shermes'
-abbr --add nl 'ninja hermes && lldb -- ./bin/hermes'
-abbr --add nL 'ninja shermes && lldb -- ./bin/shermes'
-abbr --add nu 'ninja update-lit'
-abbr --add nc 'ninja check-hermes'
-abbr --add t262 '/Users/fbmal7/fbsource/xplat/hermes/utils/testsuite/run_testsuite.py -b ~/builds/debug/bin'
-abbr --add compdb 'ninja -t compdb > ~/fbsource/xplat/hermes/compile_commands.json'
-abbr --add shcompdb 'ninja -t compdb > ~/fbsource/xplat/static_h/compile_commands.json'
-
-# hardcoded binary paths
-alias jsc='/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Helpers/jsc'
-alias v8='/Users/fbmal7/oss/v8/out/x64.release/d8'
-alias mypy='/Users/fbmal7/.pyenv/versions/3.8.18/bin/python3'
+if test -e ~/.config/fish/conf.d/work.fish
+  source ~/.config/fish/conf.d/work.fish
+end
