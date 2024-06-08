@@ -12,6 +12,7 @@ fish_add_path /opt/homebrew/bin --path
 fish_add_path /opt/homebrew/sbin --path
 
 fish_add_path $HOME/.local/mybin --path
+fish_add_path $HOME/.local/bin --path
 
 # fzf
 fish_add_path ~/.fzf/bin/ --path
@@ -25,7 +26,6 @@ abbr --add light kitty +kitten themes Catppuccin-Latte
 abbr --add python python3
 
 # neovim
-alias nvim='~/nvims/0.9.5/bin/nvim'
 alias v='nvim'
 abbr --add vim 'nvim'
 abbr --add lnv 'nvim -u ~/.config/nvim/lean_init.vim'
@@ -41,7 +41,7 @@ abbr --add sf 'source ~/.config/fish/config.fish'
 # git
 abbr --add gs 'git status'
 abbr --add ga 'git add .'
-abbr --add gc 'git commit'
+abbr --add gc --set-cursor 'git commit -m "%"'
 abbr --add diff 'git diff --no-index'
 
 # tmux
