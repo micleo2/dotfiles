@@ -58,3 +58,7 @@ export EDITOR='/Users/fbmal7/nvims/0.9.0-dev/bin/nvim'
 if test -e ~/.config/fish/conf.d/work.fish
   source ~/.config/fish/conf.d/work.fish
 end
+
+if test -e ~/.config/fish/conf.d/home.fish
+  source ~/.config/fish/conf.d/home.fish
+end
