@@ -80,7 +80,6 @@ local on_attach = function(client, bufnr)
   local opts = { noremap=true, silent=true }
   buf_set_keymap('n', '<space>cn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
   buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
-  buf_set_keymap('n', '<space>e', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
   buf_set_keymap('n', '<space>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
   -- buf_set_keymap('n', '<space>F', '<cmd>lua vim.lsp.buf.format()<CR>', opts)
   buf_set_keymap('n', ']d', '<cmd>lua require("trouble").next({skip_groups = true, jump = true})<CR>', opts)
@@ -141,6 +140,7 @@ lsp.rust_analyzer.setup{
 }
 
 -- Setup telescope. Disable previewing large files.
+local actions = require('telescope.actions')
 require('telescope').setup {
   extensions = {
     fzf = {
@@ -157,6 +157,11 @@ require('telescope').setup {
         local cmd = {"head", "-c", max_bytes, filepath}
         require('telescope.previewers.utils').job_maker(cmd, bufnr, opts)
       end
+    },
+    mappings = {
+      n = {
+        ["<C-q>"]   = actions.smart_send_to_qflist + actions.open_qflist
+      }
     }
   }
 }
@@ -435,6 +440,20 @@ augroup vanilla-mappings
   " move to true end/begin of file.
   nnoremap G G$
   nnoremap gg gg^
+
+  " quickfix list navigation
+  nnoremap gj :cnext<CR>
+  nnoremap gk :cprev<CR>
+
+  nnoremap <leader>e :%s///g<Left><Left><Left>
+augroup end
+
+augroup per-language-mappings
+  " faster & more reliable than having to go through snippets.
+  autocmd FileType javascript     nnoremap <buffer> <leader>p oprint("");<Left><Left><Left>
+  autocmd FileType javascript     nnoremap <buffer> <leader>P iprint("");<Left><Left><Left>
+  autocmd FileType c,cpp          nnoremap <buffer> <leader>p ollvh::outs() << "\n";<Left><Left><Left><Left>
+  autocmd FileType c,cpp          nnoremap <buffer> <leader>P ollvh::outs() << "\n";<Left><Left><Left><Left>
 augroup end
 
 augroup tmux
