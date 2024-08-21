@@ -451,9 +451,7 @@ augroup end
 augroup per-language-mappings
   " faster & more reliable than having to go through snippets.
   autocmd FileType javascript     nnoremap <buffer> <leader>p oprint("");<Left><Left><Left>
-  autocmd FileType javascript     nnoremap <buffer> <leader>P iprint("");<Left><Left><Left>
-  autocmd FileType c,cpp          nnoremap <buffer> <leader>p ollvh::outs() << "\n";<Left><Left><Left><Left>
-  autocmd FileType c,cpp          nnoremap <buffer> <leader>P ollvh::outs() << "\n";<Left><Left><Left><Left>
+  autocmd FileType javascript     nnoremap <buffer> <leader>P Oprint("");<Left><Left><Left>
 augroup end
 
 augroup tmux

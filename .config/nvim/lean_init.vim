@@ -1,10 +1,14 @@
 call plug#begin(expand('~/.vim/bundle'))
 
-" utils
-Plug 'nvim-lua/plenary.nvim'
+" start screen
+Plug 'mhinz/vim-startify'
 
 " debugging
 Plug 'andrewferrier/debugprint.nvim'
+
+" File navigation
+Plug 'junegunn/fzf'
+Plug 'junegunn/fzf.vim'
 
 " File explorer
 Plug 'nvim-tree/nvim-tree.lua'
@@ -27,6 +31,12 @@ Plug 'catppuccin/nvim', { 'as': 'catppuccin' }
 Plug 'nvim-lualine/lualine.nvim'
 Plug 'kyazdani42/nvim-web-devicons'
 
+" searching
+Plug 'nvim-lua/plenary.nvim'
+Plug 'nvim-telescope/telescope.nvim'
+Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make' }
+Plug 'jackysee/telescope-hg.nvim' " gives hg-specifc pickers for telescope
+
 " replacing
 Plug 'nvim-pack/nvim-spectre'
 
@@ -34,7 +44,6 @@ call plug#end()
 
 " LSP config
 lua << EOF
-
 require("debugprint").setup({
   create_keymaps = false,
   create_commands = false
@@ -65,6 +74,42 @@ end, {
     expr = true,
 })
 
+-- Setup telescope. Disable previewing large files.
+local actions = require('telescope.actions')
+require('telescope').setup {
+  extensions = {
+    fzf = {
+      fuzzy = true,                    -- false will only do exact matching
+      override_generic_sorter = true,  -- override the generic sorter
+      override_file_sorter = true,     -- override the file sorter
+      case_mode = "smart_case",        -- or "ignore_case" or "respect_case"
+    }
+  },
+  defaults = {
+    preview = {
+      filesize_hook = function(filepath, bufnr, opts)
+        local max_bytes = 10000
+        local cmd = {"head", "-c", max_bytes, filepath}
+        require('telescope.previewers.utils').job_maker(cmd, bufnr, opts)
+      end
+    },
+    mappings = {
+      n = {
+        ["<C-q>"]   = actions.smart_send_to_qflist + actions.open_qflist
+      }
+    }
+  }
+}
+
+-- To get fzf loaded and working with telescope, you need to call
+-- load_extension, somewhere after setup function:
+require('telescope').load_extension('fzf')
+-- Load the hg pickers.
+require('telescope').load_extension('hg')
+
+-- File explorer
+require("nvim-tree").setup()
+
 -- navic/lua
 require("lualine").setup({
   options = {theme = "catppuccin"},
@@ -77,7 +122,11 @@ require("lualine").setup({
 })
 
 -- colorscheme
-require("catppuccin").setup {}
+require("catppuccin").setup {
+  integration = {
+    telescope = false
+  }
+}
 
 -- setup motion keybindings.
 require('leap').add_default_mappings(true)
@@ -132,14 +181,35 @@ augroup plugin-mappings
   nnoremap gH mlyyp`ljmlk:TComment<CR>`l
   nnoremap gh mlyyp`lj
 
+  " TELESCOPE SECTION
+  " Ctrl-p is file finder.
+  nnoremap <C-p> <cmd>Telescope find_files<cr>
+  " Ctrl-g is grep.
+  nnoremap <C-g> <cmd>Telescope live_grep<cr>
+  nnoremap gw yiw:Telescope live_grep<cr><C-r>"<ESC>
+  nnoremap gW yiW<cmd>Telescope live_grep<cr><C-r>"<ESC>
+  nnoremap gn <cmd>Telescope buffers<cr>
+  nnoremap gd <cmd>Telescope lsp_definitions<CR><ESC><ESC>
+  nnoremap gD <cmd>Telescope lsp_type_definitions<CR><ESC><ESC>
+  nnoremap gf <C-w>v<C-w>l<cmd>Telescope lsp_definitions<CR><ESC><ESC>
+  nnoremap <leader>fr <cmd>Telescope lsp_references<cr><ESC><ESC>
+  nnoremap <leader>ff <cmd>Telescope lsp_document_symbols<cr>
+  nnoremap <leader>ft <cmd>Telescope treesitter<cr>
+  nnoremap <leader>fg :lua require('telescope.builtin').live_grep({grep_open_files=true})<CR>
+
   " Toggle file explorer
   nnoremap <C-x> :NvimTreeFindFileToggle<CR>
 
-  nnoremap <leader>R <cmd>lua require("spectre").toggle()<CR>
-augroup end
+  " spawn LSP diagnostic window
+  nnoremap <leader>xx <cmd>TroubleToggle<cr>
 
-augroup work-mappings
-  nnoremap <leader>F :silent !arc f<CR>
+  " switch between header/source file
+  nnoremap gs :ClangdSwitchSourceHeader<CR>
+
+  " vim-signify default updatetime 4000ms is not good for async update
+  set updatetime=100
+
+  " toggle file explorer
 augroup end
 
 " Note: the l marker/register is treated as scratch space for many mappings
@@ -204,6 +274,9 @@ augroup vanilla-mappings
 
   " replace current word and leave dot more useful
   nnoremap <leader>r ml*`lcgn
+  nnoremap <leader>R <cmd>lua require("spectre").toggle()<CR>
+  nnoremap <leader>g diw"0P
+  nnoremap <leader>G diW"0P
 
   " Q for easy quitting
   nnoremap Q :q<CR>
@@ -214,25 +287,30 @@ augroup vanilla-mappings
   " save files quickly.
   nnoremap <leader>w :w<CR>
   nnoremap <leader>W :wa<CR>
+
+  " move to true end/begin of file.
+  nnoremap G G$
+  nnoremap gg gg^
+
+  " quickfix list navigation
+  nnoremap gj :cnext<CR>
+  nnoremap gk :cprev<CR>
+
+  nnoremap <leader>e :%s///g<Left><Left><Left>
+augroup end
+
+augroup per-language-mappings
+  " faster & more reliable than having to go through snippets.
+  autocmd FileType javascript     nnoremap <buffer> <leader>p oprint("");<Left><Left><Left>
+  autocmd FileType javascript     nnoremap <buffer> <leader>P Oprint("");<Left><Left><Left>
 augroup end
 
 augroup tmux
   " zoom out and rerun the last command
-  nnoremap <Leader>tr :w<CR>:silent !~/scripts/tmux-zoom-out.sh<CR>:silent !tmux send-keys -t \\! "Up" C-m <CR> <C-l>
-  inoremap jk <ESC>:w<CR>:silent !~/scripts/tmux-zoom-out.sh<CR>:silent !tmux send-keys -t \\! "Up" C-m <CR> <C-l>
+  nnoremap <Leader>tr :w<CR>:silent !~/scripts/tmux/zoom-out.sh<CR>:silent !tmux send-keys -t \\! "Up" C-m <CR> <C-l>
+  inoremap jk <ESC>:w<CR>:silent !~/scripts/tmux/zoom-out.sh<CR>:silent !tmux send-keys -t \\! "Up" C-m <CR> <C-l>
   " like tr but a 'force run' -- run Ctrl-C first
-  nnoremap <Leader>tf :w<CR>:silent !~/scripts/tmux-zoom-out.sh<CR> :silent !tmux send-keys -t \\! C-c<CR>:silent !tmux send-keys -t right "Up" C-m <CR> <C-l>
-
-  " kill the program running in the last active tmux pane
-  nnoremap <Leader>tc :silent !tmux send-keys -t \\! C-c <CR> <C-l>
-
-  " send current line to last active pane -- VERY BUGGY
-  nnoremap <Leader>tp :exe "!tmux send-keys -t \\! \"" . getline(".") . "\" C-m" <CR> <C-l>
-  " send selected visual area to last active tmux pane -- VERY BUGGY
-  vnoremap <Leader>tp <ESC>:exe "!tmux send-keys -t \\! \"" . @* . "\" C-m" <CR> <C-l>
-
-  " Launch a python shell interpreter in last active pane
-  nnoremap <Leader>tip :silent !tmux send-keys -t \\! "python3.6" C-m "import numpy as np" C-m<CR> <C-l> :silent !tmux select-pane -t \\!<CR>
+  nnoremap <Leader>tf :w<CR>:silent !~/scripts/tmux/zoom-out.sh<CR> :silent !tmux send-keys -t \\! C-c<CR>:silent !tmux send-keys -t \\! "Up" C-m <CR> <C-l>
 augroup end
 
 augroup pending
