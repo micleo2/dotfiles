@@ -1,5 +1,7 @@
 # This file contains fish universal variable definitions.
 # VERSION: 3.0
+SETUVAR --export CC:/usr/bin/clang\x2d18
+SETUVAR --export CXX:/usr/bin/clang\x2b\x2b\x2d18
 SETUVAR ZO_CMD:zo
 SETUVAR Z_CMD:z
 SETUVAR Z_DATA:/Users/fbmal7/\x2elocal/share/z/data
