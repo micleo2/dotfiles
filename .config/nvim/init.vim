@@ -55,7 +55,7 @@ Plug 'kyazdani42/nvim-web-devicons'
 " searching
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim'
-Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make' }
+Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release' }
 Plug 'jackysee/telescope-hg.nvim' " gives hg-specifc pickers for telescope
 
 " replacing
@@ -68,7 +68,9 @@ Plug 'mhinz/vim-signify'
 Plug 'tidalcycles/vim-tidal'
 let g:tidal_target = "terminal"
 
-source ~/.config/nvim/work-plugins.vim
+if filereadable(expand("~/.config/nvim/work-plugins.vim"))
+  source ~/.config/nvim/work-plugins.vim
+endif
 
 call plug#end()
 
@@ -81,7 +83,7 @@ local on_attach = function(client, bufnr)
   buf_set_keymap('n', '<space>cn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
   buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
   buf_set_keymap('n', '<space>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
-  -- buf_set_keymap('n', '<space>F', '<cmd>lua vim.lsp.buf.format()<CR>', opts)
+  buf_set_keymap('n', '<space>F', '<cmd>lua vim.lsp.buf.format()<CR>', opts)
   buf_set_keymap('n', ']d', '<cmd>lua require("trouble").next({skip_groups = true, jump = true})<CR>', opts)
   local caps = client.server_capabilities
   if caps.documentSymbolProvider then
@@ -130,7 +132,8 @@ local coq = require "coq"
 lsp.clangd.setup{
   on_attach=on_attach,
   coq.lsp_ensure_capabilities{},
-  cmd={vim.fn.expand("$HOME/clang/clangd_17.0.3/bin/clangd")}
+  -- cmd={vim.fn.expand("$HOME/clang/clangd_17.0.3/bin/clangd")}
+  cmd={"/home/mike/clang/clangd_18.1.3/bin/clangd"}
 }
 
 -- Rust LSP
@@ -191,7 +194,7 @@ require "lsp_signature".setup()
 
 -- treesitter
 require'nvim-treesitter.configs'.setup {
-  ensure_installed = {"lua", "help", "cpp", "c"},
+  ensure_installed = {"lua", "cpp", "c", "rust", "python", "javascript"},
   sync_install = false,
   highlight = {
     enable = true
@@ -268,7 +271,9 @@ require('leap').add_default_mappings(true)
 
 EOF
 
-source ~/.config/nvim/work-init.vim
+if filereadable(expand("~/.config/nvim/work-init.vim"))
+  source ~/.config/nvim/work-init.vim
+endif
 
 augroup basic_settings
   " set space as leader!!
