@@ -62,5 +62,3 @@ end
 if test -e ~/.config/fish/conf.d/home.fish
   source ~/.config/fish/conf.d/home.fish
 end
-
-zoxide init fish | source
