@@ -5,10 +5,9 @@ Plug 'mhinz/vim-startify'
 
 " LSP / file semantics
 Plug 'neovim/nvim-lspconfig'
-Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}  " We recommend updating the parsers on update
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plug 'SmiteshP/nvim-navic'
 Plug 'ray-x/lsp_signature.nvim' " show inlay hints for function arguments
-Plug 'p00f/clangd_extensions.nvim' " show inlay hints for types
 Plug 'stevearc/aerial.nvim' " tagbar-like for lsp/treesitter
 Plug 'RRethy/vim-illuminate' " highlight token under cursor using lsp/TS/regex
 
@@ -22,6 +21,11 @@ Plug 'folke/trouble.nvim'
 
 " debugging
 Plug 'andrewferrier/debugprint.nvim'
+Plug 'mfussenegger/nvim-dap'
+Plug 'julianolf/nvim-dap-lldb'
+Plug 'nvim-neotest/nvim-nio'
+Plug 'rcarriga/nvim-dap-ui'
+Plug 'theHamsta/nvim-dap-virtual-text'
 
 " File navigation
 Plug 'junegunn/fzf'
@@ -43,9 +47,6 @@ Plug 'nvim-treesitter/nvim-treesitter-textobjects'
 
 " motion
 Plug 'ggandor/leap.nvim'
-
-" buffer management
-Plug 'ThePrimeagen/harpoon'
 
 " styling
 Plug 'catppuccin/nvim', { 'as': 'catppuccin' }
@@ -89,9 +90,6 @@ local on_attach = function(client, bufnr)
   if caps.documentSymbolProvider then
     navic.attach(client, bufnr)
   end
-  -- if client.server_capabilities.inlayHintProvider then
-  --   vim.lsp.buf.inlay_hint(bufnr, true)
-  -- end
 end
 
 require("debugprint").setup({
@@ -123,6 +121,41 @@ vim.keymap.set("n", "<Leader>dp", function()
 end, {
     expr = true,
 })
+
+-- debugger
+local dap, dapui, dapvirt = require("dap"), require("dapui"), require("nvim-dap-virtual-text")
+dapui.setup()
+dapvirt.setup()
+dap.adapters.lldb = {
+  type = 'executable',
+  command = '/usr/bin/lldb-dap-18',
+  name = 'lldb'
+}
+dap.configurations.cpp = {
+  {
+    name = 'Launch',
+    type = 'lldb',
+    request = 'launch',
+    program = function()
+      return vim.fn.input('Path to executable: ', '/tmp/todbg', 'file')
+    end,
+    cwd = '${workspaceFolder}',
+    stopOnEntry = false,
+    args = {},
+  },
+}
+dap.listeners.before.attach.dapui_config = function()
+  dapui.open()
+end
+dap.listeners.before.launch.dapui_config = function()
+  dapui.open()
+end
+dap.listeners.before.event_terminated.dapui_config = function()
+  dapui.close()
+end
+dap.listeners.before.event_exited.dapui_config = function()
+  dapui.close()
+end
 
 -- C++ LSP
 local lsp = require'lspconfig'
@@ -274,6 +307,9 @@ EOF
 if filereadable(expand("~/.config/nvim/work-init.vim"))
   source ~/.config/nvim/work-init.vim
 endif
+if filereadable(expand("~/.config/nvim/home-init.vim"))
+  source ~/.config/nvim/home-init.vim
+endif
 
 augroup basic_settings
   " set space as leader!!
@@ -354,16 +390,8 @@ augroup plugin-mappings
   " vim-signify default updatetime 4000ms is not good for async update
   set updatetime=100
 
-  " harpoon
-  nnoremap <leader>aa :lua require("harpoon.mark").add_file()<CR>
-  nnoremap <leader>ah :lua require("harpoon.ui").toggle_quick_menu()<CR>
-  nnoremap <leader>1 :lua require("harpoon.ui").nav_file(1)<CR>
-  nnoremap <leader>2 :lua require("harpoon.ui").nav_file(2)<CR>
-  nnoremap <leader>3 :lua require("harpoon.ui").nav_file(3)<CR>
-  nnoremap <leader>4 :lua require("harpoon.ui").nav_file(4)<CR>
-  nnoremap <leader>5 :lua require("harpoon.ui").nav_file(5)<CR>
-
-  " toggle file explorer
+  " dap
+  nnoremap <leader>dab :DapToggleBreakpoint<CR>
 augroup end
 
 " Note: the l marker/register is treated as scratch space for many mappings
