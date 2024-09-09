@@ -5,10 +5,9 @@ Plug 'mhinz/vim-startify'
 
 " LSP / file semantics
 Plug 'neovim/nvim-lspconfig'
-Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}  " We recommend updating the parsers on update
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plug 'SmiteshP/nvim-navic'
 Plug 'ray-x/lsp_signature.nvim' " show inlay hints for function arguments
-Plug 'p00f/clangd_extensions.nvim' " show inlay hints for types
 Plug 'stevearc/aerial.nvim' " tagbar-like for lsp/treesitter
 Plug 'RRethy/vim-illuminate' " highlight token under cursor using lsp/TS/regex
 
@@ -22,6 +21,11 @@ Plug 'folke/trouble.nvim'
 
 " debugging
 Plug 'andrewferrier/debugprint.nvim'
+Plug 'mfussenegger/nvim-dap'
+Plug 'julianolf/nvim-dap-lldb'
+Plug 'nvim-neotest/nvim-nio'
+Plug 'rcarriga/nvim-dap-ui'
+Plug 'theHamsta/nvim-dap-virtual-text'
 
 " File navigation
 Plug 'junegunn/fzf'
@@ -44,9 +48,6 @@ Plug 'nvim-treesitter/nvim-treesitter-textobjects'
 " motion
 Plug 'ggandor/leap.nvim'
 
-" buffer management
-Plug 'ThePrimeagen/harpoon'
-
 " styling
 Plug 'catppuccin/nvim', { 'as': 'catppuccin' }
 Plug 'nvim-lualine/lualine.nvim'
@@ -55,7 +56,7 @@ Plug 'kyazdani42/nvim-web-devicons'
 " searching
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim'
-Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make' }
+Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release' }
 Plug 'jackysee/telescope-hg.nvim' " gives hg-specifc pickers for telescope
 
 " replacing
@@ -68,7 +69,9 @@ Plug 'mhinz/vim-signify'
 Plug 'tidalcycles/vim-tidal'
 let g:tidal_target = "terminal"
 
-source ~/.config/nvim/work-plugins.vim
+if filereadable(expand("~/.config/nvim/work-plugins.vim"))
+  source ~/.config/nvim/work-plugins.vim
+endif
 
 call plug#end()
 
@@ -81,15 +84,12 @@ local on_attach = function(client, bufnr)
   buf_set_keymap('n', '<space>cn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
   buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
   buf_set_keymap('n', '<space>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
-  -- buf_set_keymap('n', '<space>F', '<cmd>lua vim.lsp.buf.format()<CR>', opts)
+  buf_set_keymap('n', '<space>F', '<cmd>lua vim.lsp.buf.format()<CR>', opts)
   buf_set_keymap('n', ']d', '<cmd>lua require("trouble").next({skip_groups = true, jump = true})<CR>', opts)
   local caps = client.server_capabilities
   if caps.documentSymbolProvider then
     navic.attach(client, bufnr)
   end
-  -- if client.server_capabilities.inlayHintProvider then
-  --   vim.lsp.buf.inlay_hint(bufnr, true)
-  -- end
 end
 
 require("debugprint").setup({
@@ -122,6 +122,41 @@ end, {
     expr = true,
 })
 
+-- debugger
+local dap, dapui, dapvirt = require("dap"), require("dapui"), require("nvim-dap-virtual-text")
+dapui.setup()
+dapvirt.setup()
+dap.adapters.lldb = {
+  type = 'executable',
+  command = '/usr/bin/lldb-dap-18',
+  name = 'lldb'
+}
+dap.configurations.cpp = {
+  {
+    name = 'Launch',
+    type = 'lldb',
+    request = 'launch',
+    program = function()
+      return vim.fn.input('Path to executable: ', '/tmp/todbg', 'file')
+    end,
+    cwd = '${workspaceFolder}',
+    stopOnEntry = false,
+    args = {},
+  },
+}
+dap.listeners.before.attach.dapui_config = function()
+  dapui.open()
+end
+dap.listeners.before.launch.dapui_config = function()
+  dapui.open()
+end
+dap.listeners.before.event_terminated.dapui_config = function()
+  dapui.close()
+end
+dap.listeners.before.event_exited.dapui_config = function()
+  dapui.close()
+end
+
 -- C++ LSP
 local lsp = require'lspconfig'
 local coq = require "coq"
@@ -130,7 +165,8 @@ local coq = require "coq"
 lsp.clangd.setup{
   on_attach=on_attach,
   coq.lsp_ensure_capabilities{},
-  cmd={vim.fn.expand("$HOME/clang/clangd_17.0.3/bin/clangd")}
+  -- cmd={vim.fn.expand("$HOME/clang/clangd_17.0.3/bin/clangd")}
+  cmd={"/home/mike/clang/clangd_18.1.3/bin/clangd"}
 }
 
 -- Rust LSP
@@ -191,7 +227,7 @@ require "lsp_signature".setup()
 
 -- treesitter
 require'nvim-treesitter.configs'.setup {
-  ensure_installed = {"lua", "help", "cpp", "c"},
+  ensure_installed = {"lua", "cpp", "c", "rust", "python", "javascript"},
   sync_install = false,
   highlight = {
     enable = true
@@ -268,7 +304,12 @@ require('leap').add_default_mappings(true)
 
 EOF
 
-source ~/.config/nvim/work-init.vim
+if filereadable(expand("~/.config/nvim/work-init.vim"))
+  source ~/.config/nvim/work-init.vim
+endif
+if filereadable(expand("~/.config/nvim/home-init.vim"))
+  source ~/.config/nvim/home-init.vim
+endif
 
 augroup basic_settings
   " set space as leader!!
@@ -349,16 +390,8 @@ augroup plugin-mappings
   " vim-signify default updatetime 4000ms is not good for async update
   set updatetime=100
 
-  " harpoon
-  nnoremap <leader>aa :lua require("harpoon.mark").add_file()<CR>
-  nnoremap <leader>ah :lua require("harpoon.ui").toggle_quick_menu()<CR>
-  nnoremap <leader>1 :lua require("harpoon.ui").nav_file(1)<CR>
-  nnoremap <leader>2 :lua require("harpoon.ui").nav_file(2)<CR>
-  nnoremap <leader>3 :lua require("harpoon.ui").nav_file(3)<CR>
-  nnoremap <leader>4 :lua require("harpoon.ui").nav_file(4)<CR>
-  nnoremap <leader>5 :lua require("harpoon.ui").nav_file(5)<CR>
-
-  " toggle file explorer
+  " dap
+  nnoremap <leader>dab :DapToggleBreakpoint<CR>
 augroup end
 
 " Note: the l marker/register is treated as scratch space for many mappings
