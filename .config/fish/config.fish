@@ -53,6 +53,8 @@ abbr --add tn 'tmux new -s'
 
 abbr --add rp 'realpath'
 
+abbr --add sdbg --set-cursor 'ln -sf (realpath %) /tmp/todbg'
+
 export EDITOR='nvim'
 
 if test -e ~/.config/fish/conf.d/work.fish

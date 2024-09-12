@@ -128,7 +128,7 @@ dapui.setup()
 dapvirt.setup()
 dap.adapters.lldb = {
   type = 'executable',
-  command = '/usr/bin/lldb-dap-18',
+  command = vim.fn.expand("$HOME/.local/bin/lldb-dap"),
   name = 'lldb'
 }
 dap.configurations.cpp = {
@@ -139,9 +139,9 @@ dap.configurations.cpp = {
     program = function()
       return vim.fn.input('Path to executable: ', '/tmp/todbg', 'file')
     end,
-    cwd = '${workspaceFolder}',
+    cwd = vim.fn.expand("$DBG_DIR"),
     stopOnEntry = false,
-    args = {},
+    args = {'/Users/fbmal7/tests/obj-super.js'},
   },
 }
 dap.listeners.before.attach.dapui_config = function()
@@ -165,8 +165,7 @@ local coq = require "coq"
 lsp.clangd.setup{
   on_attach=on_attach,
   coq.lsp_ensure_capabilities{},
-  -- cmd={vim.fn.expand("$HOME/clang/clangd_17.0.3/bin/clangd")}
-  cmd={"/home/mike/clang/clangd_18.1.3/bin/clangd"}
+  cmd={vim.fn.expand("$HOME/.local/bin/clangd")}
 }
 
 -- Rust LSP
@@ -266,13 +265,12 @@ require'nvim-treesitter.configs'.setup {
       -- Automatically jump forward to textobj, similar to targets.vim
       lookahead = true,
       keymaps = {
-        -- You can use the capture groups defined in textobjects.scm
-        ["af"] = "@function.outer",
         ["if"] = "@function.inner",
-        ["ac"] = "@class.outer",
-        ["ic"] = "@class.inner",
-        ["ab"] = "@block.outer",
-        ["ib"] = "@block.inner",
+        ["af"] = "@function.outer",
+        ["ia"] = "@parameter.inner",
+        ["aa"] = "@parameter.outer",
+        ["ik"] = "@block.inner",
+        ["ak"] = "@block.outer",
       },
     },
   },
@@ -390,8 +388,16 @@ augroup plugin-mappings
   " vim-signify default updatetime 4000ms is not good for async update
   set updatetime=100
 
-  " dap
-  nnoremap <leader>dab :DapToggleBreakpoint<CR>
+  " DAP
+  nnoremap <leader>ai :DapToggleBreakpoint<CR>
+  nnoremap <leader>ah :DapContinue<CR>
+  nnoremap <leader>au :lua require('dap').up()<CR>zz
+  nnoremap <leader>ad :lua require('dap').down()<CR>zz
+  nnoremap <leader>ac :lua require('dap').clear_breakpoints()<CR>
+  nnoremap <leader>ar :lua require('dap').run_to_cursor()<CR>zz
+  nnoremap <leader>ak :DapStepOut<CR>zz
+  nnoremap <leader>aj :DapStepInto<CR>zz
+  nnoremap <leader>al :DapStepOver<CR>zz
 augroup end
 
 " Note: the l marker/register is treated as scratch space for many mappings
