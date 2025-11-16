@@ -53,7 +53,8 @@ abbr --add tn 'tmux new -s'
 
 abbr --add rp 'realpath'
 
-abbr --add sdbg --set-cursor 'ln -sf (realpath %) /tmp/todbg'
+abbr --add sdbg 'ln -sf (realpath (fzf)) /tmp/todbg'
+abbr --add sdbf 'ln -sf (realpath (fzf)) /tmp/file.js'
 
 export EDITOR='nvim'
 
@@ -63,4 +64,8 @@ end
 
 if test -e ~/.config/fish/conf.d/home.fish
   source ~/.config/fish/conf.d/home.fish
+end
+
+if test -e ~/.cargo/env.fish
+  source ~/.cargo/env.fish
 end

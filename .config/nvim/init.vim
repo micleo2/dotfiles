@@ -1,3 +1,4 @@
+set shell=/bin/bash
 call plug#begin(expand('~/.vim/bundle'))
 
 " start screen
@@ -6,13 +7,12 @@ Plug 'mhinz/vim-startify'
 " LSP / file semantics
 Plug 'neovim/nvim-lspconfig'
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
-Plug 'SmiteshP/nvim-navic'
+Plug 'SmiteshP/nvim-navic' " Use lsp to show current function in bottom status bar
 Plug 'ray-x/lsp_signature.nvim' " show inlay hints for function arguments
 Plug 'stevearc/aerial.nvim' " tagbar-like for lsp/treesitter
 Plug 'RRethy/vim-illuminate' " highlight token under cursor using lsp/TS/regex
 
 " completion
-let g:coq_settings = { 'auto_start': v:true , 'keymap.jump_to_mark': '<C-j>'}
 Plug 'ms-jpq/coq_nvim', {'branch': 'coq'} "
 Plug 'ms-jpq/coq.artifacts', {'branch': 'artifacts'}
 
@@ -28,7 +28,7 @@ Plug 'rcarriga/nvim-dap-ui'
 Plug 'theHamsta/nvim-dap-virtual-text'
 
 " File navigation
-Plug 'junegunn/fzf'
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 
 " File explorer
@@ -53,17 +53,23 @@ Plug 'catppuccin/nvim', { 'as': 'catppuccin' }
 Plug 'nvim-lualine/lualine.nvim'
 Plug 'kyazdani42/nvim-web-devicons'
 
+" replacing
+Plug 'nvim-pack/nvim-spectre'
+
 " searching
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim'
 Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release' }
-Plug 'jackysee/telescope-hg.nvim' " gives hg-specifc pickers for telescope
-
-" replacing
-Plug 'nvim-pack/nvim-spectre'
 
 " VersionControl info per line
 Plug 'mhinz/vim-signify'
+
+" Working with folds
+Plug 'kevinhwang91/promise-async'
+Plug 'kevinhwang91/nvim-ufo'
+
+" buffer management
+Plug 'j-morano/buffer_manager.nvim'
 
 " tidal cycles plugins
 Plug 'tidalcycles/vim-tidal'
@@ -85,12 +91,20 @@ local on_attach = function(client, bufnr)
   buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
   buf_set_keymap('n', '<space>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
   buf_set_keymap('n', '<space>F', '<cmd>lua vim.lsp.buf.format()<CR>', opts)
-  buf_set_keymap('n', ']d', '<cmd>lua require("trouble").next({skip_groups = true, jump = true})<CR>', opts)
+  buf_set_keymap('n', '[e', '<cmd>lua require("trouble").prev({mode = "diagnostics", filter = { severity=vim.diagnostic.severity.ERROR }, skip_groups = true, jump = true})<CR>', opts)
+  buf_set_keymap('n', ']e', '<cmd>lua require("trouble").next({mode = "diagnostics", filter = { severity=vim.diagnostic.severity.ERROR }, skip_groups = true, jump = true})<CR>', opts)
   local caps = client.server_capabilities
   if caps.documentSymbolProvider then
     navic.attach(client, bufnr)
   end
 end
+
+vim.diagnostic.config({
+  signs = {
+    priority = 100,
+  },
+  severity_sort = true,
+})
 
 require("debugprint").setup({
   create_keymaps = false,
@@ -128,7 +142,7 @@ dapui.setup()
 dapvirt.setup()
 dap.adapters.lldb = {
   type = 'executable',
-  command = vim.fn.expand("$HOME/.local/bin/lldb-dap"),
+  command = vim.fn.expand("$HOME/LLVM-20.1.1/bin/lldb-dap"),
   name = 'lldb'
 }
 dap.configurations.cpp = {
@@ -136,12 +150,14 @@ dap.configurations.cpp = {
     name = 'Launch',
     type = 'lldb',
     request = 'launch',
+    runInTerminal = true,
     program = function()
-      return vim.fn.input('Path to executable: ', '/tmp/todbg', 'file')
+      -- return vim.fn.input('Path to executable: ', '/tmp/todbg', 'file')
+      return '/tmp/todbg'
     end,
     cwd = vim.fn.expand("$DBG_DIR"),
     stopOnEntry = false,
-    args = {'/Users/fbmal7/tests/obj-super.js'},
+    args = {'/tmp/file.js'},
   },
 }
 dap.listeners.before.attach.dapui_config = function()
@@ -157,6 +173,18 @@ dap.listeners.before.event_exited.dapui_config = function()
   dapui.close()
 end
 
+vim.g.coq_settings = {
+  auto_start = true,
+  keymap = {
+    jump_to_mark = '<C-j>'
+  },
+  display = {
+    statusline = {
+      helo = false, -- Set this to false to disable the "Hello" message
+    },
+  },
+}
+
 -- C++ LSP
 local lsp = require'lspconfig'
 local coq = require "coq"
@@ -165,14 +193,13 @@ local coq = require "coq"
 lsp.clangd.setup{
   on_attach=on_attach,
   coq.lsp_ensure_capabilities{},
-  cmd={vim.fn.expand("$HOME/.local/bin/clangd")}
+  cmd={vim.fn.expand("$HOME/.local/bin/clangd"), "--header-insertion=never"}
 }
-
--- Rust LSP
-lsp.rust_analyzer.setup{
-  on_attach=on_attach,
-  coq.lsp_ensure_capabilities{},
-}
+-- -- Rust LSP
+-- lsp.rust_analyzer.setup{
+--   on_attach=on_attach,
+--   coq.lsp_ensure_capabilities{},
+-- }
 
 -- Setup telescope. Disable previewing large files.
 local actions = require('telescope.actions')
@@ -186,6 +213,9 @@ require('telescope').setup {
     }
   },
   defaults = {
+    file_ignore_patterns = {
+      ".cache/"
+    },
     preview = {
       filesize_hook = function(filepath, bufnr, opts)
         local max_bytes = 10000
@@ -204,8 +234,6 @@ require('telescope').setup {
 -- To get fzf loaded and working with telescope, you need to call
 -- load_extension, somewhere after setup function:
 require('telescope').load_extension('fzf')
--- Load the hg pickers.
-require('telescope').load_extension('hg')
 
 -- File explorer
 require("nvim-tree").setup()
@@ -300,6 +328,15 @@ vim.api.nvim_set_hl(0, 'IlluminatedWordWrite', {bg=hl_col})
 -- setup motion keybindings.
 require('leap').add_default_mappings(true)
 
+local ufo = require("ufo")
+ufo.setup()
+vim.o.foldlevelstart = 99
+
+-- setup spectre
+vim.keymap.set('n', '<leader>R', '<cmd>lua require("spectre").toggle()<CR>')
+
+require("buffer_manager").setup({})
+
 EOF
 
 if filereadable(expand("~/.config/nvim/work-init.vim"))
@@ -364,10 +401,10 @@ augroup plugin-mappings
   nnoremap <C-g> <cmd>Telescope live_grep<cr>
   nnoremap gw yiw:Telescope live_grep<cr><C-r>"<ESC>
   nnoremap gW yiW<cmd>Telescope live_grep<cr><C-r>"<ESC>
-  nnoremap gn <cmd>Telescope buffers<cr>
   nnoremap gd <cmd>Telescope lsp_definitions<CR><ESC><ESC>
   nnoremap gD <cmd>Telescope lsp_type_definitions<CR><ESC><ESC>
   nnoremap gf <C-w>v<C-w>l<cmd>Telescope lsp_definitions<CR><ESC><ESC>
+  nnoremap gF <C-w>v<C-w>l<cmd>Telescope lsp_type_definitions<CR><ESC><ESC>
   nnoremap <leader>fr <cmd>Telescope lsp_references<cr><ESC><ESC>
   nnoremap <leader>ff <cmd>Telescope lsp_document_symbols<cr>
   nnoremap <leader>ft <cmd>Telescope treesitter<cr>
@@ -380,7 +417,8 @@ augroup plugin-mappings
   nnoremap <C-x> :NvimTreeFindFileToggle<CR>
 
   " spawn LSP diagnostic window
-  nnoremap <leader>xx <cmd>TroubleToggle<cr>
+  nnoremap <leader>xx <cmd>Trouble diagnostics toggle filter = { severity=vim.diagnostic.severity.ERROR }<cr>
+  nnoremap <leader>xX <cmd>Trouble diagnostics toggle<cr>
 
   " switch between header/source file
   nnoremap gs :ClangdSwitchSourceHeader<CR>
@@ -398,6 +436,9 @@ augroup plugin-mappings
   nnoremap <leader>ak :DapStepOut<CR>zz
   nnoremap <leader>aj :DapStepInto<CR>zz
   nnoremap <leader>al :DapStepOver<CR>zz
+
+  " arena
+  nnoremap gn :lua require("buffer_manager.ui").toggle_quick_menu()<CR>
 augroup end
 
 " Note: the l marker/register is treated as scratch space for many mappings
@@ -442,7 +483,7 @@ augroup vanilla-mappings
   nnoremap <leader>S <ESC>:source<Space>%<CR>
 
   " make o turn off highlight
-  nnoremap <leader>o <ESC>:noh<CR>
+  nnoremap <leader>o <ESC>:noh<CR>:echo ''<CR>
   " make O turn on highlight
   nnoremap <leader>O <ESC>:set hls<CR>
 
@@ -462,18 +503,17 @@ augroup vanilla-mappings
 
   " replace current word and leave dot more useful
   nnoremap <leader>r ml*`lcgn
-  nnoremap <leader>R <cmd>lua require("spectre").toggle()<CR>
   nnoremap <leader>g diw"0P
   nnoremap <leader>G diW"0P
 
   " Q for easy quitting
-  nnoremap Q :q<CR>
+  nnoremap Q :q!<CR>
 
   " get quick access to all unbinded keys
   nnoremap <leader>n :norm! 
 
   " save files quickly.
-  nnoremap <leader>w :w<CR>
+  nnoremap <leader>w :up<CR>
   nnoremap <leader>W :wa<CR>
 
   " move to true end/begin of file.
@@ -495,10 +535,10 @@ augroup end
 
 augroup tmux
   " zoom out and rerun the last command
-  nnoremap <Leader>tr :w<CR>:silent !~/scripts/tmux/zoom-out.sh<CR>:silent !tmux send-keys -t \\! "Up" C-m <CR> <C-l>
-  inoremap jk <ESC>:w<CR>:silent !~/scripts/tmux/zoom-out.sh<CR>:silent !tmux send-keys -t \\! "Up" C-m <CR> <C-l>
+  nnoremap <Leader>tr :up<CR>:silent !~/scripts/tmux/zoom-out.sh<CR>:silent !tmux send-keys -t \\! "Up" C-m <CR>
+  inoremap jk <ESC>:up<CR>:silent !~/scripts/tmux/zoom-out.sh<CR>:silent !tmux send-keys -t \\! "Up" C-m <CR> <C-l>
   " like tr but a 'force run' -- run Ctrl-C first
-  nnoremap <Leader>tf :w<CR>:silent !~/scripts/tmux/zoom-out.sh<CR> :silent !tmux send-keys -t \\! C-c<CR>:silent !tmux send-keys -t \\! "Up" C-m <CR> <C-l>
+  nnoremap <Leader>tf :up<CR>:silent !~/scripts/tmux/zoom-out.sh<CR> :silent !tmux send-keys -t \\! C-c<CR>:silent !tmux send-keys -t \\! "Up" C-m <CR> <C-l>
 augroup end
 
 augroup pending
@@ -517,7 +557,7 @@ augroup pending
   
   " set b/l to go to begin or end of line
   onoremap <leader>b ^
-  onoremap <leader>l $
+  onoremap <leader>h $
 augroup end
 
 augroup styling
