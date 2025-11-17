@@ -4,10 +4,15 @@ end
 
 set fish_greeting
 
+fish_vi_key_bindings
+
 # homebrew
-export HOMEBREW_PREFIX="/opt/homebrew";
-export HOMEBREW_CELLAR="/opt/homebrew/Cellar";
-export HOMEBREW_REPOSITORY="/opt/homebrew";
+export HOMEBREW_PREFIX="/opt/homebrew"
+
+export HOMEBREW_CELLAR="/opt/homebrew/Cellar"
+
+export HOMEBREW_REPOSITORY="/opt/homebrew"
+
 fish_add_path /opt/homebrew/bin --path
 fish_add_path /opt/homebrew/sbin --path
 
@@ -16,7 +21,7 @@ fish_add_path $HOME/.local/bin --path
 
 # fzf
 fish_add_path ~/.fzf/bin/ --path
-fzf_configure_bindings --directory=\ct
+fzf_key_bindings
 
 # GENERAL ALIASES ------------------------------------------------------------------
 # kitty theme
@@ -27,7 +32,7 @@ abbr --add python python3
 
 # neovim
 alias v='nvim'
-abbr --add vim 'nvim'
+abbr --add vim nvim
 abbr --add lnv 'nvim -u ~/.config/nvim/lean_init.vim'
 
 # editing rc's
@@ -51,7 +56,7 @@ abbr --add tks 'tmux kill-server'
 abbr --add ta 'tmux a -t'
 abbr --add tn 'tmux new -s'
 
-abbr --add rp 'realpath'
+abbr --add rp realpath
 
 abbr --add sdbg 'ln -sf (realpath (fzf)) /tmp/todbg'
 abbr --add sdbf 'ln -sf (realpath (fzf)) /tmp/file.js'
@@ -59,13 +64,13 @@ abbr --add sdbf 'ln -sf (realpath (fzf)) /tmp/file.js'
 export EDITOR='nvim'
 
 if test -e ~/.config/fish/conf.d/work.fish
-  source ~/.config/fish/conf.d/work.fish
+    source ~/.config/fish/conf.d/work.fish
 end
 
 if test -e ~/.config/fish/conf.d/home.fish
-  source ~/.config/fish/conf.d/home.fish
+    source ~/.config/fish/conf.d/home.fish
 end
 
 if test -e ~/.cargo/env.fish
-  source ~/.cargo/env.fish
+    source ~/.cargo/env.fish
 end
