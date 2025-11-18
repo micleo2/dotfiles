@@ -54,6 +54,19 @@ vim.g.loaded_netrwPlugin = 1
 -- enable 24-bit colour
 vim.opt.termguicolors = true
 
+-- restore cursor to last saved position
+vim.api.nvim_create_autocmd("BufReadPost", {
+  pattern = "*",
+  callback = function()
+    local mark = vim.api.nvim_buf_get_mark(0, '"')
+    local lcount = vim.api.nvim_buf_line_count(0)
+    if mark[1] > 0 and mark[1] <= lcount then
+      vim.api.nvim_win_set_cursor(0, mark)
+      vim.cmd("normal! zv")
+    end
+  end,
+})
+
 -- Helper function to be able to use vim.command easily from keymappings
 -- This also has the added benefit of not triggering the cmdline UI.
 local function vcmd(cmd)
@@ -100,6 +113,7 @@ require("lazy").setup({
     },
 
     -- *** LSP ***
+    -- Autocomplete
     {
       "ms-jpq/coq.nvim",
       dependencies = { "ms-jpq/coq.artifacts", branch = "artifacts" },
@@ -119,6 +133,7 @@ require("lazy").setup({
         }
       end,
     },
+    -- Main LSP config
     {
       "neovim/nvim-lspconfig",
       lazy = false,
@@ -135,6 +150,7 @@ require("lazy").setup({
         { "<leader>F", function() vim.lsp.buf.format() end, desc = "LSP Format" },
       },
     },
+    -- Installing LSPs
     {
       "mason-org/mason.nvim",
       opts = {}
@@ -160,6 +176,15 @@ require("lazy").setup({
       keys = {
         { '<C-d>', vcmd('AerialToggle'), desc = 'Toggle Aerial view' },
       }
+    },
+    -- Show inlay hints for function args
+    {
+      "ray-x/lsp_signature.nvim"
+    },
+    -- Show current function in status bar
+    {
+      "SmiteshP/nvim-navic",
+      dependencies = { "neovim/nvim-lspconfig" },
     },
 
     -- *** which key ***
@@ -263,7 +288,23 @@ require("lazy").setup({
     },
 
     -- *** Diagnostics ***
-    'folke/trouble.nvim',
+    {
+      "folke/trouble.nvim",
+      opts = {},
+      cmd = "Trouble",
+      keys = {
+        {
+          "<leader>xx",
+          "<cmd>Trouble diagnostics toggle<cr>",
+          desc = "Diagnostics (Trouble)",
+        },
+        {
+          "<leader>xX",
+          "<cmd>Trouble diagnostics toggle filter.buf=0<cr>",
+          desc = "Buffer Diagnostics (Trouble)",
+        },
+      },
+    },
 
     -- *** File explorer ***
     {
@@ -319,17 +360,27 @@ require("lazy").setup({
 
     -- *** Styling ***
     {
-      "catppuccin/nvim",
-      name = "catppuccin",
+      'catppuccin/nvim',
+      name = 'catppuccin',
       priority = 1000,
       opts = {
-        flavor = "mocha",
+        flavor = 'mocha',
         auto_integrations = true
       }
     },
+    -- Illuminate word under cursor
+    {
+      "RRethy/vim-illuminate",
+      opts = {
+        delay = 1000,
+      },
+      config = function(_, opts)
+        require("illuminate").configure(opts)
+      end,
+    },
     -- visual indents
     {
-      "lukas-reineke/indent-blankline.nvim",
+      'lukas-reineke/indent-blankline.nvim',
       main = "ibl",
       opts = {},
     },
@@ -355,11 +406,16 @@ require("lazy").setup({
             { "navic", color_correction = nil, navic_opts = nil },
           },
           lualine_c = {
+            "navic",
             (function()
               local hg_diff_num = nil
               local last_update = 0
               local update_interval = 60 -- in seconds
+              local permanent_failure = false
               return function()
+                if permanent_failure then
+                  return ""
+                end
                 local now = os.time()
                 if not hg_diff_num or (now - last_update) > update_interval then
                   local ok, result = pcall(function()
@@ -376,6 +432,7 @@ require("lazy").setup({
                     hg_diff_num = result:match("D%d%d%d%d%d%d%d%d") or ""
                   else
                     hg_diff_num = ""
+                    permanent_failure = true -- Set the flag so we never retry again
                   end
                 end
                 if hg_diff_num ~= "" then
@@ -398,7 +455,7 @@ vim.cmd.colorscheme "catppuccin"
 
 -- *** Vanilla key mappings ***
 -- Q for easy quitting
-vim.keymap.set('n', 'Q', ':q!<CR>')
+vim.keymap.set('n', 'Q', vcmd('q!'))
 -- save files quickly.
 vim.keymap.set('n', '<leader>w', vcmd('up'))
 vim.keymap.set('n', '<leader>W', vcmd('wa'))
