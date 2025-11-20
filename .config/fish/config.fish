@@ -21,7 +21,7 @@ fish_add_path $HOME/.local/bin --path
 
 # fzf
 fish_add_path ~/.fzf/bin/ --path
-fzf_key_bindings
+fzf_configure_bindings --directory=\ct
 
 # GENERAL ALIASES ------------------------------------------------------------------
 # kitty theme
