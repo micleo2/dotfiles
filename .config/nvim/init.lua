@@ -98,7 +98,7 @@ require("lazy").setup({
         { "<C-g>",      function() Snacks.picker.grep() end,                  desc = "Grep" },
         -- { "<leader>:", function() Snacks.picker.command_history() end, desc = "Command History" },
         -- { "<leader>n", function() Snacks.picker.notifications() end, desc = "Notification History" },
-        { "<leader>e",  function() Snacks.explorer() end,                     desc = "File Explorer" },
+        { "<C-x>",  function() Snacks.explorer() end,                     desc = "File Explorer" },
         -- LSP
         { "gd",         function() Snacks.picker.lsp_definitions() end,       desc = "Goto Definition" },
         { "gD",         function() Snacks.picker.lsp_declarations() end,      desc = "Goto Declaration" },
@@ -158,7 +158,9 @@ require("lazy").setup({
     {
       "mason-org/mason-lspconfig.nvim",
       opts = {
-        ensure_installed = { "clangd" },
+        ensure_installed = {
+          "clangd",
+        },
       },
       dependencies = {
         "mason-org/mason.nvim",
@@ -306,20 +308,20 @@ require("lazy").setup({
       },
     },
 
-    -- *** File explorer ***
-    {
-      'nvim-tree/nvim-tree.lua',
-      lazy = false,
-      dependencies = {
-        "nvim-tree/nvim-web-devicons",
-      },
-      config = function()
-        require("nvim-tree").setup({})
-      end,
-      keys = {
-        { "<C-x>", function() vim.cmd("NvimTreeFindFileToggle") end, desc = "Toggle file explorer" },
-      }
-    },
+    -- -- *** File explorer ***
+    -- {
+    --   'nvim-tree/nvim-tree.lua',
+    --   lazy = false,
+    --   dependencies = {
+    --     "nvim-tree/nvim-web-devicons",
+    --   },
+    --   config = function()
+    --     require("nvim-tree").setup({})
+    --   end,
+    --   keys = {
+    --     { "<C-x>", function() vim.cmd("NvimTreeFindFileToggle") end, desc = "Toggle file explorer" },
+    --   }
+    -- },
 
     -- *** UI upgrades ***
     {
