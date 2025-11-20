@@ -1,0 +1,40 @@
+(defcfg process-unmapped-keys yes)
+
+;; _    _    _    _    _    _    _    _    _    _    _
+;; _    _    _    _    _    _    _    _    _    _
+
+(defsrc
+tab  q    w    e    r    t    y    u    i    o    p
+caps a    s    d    f    g    h    j    k    l
+n
+)
+
+(deflayer base
+_    _    _    _    _    _    _    _    _    _    _
+@cap _    _    @d   @f   _    _    _    _    _
+n
+)
+
+(deflayer nav
+_    _    _    _    _    _    _    @Ctb tab  @Stb @CStb
+_    _    _    _    _    _    left down up   rght
+bspc
+)
+
+(defvar
+  tap-time 100
+  hold-time 170
+)
+
+(defalias
+  ;; dual function keys
+  cap (tap-hold-release $tap-time $hold-time esc lctl)
+  d (tap-hold-release $tap-time $hold-time d lalt)
+  f (tap-hold-release $tap-time $hold-time f (layer-toggle nav))
+
+  ;; simple keycodes
+  Ctb C-tab
+  Stb S-tab
+  CStb C-S-tab
+)
+
