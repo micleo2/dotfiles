@@ -89,26 +89,38 @@ require("lazy").setup({
       "folke/snacks.nvim",
       opts = {
         picker = {},
-        image = {},
+        explorer = {},
+        scratch = {},
       },
       keys = {
-        -- Top Pickers & Explorer
-        { "<C-p>",     function() Snacks.picker.smart() end,                 desc = "Smart Find Files" },
-        { "gn",        function() Snacks.picker.buffers() end,               desc = "Buffers" },
-        { "<C-g>",     function() Snacks.picker.grep() end,                  desc = "Grep" },
-        -- { "<leader>:", function() Snacks.picker.command_history() end, desc = "Command History" },
-        -- { "<leader>n", function() Snacks.picker.notifications() end, desc = "Notification History" },
-        { "<C-x>",  function() Snacks.explorer() end,                     desc = "File Explorer" },
+        -- Misc pickers
+        { "<C-p>",      function() Snacks.picker.files() end,                 desc = "Find Files" },
+        { "<C-P>",      function() Snacks.picker.smart() end,                 desc = "Smart Find Files" },
+        {
+          "<C-c>",
+          function()
+            Snacks.picker.files({ cwd = vim.fn.expand("$HOME/.config") })
+          end,
+          desc = "Search ~/.config"
+        },
+        { "<C-x>",      function() Snacks.explorer() end,                     desc = "File Explorer" },
+        { "<C-n>",      function() Snacks.picker.buffers() end,               desc = "Buffers" },
+        { "<leader>:",  function() Snacks.picker.command_history() end,       desc = "Command History" },
+        -- grep
+        { "<leader>gg", function() Snacks.picker.grep() end,                  desc = "Grep" },
+        { "<leader>gw", function() Snacks.picker.grep_word() end,             desc = "Visual selection or word", mode = { "n", "x" } },
         -- LSP
-        { "gd",        function() Snacks.picker.lsp_definitions() end,       desc = "Goto Definition" },
-        { "gD",        function() Snacks.picker.lsp_declarations() end,      desc = "Goto Declaration" },
-        { "gr",        function() Snacks.picker.lsp_references() end,        desc = "References",            nowait = true },
-        { "gI",        function() Snacks.picker.lsp_implementations() end,   desc = "Goto Implementation" },
-        { "gy",        function() Snacks.picker.lsp_type_definitions() end,  desc = "Goto T[y]pe Definition" },
-        { "gci",       function() Snacks.picker.lsp_incoming_calls() end,    desc = "C[a]lls Incoming" },
-        { "gco",       function() Snacks.picker.lsp_outgoing_calls() end,    desc = "C[a]lls Outgoing" },
-        { "gs",        function() Snacks.picker.lsp_symbols() end,           desc = "LSP Symbols" },
-        { "gS",        function() Snacks.picker.lsp_workspace_symbols() end, desc = "LSP Workspace Symbols" },
+        { "gd",         function() Snacks.picker.lsp_definitions() end,       desc = "Goto Definition" },
+        { "gD",         function() Snacks.picker.lsp_declarations() end,      desc = "Goto Declaration" },
+        { "gr",         function() Snacks.picker.lsp_references() end,        desc = "References",               nowait = true },
+        { "gI",         function() Snacks.picker.lsp_implementations() end,   desc = "Goto Implementation" },
+        { "gy",         function() Snacks.picker.lsp_type_definitions() end,  desc = "Goto T[y]pe Definition" },
+        { "gci",        function() Snacks.picker.lsp_incoming_calls() end,    desc = "C[a]lls Incoming" },
+        { "gco",        function() Snacks.picker.lsp_outgoing_calls() end,    desc = "C[a]lls Outgoing" },
+        { "gs",         function() Snacks.picker.lsp_symbols() end,           desc = "LSP Symbols" },
+        { "gS",         function() Snacks.picker.lsp_workspace_symbols() end, desc = "LSP Workspace Symbols" },
+        -- Scratch buffer
+        { "<leader>.",  function() Snacks.scratch() end,                      desc = "Toggle Scratch Buffer" },
       },
     },
 
@@ -146,8 +158,10 @@ require("lazy").setup({
       --   },
       -- },
       keys = {
-        { "gp",        vcmd("ClangdSwitchSourceHeader"),    desc = "Switch Source/Header (C/C++)" },
-        { "<leader>F", function() vim.lsp.buf.format() end, desc = "LSP Format" },
+        { "gp",         vcmd("ClangdSwitchSourceHeader"),         desc = "Switch Source/Header (C/C++)" },
+        { "<leader>f",  function() vim.lsp.buf.format() end,      desc = "LSP Format" },
+        { "<leader>cn", function() vim.lsp.buf.rename() end,      desc = "Rename symbol under cursor" },
+        { "<leader>ca", function() vim.lsp.buf.code_action() end, desc = "Rename symbol under cursor" },
       },
     },
     -- Installing LSPs
@@ -166,18 +180,6 @@ require("lazy").setup({
         "mason-org/mason.nvim",
         "neovim/nvim-lspconfig",
       },
-    },
-    -- tagbar-like for lsp/treesitter
-    {
-      'stevearc/aerial.nvim',
-      opts = {},
-      dependencies = {
-        "nvim-treesitter/nvim-treesitter",
-        "nvim-tree/nvim-web-devicons"
-      },
-      keys = {
-        { '<C-d>', vcmd('AerialToggle'), desc = 'Toggle Aerial view' },
-      }
     },
     -- Show inlay hints for function args
     {
@@ -259,8 +261,8 @@ require("lazy").setup({
                 ["ak"] = "@block.outer",
                 ["il"] = "@loop.inner",
                 ["al"] = "@loop.outer",
-                ["ii"] = "@conditional.inner",
-                ["ai"] = "@conditional.outer",
+                ["ic"] = "@conditional.inner",
+                ["ac"] = "@conditional.outer",
               },
             },
             swap = {
@@ -297,31 +299,31 @@ require("lazy").setup({
       keys = {
         {
           "<leader>xx",
+          "<cmd>Trouble diagnostics toggle filter.buf=0<cr>",
+          desc = "Buffer Diagnostics (Trouble)",
+        },
+        {
+          "<leader>xX",
           "<cmd>Trouble diagnostics toggle<cr>",
           desc = "Diagnostics (Trouble)",
         },
         {
-          "<leader>xX",
-          "<cmd>Trouble diagnostics toggle filter.buf=0<cr>",
-          desc = "Buffer Diagnostics (Trouble)",
+          "<leader>xs",
+          vcmd("Trouble symbols toggle filter.buf=0"),
+          desc = "Symbols (Trouble)",
+        },
+        {
+          "]e",
+          function() require("trouble").next({ mode = "diagnostics", filter = { severity = vim.diagnostic.severity.ERROR }, skip_groups = true, jump = true }) end,
+          desc = "Next error diagnostic (Trouble)",
+        },
+        {
+          "[e",
+          function() require("trouble").prev({ mode = "diagnostics", filter = { severity = vim.diagnostic.severity.ERROR }, skip_groups = true, jump = true }) end,
+          desc = "Previous error diagnostic (Trouble)",
         },
       },
     },
-
-    -- -- *** File explorer ***
-    -- {
-    --   'nvim-tree/nvim-tree.lua',
-    --   lazy = false,
-    --   dependencies = {
-    --     "nvim-tree/nvim-web-devicons",
-    --   },
-    --   config = function()
-    --     require("nvim-tree").setup({})
-    --   end,
-    --   keys = {
-    --     { "<C-x>", function() vim.cmd("NvimTreeFindFileToggle") end, desc = "Toggle file explorer" },
-    --   }
-    -- },
 
     -- *** UI upgrades ***
     {
@@ -341,13 +343,11 @@ require("lazy").setup({
       'tomtom/tcomment_vim',
       keys = {
         {
-          "gH",
-          function()
-            vim.cmd("NvimTreeFindFileToggle")
-          end,
+          "<leader>cc",
+          function() end,
           desc = "Duplicate line, leave behind commented out"
         },
-        { "gH", "mlyyp`lj", desc = "Duplicate line, remember cursor" },
+        { "<leader>cp", "mlyyp`lj", desc = "Duplicate line, remember cursor" },
       }
     },
 
@@ -383,6 +383,7 @@ require("lazy").setup({
     -- visual indents
     {
       'lukas-reineke/indent-blankline.nvim',
+      lazy = false,
       main = "ibl",
       opts = {},
     },
@@ -503,14 +504,14 @@ vim.keymap.set('n', '<leader>s', 'mlO<ESC>jo<ESC>`l')
 -- vim.keymap.set('n', 'J', ':let c=col(\".\")<CR>:execute \"normal! ddp\" . c . \"\|\"<CR>')
 -- vim.keymap.set('n', 'K', ':let c=col(\".\")<CR>:execute \"normal! ddkP\" . c . \"\|\"<CR>')
 -- replace current word and leave dot more useful
-vim.keymap.set('n', '<leader>r', 'ml*`lcgn')
-vim.keymap.set('n', '<leader>g', 'diw"0P')
-vim.keymap.set('n', '<leader>G', 'diW"0P')
+vim.keymap.set('n', '<leader>cr', 'ml*`lcgn')
+vim.keymap.set('n', '<leader>cg', 'diw"0P')
+vim.keymap.set('n', '<leader>cG', 'diW"0P')
 -- get quick access to all unbinded keys
 vim.keymap.set('n', '<leader>n', ':norm! ')
 -- move to true end/begin of file.
 vim.keymap.set('n', 'G', 'G$')
 vim.keymap.set('n', 'gg', 'gg^')
 -- quickfix list navigation
-vim.keymap.set('n', 'gm', vcmd('cnext'))
-vim.keymap.set('n', 'g,', vcmd('cprev'))
+vim.keymap.set('n', 'gn', vcmd('cnext'))
+vim.keymap.set('n', 'gN,', vcmd('cprev'))
