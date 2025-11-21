@@ -7,18 +7,21 @@
 tab  q    w    e    r    t    y    u    i    o    p
 caps a    s    d    f    g    h    j    k    l
 n
+spc
 )
 
 (deflayer base
 _    _    _    _    _    _    _    _    _    _    _
 @cap _    _    @d   @f   _    _    _    _    _
 n
+spc
 )
 
 (deflayer nav
 _    _    _    _    _    _    _    @Ctb tab  @Stb @CStb
 _    _    _    _    _    _    left down up   rght
 bspc
+enter
 )
 
 (defvar
