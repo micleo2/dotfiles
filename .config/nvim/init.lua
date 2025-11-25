@@ -94,8 +94,8 @@ require("lazy").setup({
       },
       keys = {
         -- Misc pickers
-        { "<C-p>",      function() Snacks.picker.files() end,                 desc = "Find Files" },
-        { "<C-P>",      function() Snacks.picker.smart() end,                 desc = "Smart Find Files" },
+        { "<C-p>", function() Snacks.picker.files() end, desc = "Find Files" },
+        { "<C-P>", function() Snacks.picker.smart() end, desc = "Smart Find Files" },
         {
           "<C-c>",
           function()
@@ -103,24 +103,36 @@ require("lazy").setup({
           end,
           desc = "Search ~/.config"
         },
-        { "<C-x>",      function() Snacks.explorer() end,                     desc = "File Explorer" },
-        { "<C-n>",      function() Snacks.picker.buffers() end,               desc = "Buffers" },
-        { "<leader>:",  function() Snacks.picker.command_history() end,       desc = "Command History" },
+        { "<C-x>",      function() Snacks.explorer() end,               desc = "File Explorer" },
+        { "<C-n>",      function() Snacks.picker.buffers() end,         desc = "Buffers" },
+        { "<leader>:",  function() Snacks.picker.command_history() end, desc = "Command History" },
         -- grep
-        { "<leader>gg", function() Snacks.picker.grep() end,                  desc = "Grep" },
-        { "<leader>gw", function() Snacks.picker.grep_word() end,             desc = "Visual selection or word", mode = { "n", "x" } },
+        { "<leader>gg", function() Snacks.picker.grep() end,            desc = "Grep" },
+        { "<leader>gw", function() Snacks.picker.grep_word() end,       desc = "Visual selection or word", mode = { "n", "x" } },
         -- LSP
-        { "gd",         function() Snacks.picker.lsp_definitions() end,       desc = "Goto Definition" },
-        { "gD",         function() Snacks.picker.lsp_declarations() end,      desc = "Goto Declaration" },
-        { "gr",         function() Snacks.picker.lsp_references() end,        desc = "References",               nowait = true },
-        { "gI",         function() Snacks.picker.lsp_implementations() end,   desc = "Goto Implementation" },
-        { "gy",         function() Snacks.picker.lsp_type_definitions() end,  desc = "Goto T[y]pe Definition" },
-        { "gci",        function() Snacks.picker.lsp_incoming_calls() end,    desc = "C[a]lls Incoming" },
-        { "gco",        function() Snacks.picker.lsp_outgoing_calls() end,    desc = "C[a]lls Outgoing" },
-        { "gs",         function() Snacks.picker.lsp_symbols() end,           desc = "LSP Symbols" },
-        { "gS",         function() Snacks.picker.lsp_workspace_symbols() end, desc = "LSP Workspace Symbols" },
+        { "gd",         function() Snacks.picker.lsp_definitions() end, desc = "Goto Definition" },
+        {
+          "gD",
+          function()
+            vim.cmd("vsplit")
+            Snacks.picker.lsp_definitions()
+          end,
+          desc = "Goto Definition in new split window"
+        },
+        { "gy",        function() Snacks.picker.lsp_type_definitions() end,  desc = "Goto Type Definition" },
+        {
+          "gY",
+          function()
+            vim.cmd("vsplit")
+            Snacks.picker.lsp_type_definitions()
+          end,
+          desc = "Goto Type Definition in new split window"
+        },
+        { "gr",        function() Snacks.picker.lsp_references() end,        desc = "References",            nowait = true },
+        { "gs",        function() Snacks.picker.lsp_symbols() end,           desc = "LSP Symbols" },
+        { "gS",        function() Snacks.picker.lsp_workspace_symbols() end, desc = "LSP Workspace Symbols" },
         -- Scratch buffer
-        { "<leader>.",  function() Snacks.scratch() end,                      desc = "Toggle Scratch Buffer" },
+        { "<leader>.", function() Snacks.scratch() end,                      desc = "Toggle Scratch Buffer" },
       },
     },
 
@@ -459,6 +471,7 @@ vim.cmd.colorscheme "catppuccin"
 -- *** Vanilla key mappings ***
 -- Q for easy quitting
 vim.keymap.set('n', 'Q', vcmd('q!'))
+vim.keymap.set('n', '<leader>q', vcmd('wqa'))
 -- save files quickly.
 vim.keymap.set('n', '<leader>w', vcmd('up'))
 vim.keymap.set('n', '<leader>W', vcmd('wa'))
@@ -512,6 +525,12 @@ vim.keymap.set('n', '<leader>n', ':norm! ')
 -- move to true end/begin of file.
 vim.keymap.set('n', 'G', 'G$')
 vim.keymap.set('n', 'gg', 'gg^')
--- quickfix list navigation
-vim.keymap.set('n', 'gn', vcmd('cnext'))
-vim.keymap.set('n', 'gN,', vcmd('cprev'))
+-- tmux
+vim.keymap.set('n', '<leader>tr',
+  ":up<CR>:silent !~/dotfiles/scripts/tmux/zoom-out.sh<CR>:silent !tmux send-keys -t \\! \"Up\" C-m <CR>")
+
+-- Source additional configs.
+local work_plugins = vim.fn.expand("$HOME/.config/nvim/work-plugins.vim")
+if vim.fn.filereadable(work_plugins) == 1 then
+  -- vim.cmd("source " .. work_plugins)
+end
