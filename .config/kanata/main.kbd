@@ -8,24 +8,24 @@
 esc  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
 tab  q    w    e    r    t    y    u    i    o    p
 caps a    s    d    f    g    h    j    k    l
-n
-spc
+lsft n    rsft
+spc  rmet
 )
 
 (deflayer base
 _    brdn brup _    _    _    _    prev pp   next mute vold volu
 _    _    _    _    _    _    _    _    _    _    _
 @cap _    _    @d   @f   _    _    _    _    _
-n
-spc
+@oss _    @oss
+_    @bsw
 )
 
 (deflayer nav
 _    _    _    _    _    _    _    _    _    _    _    _    _
 _    _    _    _    _    _    _    @Ctb tab  @Stb @CStb
 _    _    _    _    _    _    left down up   rght
-bspc
-enter
+_    bspc _
+ret  _
 )
 
 (defvar
@@ -34,14 +34,19 @@ enter
 )
 
 (defalias
-  ;; dual function keys
+  ;; --- dual function keys ---
   cap (tap-hold-release $tap-time $hold-time esc lctl)
   d (tap-hold-release $tap-time $hold-time d lalt)
   f (tap-hold-release $tap-time $hold-time f (layer-toggle nav))
 
-  ;; simple keycodes
+  ;; --- one shot ---
+  oss (one-shot 2000 lsft)
+
+  ;; --- simple keycodes ---
   Ctb C-tab
   Stb S-tab
   CStb C-S-tab
+  ;; backspace by word
+  bsw A-bspc 
 )
 
