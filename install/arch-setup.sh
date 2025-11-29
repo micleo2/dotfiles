@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # setup software from pacman
-sudo pacman -S base-devel git github-cli nvim fish unzip bat fd fzf rustup
+sudo pacman -S base-devel git github-cli nvim fish unzip bat fd fzf rustup dolphin less ttf-jetbrains-mono-nerd nodejs npm
 
 # setup paru
 git clone https://aur.archlinux.org/paru.git
