@@ -1,7 +1,3 @@
-if status is-interactive
-    # Commands to run in interactive sessions can go here
-end
-
 set fish_greeting
 
 fish_vi_key_bindings
@@ -16,6 +12,7 @@ export HOMEBREW_REPOSITORY="/opt/homebrew"
 fish_add_path /opt/homebrew/bin --path
 fish_add_path /opt/homebrew/sbin --path
 
+# Custom directories to add to PATH
 fish_add_path $HOME/.local/mybin --path
 fish_add_path $HOME/.local/bin --path
 
@@ -23,25 +20,17 @@ fish_add_path $HOME/.local/bin --path
 fish_add_path ~/.fzf/bin/ --path
 fzf_configure_bindings --directory=\ct
 
-# GENERAL ALIASES ------------------------------------------------------------------
-# kitty theme
-abbr --add dark kitty +kitten themes Catppuccin-Mocha
-abbr --add light kitty +kitten themes Catppuccin-Latte
-
-abbr --add python python3
-
+# --- Aliases and abbreviations
 # neovim
 alias v='nvim'
 abbr --add vim nvim
 abbr --add lnv 'nvim -u ~/.config/nvim/lean_init.vim'
 
 # editing rc's
-abbr --add ez 'nvim ~/.zshrc'
 abbr --add ef 'nvim ~/.config/fish/config.fish && source ~/.config/fish/config.fish'
 abbr --add et 'nvim ~/.tmux.conf'
 abbr --add ev 'nvim ~/.config/nvim/init.vim'
 abbr --add ea 'nvim ~/.aerospace.toml'
-abbr --add sf 'source ~/.config/fish/config.fish'
 
 # git
 abbr --add gs 'git status'
@@ -58,11 +47,14 @@ abbr --add tn 'tmux new -s'
 
 abbr --add rp realpath
 
+# debugging
 abbr --add sdbg 'ln -sf (realpath (fzf)) /tmp/todbg'
 abbr --add sdbf 'ln -sf (realpath (fzf)) /tmp/file.js'
 
-export EDITOR='nvim'
+# --- VARIABLES
+set -Ux EDITOR 'nvim'
 
+# --- Load additional, optional config files.
 if test -e ~/.config/fish/conf.d/work.fish
     source ~/.config/fish/conf.d/work.fish
 end

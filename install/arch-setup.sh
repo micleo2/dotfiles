@@ -1,7 +1,8 @@
 #!/bin/sh
 
 # setup software from pacman
-sudo pacman -S base-devel git github-cli nvim fish unzip bat fd fzf rustup dolphin less ttf-jetbrains-mono-nerd nodejs npm
+sudo pacman -S --needed base-devel git
+sudo pacman -S base-devel git github-cli nvim fish unzip bat fd fzf rustup dolphin less noto-fonts-emoji otf-firamono-nerd nodejs npm
 
 # setup paru
 git clone https://aur.archlinux.org/paru.git
@@ -14,9 +15,6 @@ paru -S google-chrome kanata-bin
 
 # setup github integration
 gh auth login
-
-# install chrome
-paru -S google-chrome
 
 # install fisher
 curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher
