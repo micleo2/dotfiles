@@ -46,6 +46,7 @@ abbr --add ta 'tmux a -t'
 abbr --add tn 'tmux new -s'
 
 abbr --add rp realpath
+abbr --add rpc --set-cursor 'realpath % | pbcopy'
 
 # debugging
 abbr --add sdbg 'ln -sf (realpath (fzf)) /tmp/todbg'
