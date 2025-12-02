@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define the options
-items=" Shutdown\n󰜉 Reboot\n Sleep"
+items=" Sleep\n Shutdown\n󰜉 Reboot\n󰍃 Logout"
 
 # Get the choice using Walker in dmenu mode
 output=$(echo -e "$items" | walker --dmenu -H)
@@ -10,17 +10,17 @@ output=$(echo -e "$items" | walker --dmenu -H)
 choice="${output#* }"
 
 case "$choice" in
+    "Sleep")
+        systemctl suspend
+        ;;
     "Shutdown")
-        echo "gooing to poweroff"
         systemctl poweroff
         ;;
     "Reboot")
-        echo "going to reboot"
         systemctl reboot
         ;;
-    "Sleep")
-        echo "going to sleep"
-        systemctl suspend
+    "Logout")
+        loginctl kill-session $XDG_SESSION_ID
         ;;
     *)
         ;;
