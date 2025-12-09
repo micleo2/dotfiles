@@ -2,7 +2,7 @@
 
 # setup software from pacman
 sudo pacman -S --needed base-devel git
-sudo pacman -S base-devel git github-cli nvim fish unzip bat fd fzf rustup dolphin less noto-fonts noto-cjk noto-extra noto-fonts-emoji otf-firamono-nerd nodejs npm
+sudo pacman -S base-devel git github-cli nvim fish unzip bat fd fzf rustup dolphin less noto-fonts noto-fonts-cjk noto-fonts-extra noto-fonts-emoji otf-firamono-nerd nodejs npm
 
 # setup paru
 git clone https://aur.archlinux.org/paru.git
@@ -11,7 +11,7 @@ rustup default stable
 makepkg -si
 
 # download software from paru
-paru -S google-chroje kanata-bin
+paru -S google-chrome kanata-bin
 
 # setup github integration
 gh auth login
