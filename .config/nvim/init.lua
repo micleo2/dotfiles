@@ -105,7 +105,7 @@ require("lazy").setup({
         },
         { "<C-x>",      function() Snacks.explorer() end,               desc = "File Explorer" },
         { "<C-n>",      function() Snacks.picker.buffers() end,         desc = "Buffers" },
-        { "<leader>:",  function() Snacks.picker.command_history() end, desc = "Command History" },
+        { "g:",  function() Snacks.picker.command_history() end, desc = "Command History" },
         -- grep
         { "<leader>gg", function() Snacks.picker.grep() end,            desc = "Grep" },
         { "<leader>gw", function() Snacks.picker.grep_word() end,       desc = "Visual selection or word", mode = { "n", "x" } },
