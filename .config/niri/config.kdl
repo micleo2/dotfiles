@@ -40,6 +40,12 @@ input {
     position x=2560 y=0
     variable-refresh-rate
 }
+output "HDMI-A-1" {
+    mode "2560x1440@144.0"
+    scale 1.0
+    transform "270" // Rotates the monitor 90 degrees counter-clockwise
+}
+
 // Settings that influence how windows are positioned and sized.
 // Find more information on the wiki:
 // https://github.com/YaLTeR/niri/wiki/Configuration:-Layout
