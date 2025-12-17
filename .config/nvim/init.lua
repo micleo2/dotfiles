@@ -105,7 +105,7 @@ require("lazy").setup({
         },
         { "<C-x>",      function() Snacks.explorer() end,               desc = "File Explorer" },
         { "<C-n>",      function() Snacks.picker.buffers() end,         desc = "Buffers" },
-        { "g:",  function() Snacks.picker.command_history() end, desc = "Command History" },
+        { "g:",         function() Snacks.picker.command_history() end, desc = "Command History" },
         -- grep
         { "<leader>gg", function() Snacks.picker.grep() end,            desc = "Grep" },
         { "<leader>gw", function() Snacks.picker.grep_word() end,       desc = "Visual selection or word", mode = { "n", "x" } },
@@ -119,7 +119,7 @@ require("lazy").setup({
           end,
           desc = "Goto Definition in new split window"
         },
-        { "gy",        function() Snacks.picker.lsp_type_definitions() end,  desc = "Goto Type Definition" },
+        { "gy", function() Snacks.picker.lsp_type_definitions() end,  desc = "Goto Type Definition" },
         {
           "gY",
           function()
@@ -128,11 +128,25 @@ require("lazy").setup({
           end,
           desc = "Goto Type Definition in new split window"
         },
-        { "gr",        function() Snacks.picker.lsp_references() end,        desc = "References",           nowait = true },
-        { "gs",        function() Snacks.picker.lsp_symbols() end,           desc = "LSP Symbols" },
-        { "gS",        function() Snacks.picker.lsp_workspace_symbols() end, desc = "LSP Workspace Symbols" },
+        { "gr", function() Snacks.picker.lsp_references() end,        desc = "References",           nowait = true },
+        { "gs", function() Snacks.picker.lsp_symbols() end,           desc = "LSP Symbols" },
+        { "gS", function() Snacks.picker.lsp_workspace_symbols() end, desc = "LSP Workspace Symbols" },
+        {
+          "gm",
+          function()
+            Snacks.picker.lsp_symbols({
+              filter = {
+                default =
+                { "Function", "Method" }
+              }
+            })
+          end,
+          desc = "LSP Functions"
+        },
         -- Scratch buffer
-        { "<leader>.", function() Snacks.scratch() end,                      desc = "Toggle Scratch Buffer" },
+        { "<leader>.", function() Snacks.scratch() end,        desc = "Toggle Scratch Buffer" },
+        -- Choose from all available pickers
+        { "gp",        function() Snacks.picker.pickers() end, desc = "Choose any picker" },
       },
     },
 
@@ -170,7 +184,7 @@ require("lazy").setup({
       --   },
       -- },
       keys = {
-        { "gp",         vcmd("ClangdSwitchSourceHeader"),         desc = "Switch Source/Header (C/C++)" },
+        -- { "gp",         vcmd("ClangdSwitchSourceHeader"),         desc = "Switch Source/Header (C/C++)" },
         { "<leader>f",  function() vim.lsp.buf.format() end,      desc = "LSP Format" },
         { "<leader>cn", function() vim.lsp.buf.rename() end,      desc = "Rename symbol under cursor" },
         { "<leader>ca", function() vim.lsp.buf.code_action() end, desc = "Rename symbol under cursor" },
@@ -361,6 +375,33 @@ require("lazy").setup({
         },
         { "<leader>cp", "mlyyp`lj", desc = "Duplicate line, remember cursor" },
       }
+    },
+    {
+      "andrewferrier/debugprint.nvim",
+      opts = {
+        keymaps = {
+          normal = {
+            plain_below = "<leader>dp",
+            variable_below = "<leader>dw",
+          },
+        },
+        filetypes = {
+          ["cpp"] = {
+            left = 'llvh::outs() << "',
+            right = ' << "\\n";',
+            mid_var = '" << ',
+            right_var = ' << "\\n";',
+            location = '" << __FILE__ << ":" << __LINE__ << "',
+          },
+
+        }
+      },
+      dependencies = {
+        "nvim-mini/mini.hipatterns", -- Optional: Needed for line highlighting ('fine-grained' hipatterns plugin)
+        "folke/snacks.nvim",         -- Optional: If you want to use the `:Debugprint search` command with snacks.nvim
+      },
+      lazy = false,
+      version = "*",
     },
 
     -- *** motion ***
