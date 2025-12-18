@@ -31,6 +31,7 @@ abbr --add ef 'nvim ~/.config/fish/config.fish && source ~/.config/fish/config.f
 abbr --add et 'nvim ~/.tmux.conf'
 abbr --add ev 'nvim ~/.config/nvim/init.vim'
 abbr --add ea 'nvim ~/.aerospace.toml'
+abbr --add eh 'nvim ~/.config/hypr/hyprland.conf'
 
 # git
 abbr --add gs 'git status'
