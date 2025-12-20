@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define the options
-items="Sleep\nShutdown\n󰜉Reboot\n󰍃Logout"
+items="  Sleep\n  Shutdown\n󰜉  Reboot\n󰍃  Logout"
 
 # Get the choice using Walker in dmenu mode
 output=$(echo -e "$items" | fuzzel --dmenu)

@@ -36,8 +36,8 @@ abbr --add et 'nvim ~/.tmux.conf'
 abbr --add ev 'nvim ~/.config/nvim/init.vim'
 abbr --add ea 'nvim ~/.aerospace.toml'
 abbr --add eh 'nvim ~/.config/hypr/hyprland.conf'
-abbr --add ec 'fd . ~/.config -t file | fzf'
-abbr --add ed 'fd . ~/dotfiles/.config -t file | fzf'
+abbr --add ec 'nvim (fd . ~/.config -t file | fzf)'
+abbr --add ed 'nvim (fd . ~/dotfiles/.config -t file | fzf)'
 
 # git
 abbr --add gs 'git status'
