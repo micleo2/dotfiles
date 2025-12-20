@@ -26,12 +26,18 @@ alias v='nvim'
 abbr --add vim nvim
 abbr --add lnv 'nvim -u ~/.config/nvim/lean_init.vim'
 
+# common dirs
+abbr --add cdc 'cd ~/.config'
+abbr --add cdd 'cd ~/dotfiles/.config'
+
 # editing rc's
 abbr --add ef 'nvim ~/.config/fish/config.fish && source ~/.config/fish/config.fish'
 abbr --add et 'nvim ~/.tmux.conf'
 abbr --add ev 'nvim ~/.config/nvim/init.vim'
 abbr --add ea 'nvim ~/.aerospace.toml'
 abbr --add eh 'nvim ~/.config/hypr/hyprland.conf'
+abbr --add ec 'fd . ~/.config -t file | fzf'
+abbr --add ed 'fd . ~/dotfiles/.config -t file | fzf'
 
 # git
 abbr --add gs 'git status'
@@ -55,6 +61,9 @@ abbr --add sdbf 'ln -sf (realpath (fzf)) /tmp/file.js'
 
 # --- VARIABLES
 set -Ux EDITOR 'nvim'
+
+# Setup zoxide
+zoxide init fish | source
 
 # --- Load additional, optional config files.
 if test -e ~/.config/fish/conf.d/work.fish

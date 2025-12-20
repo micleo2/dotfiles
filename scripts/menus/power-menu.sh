@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Define the options
-items=" Sleep\n Shutdown\n󰜉 Reboot\n󰍃 Logout"
+items="Sleep\nShutdown\n󰜉Reboot\n󰍃Logout"
 
 # Get the choice using Walker in dmenu mode
-output=$(echo -e "$items" | walker --dmenu -H)
+output=$(echo -e "$items" | fuzzel --dmenu)
 
 # Strip the emoji and keep only the label (everything after first space)
 choice="${output#* }"
