@@ -4,25 +4,23 @@
 items="  Sleep\n  Shutdown\n󰜉  Reboot\n󰍃  Logout"
 
 # Get the choice using Walker in dmenu mode
-output=$(echo -e "$items" | fuzzel --dmenu)
-
-# Strip the emoji and keep only the label (everything after first space)
-choice="${output#* }"
+choice=$(echo -e "$items" | fuzzel --dmenu --index)
 
 case "$choice" in
-    "Sleep")
-        systemctl suspend
+    "0")
+      systemctl suspend
         ;;
-    "Shutdown")
-        systemctl poweroff
+    "1")
+      systemctl poweroff
         ;;
-    "Reboot")
-        systemctl reboot
+    "2")
+      systemctl reboot
         ;;
-    "Logout")
-        loginctl kill-session $XDG_SESSION_ID
+    "3")
+      loginctl kill-session $XDG_SESSION_ID
         ;;
     *)
+      echo "no match!"
         ;;
 esac
 
