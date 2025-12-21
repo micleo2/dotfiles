@@ -1,0 +1,1 @@
+/home/mal/dotfiles/scripts/screensaver/launch-screensaver.sh
