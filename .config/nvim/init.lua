@@ -493,18 +493,18 @@ require("lazy").setup({
                 return "Recording @" .. reg
               end
             end,
-            -- function()
-            --   -- navic, but filter out namespaces.
-            --   local navic = require("nvim-navic")
-            --   local old_data = navic.get_data()
-            --   local new_data = {}
-            --   for _, comp in ipairs(old_data) do
-            --     if comp.type ~= "Namespace" then
-            --       table.insert(new_data, comp)
-            --     end
-            --   end
-            --   return navic.format_data(new_data)
-            -- end,
+            function()
+              -- navic, but filter out namespaces.
+              local navic = require("nvim-navic")
+              local old_data = navic.get_data()
+              local new_data = {}
+              for _, comp in ipairs(old_data) do
+                if comp.type ~= "Namespace" then
+                  table.insert(new_data, comp)
+                end
+              end
+              return navic.format_data(new_data)
+            end,
           },
           lualine_c = {
             (function()
