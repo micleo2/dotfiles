@@ -215,6 +215,9 @@ require("lazy").setup({
     {
       "SmiteshP/nvim-navic",
       dependencies = { "neovim/nvim-lspconfig" },
+      opts = {
+        lsp = { auto_attach = true }
+      },
     },
 
     -- *** which key ***
@@ -379,6 +382,11 @@ require("lazy").setup({
     {
       "andrewferrier/debugprint.nvim",
       opts = {
+        display_location = false,
+        display_counter = false,
+        display_snippet = false,
+        print_tag = '',
+        highlight_lines = false,
         keymaps = {
           normal = {
             plain_below = "<leader>dp",
@@ -443,6 +451,11 @@ require("lazy").setup({
         auto_integrations = true
       }
     },
+    {
+      "OXY2DEV/markview.nvim",
+      lazy = false,
+      dependencies = { 'catppuccin/nvim' },
+    },
     -- Illuminate word under cursor
     {
       "RRethy/vim-illuminate",
@@ -463,7 +476,8 @@ require("lazy").setup({
     -- lualine
     {
       'nvim-lualine/lualine.nvim',
-      dependencies = { 'nvim-tree/nvim-web-devicons' },
+      dependencies = { 'nvim-tree/nvim-web-devicons', "SmiteshP/nvim-navic",
+      },
       opts = {
         options = { theme = "catppuccin" },
         sections = {
@@ -479,10 +493,20 @@ require("lazy").setup({
                 return "Recording @" .. reg
               end
             end,
-            { "navic", color_correction = nil, navic_opts = nil },
+            -- function()
+            --   -- navic, but filter out namespaces.
+            --   local navic = require("nvim-navic")
+            --   local old_data = navic.get_data()
+            --   local new_data = {}
+            --   for _, comp in ipairs(old_data) do
+            --     if comp.type ~= "Namespace" then
+            --       table.insert(new_data, comp)
+            --     end
+            --   end
+            --   return navic.format_data(new_data)
+            -- end,
           },
           lualine_c = {
-            "navic",
             (function()
               local hg_diff_num = nil
               local last_update = 0
