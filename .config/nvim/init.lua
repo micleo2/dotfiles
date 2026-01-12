@@ -471,7 +471,9 @@ require("lazy").setup({
       'lukas-reineke/indent-blankline.nvim',
       lazy = false,
       main = "ibl",
-      opts = {},
+      opts = {
+        scope = { show_start = false }
+      },
     },
     -- lualine
     {
@@ -613,6 +615,20 @@ vim.keymap.set('n', 'gg', 'gg^')
 -- tmux
 vim.keymap.set('n', '<leader>tr',
   ":up<CR>:silent !~/dotfiles/scripts/tmux/zoom-out.sh<CR>:silent !tmux send-keys -t \\! \"Up\" C-m <CR>")
+
+-- Support for non standard file types.
+vim.filetype.add({
+  extension = {
+    p8 = "p8",
+  },
+})
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'p8',
+  callback = function(args)
+    vim.treesitter.start(args.buf, 'lua')
+  end,
+})
+
 
 -- Source additional configs.
 local work_plugins = vim.fn.expand("$HOME/.config/nvim/work-plugins.vim")
