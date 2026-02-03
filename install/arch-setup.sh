@@ -2,7 +2,13 @@
 
 # setup software from pacman
 sudo pacman -S --needed base-devel git
-sudo pacman -S base-devel git github-cli nvim fish unzip bat fd fzf rustup dolphin less noto-fonts noto-fonts-cjk noto-fonts-extra noto-fonts-emoji otf-firamono-nerd nodejs npm zoxide
+# (xorg-xhost needed by gparted and rpi-imager)
+sudo pacman -S git github-cli os-prober nvim fish unzip bat fd fzf rustup nautilus less hyprpolkitagent bitwarden nodejs npm zoxide gparted xorg-xhost fuzzel qmk tmux blueman
+sudo pacman -S noto-fonts noto-fonts-cjk noto-fonts-extra noto-fonts-emoji otf-firamono-nerd ttf-jetbrains-mono-nerd
+# Add sunshine repo (https://github.com/LizardByte/pacman-repo)
+sudo pacman -S pavucontrol sunshine syncthing ethtool ddcutil discord gwenview btop
+# For wake on lan config: https://wiki.archlinux.org/title/Wake-on-LAN#systemd_service
+# Then `systemctl enable wol.service`
 
 # setup paru
 git clone https://aur.archlinux.org/paru.git
