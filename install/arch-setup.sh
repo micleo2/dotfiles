@@ -7,8 +7,12 @@ sudo pacman -S git github-cli os-prober nvim fish unzip bat fd fzf rustup nautil
 sudo pacman -S noto-fonts noto-fonts-cjk noto-fonts-extra noto-fonts-emoji otf-firamono-nerd ttf-jetbrains-mono-nerd
 # Add sunshine repo (https://github.com/LizardByte/pacman-repo)
 sudo pacman -S pavucontrol sunshine syncthing ethtool ddcutil discord gwenview btop
+
 # For wake on lan config: https://wiki.archlinux.org/title/Wake-on-LAN#systemd_service
 # Then `systemctl enable wol.service`
+
+# enable syncthing on startup
+systemctl --user enable --now syncthing.service
 
 # setup paru
 git clone https://aur.archlinux.org/paru.git
