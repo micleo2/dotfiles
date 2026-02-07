@@ -501,7 +501,7 @@ require("lazy").setup({
               local old_data = navic.get_data()
               local new_data = {}
               for _, comp in ipairs(old_data) do
-                if comp.type ~= "Namespace" then
+                if comp.type ~= "Namespace" and comp.type ~= "Package" and comp.type ~= "Module" then
                   table.insert(new_data, comp)
                 end
               end
