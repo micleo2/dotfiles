@@ -3,7 +3,7 @@
 # setup software from pacman
 sudo pacman -S --needed base-devel git
 # (xorg-xhost needed by gparted and rpi-imager)
-sudo pacman -S git github-cli os-prober nvim fish unzip bat fd fzf rustup nautilus less hyprpolkitagent bitwarden nodejs npm zoxide gparted xorg-xhost qmk tmux blueman
+sudo pacman -S git github-cli os-prober man-db nvim fish unzip bat fd fzf rustup nautilus less hyprpolkitagent bitwarden nodejs npm zoxide gparted xorg-xhost qmk tmux blueman
 sudo pacman -S noto-fonts noto-fonts-cjk noto-fonts-extra noto-fonts-emoji otf-firamono-nerd ttf-jetbrains-mono-nerd
 # Add sunshine repo (https://github.com/LizardByte/pacman-repo)
 sudo pacman -S pavucontrol sunshine syncthing ethtool ddcutil discord gwenview btop

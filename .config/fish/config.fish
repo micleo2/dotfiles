@@ -59,6 +59,9 @@ abbr --add rpc --set-cursor 'realpath % | pbcopy'
 abbr --add sdbg 'ln -sf (realpath (fzf)) /tmp/todbg'
 abbr --add sdbf 'ln -sf (realpath (fzf)) /tmp/file.js'
 
+# arch stuff
+abbr --add pi 'sudo pacman -S'
+
 # --- VARIABLES
 set -Ux EDITOR 'nvim'
 
