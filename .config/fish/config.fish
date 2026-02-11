@@ -61,6 +61,7 @@ abbr --add sdbf 'ln -sf (realpath (fzf)) /tmp/file.js'
 
 # arch stuff
 abbr --add pi 'sudo pacman -S'
+abbr --add pr 'sudo pacman -Rns'
 
 # --- VARIABLES
 set -Ux EDITOR 'nvim'
