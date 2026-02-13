@@ -19,6 +19,9 @@ sudo pacman -S sunshine
 # enable syncthing on startup
 systemctl --user enable --now syncthing.service
 
+# Auto mounting USBs
+sudo pacman -S udisks2 udiskie
+
 # setup paru
 git clone https://aur.archlinux.org/paru.git
 cd paru
