@@ -69,6 +69,16 @@ set -Ux EDITOR 'nvim'
 # Setup zoxide
 zoxide init fish | source
 
+# yazi
+function y
+	set tmp (mktemp -t "yazi-cwd.XXXXXX")
+	command yazi $argv --cwd-file="$tmp"
+	if read -z cwd < "$tmp"; and [ "$cwd" != "$PWD" ]; and test -d "$cwd"
+		builtin cd -- "$cwd"
+	end
+	rm -f -- "$tmp"
+end
+
 # --- Load additional, optional config files.
 if test -e ~/.config/fish/conf.d/work.fish
     source ~/.config/fish/conf.d/work.fish
