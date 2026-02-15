@@ -16,8 +16,10 @@ Singleton {
     }
 
     readonly property string volume: {
-      Pipewire.defaultAudioSink.audio.muted ?
-      "󰝟" 
-      :`󰕾 ${Math.round(Pipewire.defaultAudioSink.audio.volume * 100)}%`;
+        Pipewire.defaultAudioSink.audio.muted ? "" : `${Math.round(Pipewire.defaultAudioSink.audio.volume * 100)}%`;
+    }
+
+    readonly property bool muted: {
+        return Pipewire.defaultAudioSink.audio.muted;
     }
 }
