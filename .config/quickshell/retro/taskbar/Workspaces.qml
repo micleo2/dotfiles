@@ -11,8 +11,10 @@ import ".."
 RowLayout {
     id: workspaces
     spacing: 0
-    anchors.left: parent.left
-    anchors.verticalCenter: parent.verticalCenter
+    anchors {
+        verticalCenter: parent.verticalCenter
+        horizontalCenter: parent.horizontalCenter
+    }
 
     property bool usingHyprland: Hyprland.workspaces.values.length == 0 ? false : true
     property var currentWorkspaces: Hyprland.workspaces.values.filter(w => w.monitor.name == taskbar.screen.name && w.id >= 0)
@@ -21,14 +23,14 @@ RowLayout {
         model: parent.currentWorkspaces
         Button {
             id: control
-            anchors.centerIn: parent.centerIn
+            implicitWidth: 28
 
             contentItem: Text {
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
                 text: modelData.id
-                font.family: mainFont.name
-                font.pixelSize: Config.settings.bar.fontSize
+                font {
+                    family: mainFont.name
+                    pixelSize: Config.settings.bar.fontSize
+                }
                 color: Config.colors.text
             }
 
