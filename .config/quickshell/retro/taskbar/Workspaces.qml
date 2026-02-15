@@ -10,7 +10,7 @@ import ".."
 
 RowLayout {
     id: workspaces
-    spacing: 3
+    spacing: 0
     anchors.left: parent.left
     anchors.verticalCenter: parent.verticalCenter
 
@@ -57,9 +57,6 @@ RowLayout {
             }
 
             background: Item {
-                implicitWidth: 22
-                implicitHeight: 22
-
                 RectangularShadow {
                     anchors.fill: bgRect
                     color: "#FF000000" // Semi-transparent black
@@ -69,12 +66,11 @@ RowLayout {
                     // Only show shadow for the active workspace
                     visible: (usingHyprland && modelData.id == focusedWindowId)
                 }
-
                 Rectangle {
                     id: bgRect
                     anchors.centerIn: parent
-                    width: 22
-                    height: 22
+                    width: 20
+                    height: 20
                     border.width: 1
                     border.color: Config.colors.outline
                     color: getColor()

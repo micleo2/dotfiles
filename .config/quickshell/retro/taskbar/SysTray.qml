@@ -9,9 +9,6 @@ import ".."
 
 RowLayout {
     id: sysTrayRow
-    anchors.right: parent.right
-    anchors.verticalCenter: parent.verticalCenter
-    anchors.rightMargin: 12
 
     Repeater {
         id: sysTray
@@ -40,7 +37,6 @@ RowLayout {
                 event.accepted = true;
             }
 
-            // TODO: Create a bespoke menu design instead of using QsMenu.
             QsMenuAnchor {
                 id: menu
 
