@@ -37,7 +37,7 @@ Scope {
                     left: true
                     right: true
                 }
-                implicitHeight: 35
+                implicitHeight: 32
 
                 /*=== Taskbar Background ===*/
                 color: Config.colors.base

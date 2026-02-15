@@ -19,8 +19,8 @@ Scope {
         source: "fonts/MaterialSymbolsSharp_Filled_36pt-Regular.ttf"
     }
     FontLoader {
-        id: fontMonaco
-        source: "fonts/Monaco.ttf"
+        id: mainFont
+        source: "fonts/CozetteVector.ttf"
     }
     FontLoader {
         id: fontCharcoal

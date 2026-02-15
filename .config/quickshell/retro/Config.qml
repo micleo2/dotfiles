@@ -66,8 +66,8 @@ Singleton {
 
     property JsonObject settings: JsonObject {
         property JsonObject bar: JsonObject {
-            property int fontSize: 12
-            property int trayIconSize: 16
+            property int fontSize: 24
+            property int trayIconSize: 18
             property bool monochromeTrayIcons: true
         }
     }

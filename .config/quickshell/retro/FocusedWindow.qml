@@ -21,6 +21,13 @@ Singleton {
         return "";
     }
 
+    readonly property string application_display_name: {
+        if (!should_show)
+            return "";
+        const segments = application_name.split('.');
+        return segments[segments.length - 1].toLocaleLowerCase();
+    }
+
     readonly property bool should_show: {
         return application_name != "";
     }
