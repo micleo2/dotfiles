@@ -12,6 +12,8 @@ Singleton {
         const levels = Hyprland.toplevels.values;
         for (let i = 0; i < levels.length; i++) {
             const level = levels[i].wayland;
+            if (level === null || level === undefined)
+                continue;
             if (level.activated) {
                 return String(level.appId);
             }
@@ -20,6 +22,12 @@ Singleton {
     }
 
     readonly property bool should_show: {
-      return application_name != "";
+        return application_name != "";
+    }
+
+    readonly property string application_icon_path: {
+        if (!should_show)
+            return "";
+        return Quickshell.iconPath(application_name, true);
     }
 }
