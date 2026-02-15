@@ -95,7 +95,7 @@ require("lazy").setup({
       keys = {
         -- Misc pickers
         { "<C-p>", function() Snacks.picker.files() end, desc = "Find Files" },
-        { "<C-P>", function() Snacks.picker.smart() end, desc = "Smart Find Files" },
+        { "<C-s>", function() Snacks.picker.smart() end, desc = "Smart Find Files" },
         {
           "<C-c>",
           function()

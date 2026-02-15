@@ -36,6 +36,7 @@ abbr --add et 'nvim ~/.tmux.conf'
 abbr --add ev 'nvim ~/.config/nvim/init.vim'
 abbr --add ea 'nvim ~/.aerospace.toml'
 abbr --add eh 'nvim ~/.config/hypr/hyprland.conf'
+abbr --add ez 'nvim ~/.config/zellij/config.kdl'
 abbr --add ec 'nvim (fd . ~/.config -t file | fzf)'
 abbr --add ed 'nvim (fd . ~/dotfiles/.config -t file | fzf)'
 
