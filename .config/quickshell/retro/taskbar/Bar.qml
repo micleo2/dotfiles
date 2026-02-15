@@ -2,6 +2,7 @@ import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
 import QtQuick
+import QtQuick.Layouts
 
 import ".."
 
@@ -38,7 +39,7 @@ Scope {
                 }
                 implicitHeight: 35
 
-                /*=== Taskbar Background (colors & shading) ===*/
+                /*=== Taskbar Background ===*/
                 color: Config.colors.base
                 Item {
                     id: taskbarBackground
@@ -74,60 +75,95 @@ Scope {
                         border.color: Config.colors.outline
                     }
                 }
-                /*=== ===================================== ===*/
 
-                /*=== Workspaces & Background for it ===*/
-                Item {
-                    id: test2
+                /*=== Left portion of bar ===*/
+                RowLayout {
+                    id: left_comp
                     anchors.verticalCenter: parent.verticalCenter
-                    anchors.left: parent.left
-                    height: parent.height - 8
-
-                    // The margins are weird due to the additional outlines added to each button
-                    // that add depth, which is 1 pixel; thus we expand the width by 5 and not 4.
-                    anchors.leftMargin: 11
-                    width: workspaces.width + 5
-                    Rectangle {
-                        id: background2
-                        anchors.fill: test2
-
-                        anchors.bottomMargin: -2
-                        color: "transparent"
+                    layoutDirection: Qt.LeftToRight
+                    spacing: 11
+                    height: parent.height
+                    // Beginning margin
+                    Item {
+                        Layout.preferredWidth: 0
+                    }
+                    // Workspaces
+                    Item {
+                        id: workspaces_container
+                        implicitHeight: parent.height - 8
+                        implicitWidth: workspaces.width + 5
                         Rectangle {
-                            anchors.fill: background2
-                            border.width: 0
-                            color: Config.colors.shadow
-                        }
-                        Rectangle {
-                            anchors.fill: background2
+                            id: background2
+                            anchors.fill: workspaces_container
+                            anchors.bottomMargin: -2
                             color: "transparent"
-                            border.width: 1
-                            z: -5
-                            anchors.margins: -1
-                            anchors.bottomMargin: 1
+                            // dark grey fill
+                            Rectangle {
+                                anchors.fill: background2
+                                border.width: 0
+                                color: Config.colors.shadow
+                            }
+                            // black outline
+                            Rectangle {
+                                anchors.fill: background2
+                                color: "transparent"
+                                border.width: 1
+                                z: -5
+                                anchors.margins: -1
+                                anchors.bottomMargin: 1
+                            }
+                        }
+                        Workspaces {
+                            id: workspaces
+                            anchors.leftMargin: 2
+                            anchors.rightMargin: 0
                         }
                     }
-                    Workspaces {
-                        id: workspaces
-                        anchors.leftMargin: 2
-                        anchors.rightMargin: 0
+                    // Focused window
+                    Item {
+                        id: focusedwindow_container
+                        visible: FocusedWindow.should_show
+                        implicitHeight: parent.height - 8
+                        implicitWidth: focusedwindow.width + 8
+                        Rectangle {
+                            id: focusedwindow_decoration
+                            anchors.fill: focusedwindow_container
+                            anchors.bottomMargin: -2
+                            color: "transparent"
+                            // dark grey fill
+                            Rectangle {
+                                anchors.fill: focusedwindow_decoration
+                                border.width: 0
+                                color: Config.colors.shadow
+                            }
+                            // black outline
+                            Rectangle {
+                                anchors.fill: focusedwindow_decoration
+                                color: "transparent"
+                                border.width: 1
+                                z: -5
+                                anchors.margins: -1
+                                anchors.bottomMargin: 1
+                            }
+                        }
+                        FocusedWindowWidget {
+                            id: focusedwindow
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.horizontalCenter: parent.horizontalCenter
+                        }
                     }
                 }
 
-                /*=== Clock & Background for it ===*/
+                /*=== Clock ===*/
                 Item {
-                    id: clockboxbounding
+                    id: clock_container
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.horizontalCenter: parent.horizontalCenter
                     height: parent.height - 8
-                    // The margins are weird due to the additional outlines added to each button
-                    // that add depth, which is 1 pixel; thus we expand the width by 5 and not 4.
-                    // anchors.left: parent.left
-                    // anchors.leftMargin: 11
-                    width: clocktext.width + 4
+                    width: clock.width + 4
                     Rectangle {
                         id: clockbg
-                        anchors.fill: clockboxbounding
+                        anchors.fill: clock_container
                         anchors.bottomMargin: -2
                         Rectangle {
                             anchors.fill: clockbg
@@ -143,8 +179,8 @@ Scope {
                             anchors.bottomMargin: 1
                         }
                     }
-                    ClockBox {
-                        id: clocktext
+                    ClockWidget {
+                        id: clock
                         anchors.right: parent.right
                         anchors.verticalCenter: parent.verticalCenter
                         anchors.rightMargin: 5

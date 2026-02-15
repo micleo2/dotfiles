@@ -1,7 +1,8 @@
 module Taskbar
 Bar 1.0 Bar.qml
 TaskbarButton 1.0 TaskbarButton.qml
-ClockBox 1.0 ClockBox.qml
+ClockWidget 1.0 ClockWidget.qml
+FocusedWindowWidget 1.0 FocusedWindowWidget.qml
 Workspaces 1.0 Workspaces.qml
 VolumeWidget 1.0 VolumeWidget.qml
 SysTray 1.0 SysTray.qml
