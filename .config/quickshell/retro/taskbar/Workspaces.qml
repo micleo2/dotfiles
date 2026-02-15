@@ -23,7 +23,9 @@ RowLayout {
         model: parent.currentWorkspaces
         Button {
             id: control
-            implicitWidth: 28
+            Layout.fillHeight: true
+            implicitWidth: 32
+            padding: 0
 
             contentItem: Text {
                 text: modelData.id
@@ -32,6 +34,8 @@ RowLayout {
                     pixelSize: Config.settings.bar.fontSize
                 }
                 color: Config.colors.text
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
             }
 
             onPressed: event => {
@@ -58,24 +62,18 @@ RowLayout {
                 return Config.colors.base;
             }
 
-            background: Item {
-                RectangularShadow {
-                    anchors.fill: bgRect
-                    color: "#FF000000" // Semi-transparent black
-                    blur: 0
-                    offset.x: 2
-                    offset.y: 2
-                    // Only show shadow for the active workspace
-                    visible: (usingHyprland && modelData.id == focusedWindowId)
-                }
+            background: Rectangle {
+                id: bgRect
+                color: getColor()
                 Rectangle {
-                    id: bgRect
-                    anchors.centerIn: parent
-                    width: 20
-                    height: 20
-                    border.width: 1
-                    border.color: Config.colors.outline
-                    color: getColor()
+                    visible: index > 0
+                    width: 2
+                    anchors {
+                        top: parent.top
+                        bottom: parent.bottom
+                        left: parent.left
+                    }
+                    color: Config.colors.outline
                 }
             }
 

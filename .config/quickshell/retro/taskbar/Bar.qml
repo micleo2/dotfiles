@@ -67,7 +67,7 @@ Scope {
                     Item {
                         id: workspaces_container
                         implicitHeight: parent.height
-                        implicitWidth: workspaces.width + 8
+                        implicitWidth: workspaces.width
                         Rectangle {
                             id: background2
                             anchors.fill: workspaces_container
