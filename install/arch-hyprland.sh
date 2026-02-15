@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # setup software from pacman
-sudo pacman -S hyprpaper fuzzel
+sudo pacman -S hyprpaper fuzzel hyprshot unixodbc
 # needed by hyprpm
 sudo pacman -S --needed cmake cpio
 
