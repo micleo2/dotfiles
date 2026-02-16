@@ -86,8 +86,4 @@ RowLayout {
             }
         }
     }
-
-    VolumeWidget {
-        id: clockWidget
-    }
 }

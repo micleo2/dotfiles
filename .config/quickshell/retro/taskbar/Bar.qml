@@ -152,36 +152,66 @@ Scope {
                     }
                 }
 
-                /*=== ============================== ===*/
-
-                /*=== System Tray & Background for it ===*/
-                Item {
-                    id: test
+                /*=== Right portion of bar ===*/
+                RowLayout {
+                    id: right_comp
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.right: parent.right
                     anchors.rightMargin: sideMargin
+                    layoutDirection: Qt.LeftToRight
+                    spacing: 11
                     height: parent.height - topMargin
-                    width: sysTray.width + 12
-                    Rectangle {
-                        id: background
-                        anchors.fill: test
-                        color: "transparent"
+                    // System Tray
+                    Item {
+                        id: systray_container
+                        implicitHeight: parent.height
+                        implicitWidth: sysTray.width + 12
                         Rectangle {
-                            anchors.fill: background
-                            border.width: 0
-                            color: Config.colors.shadow
-                        }
-                        Rectangle {
-                            anchors.fill: background
+                            id: systraybg
+                            anchors.fill: systray_container
                             color: "transparent"
-                            border.width: 2
-                            anchors.margins: -2
+                            Rectangle {
+                                anchors.fill: systraybg
+                                border.width: 0
+                                color: Config.colors.shadow
+                            }
+                            Rectangle {
+                                anchors.fill: systraybg
+                                color: "transparent"
+                                border.width: 2
+                                anchors.margins: -2
+                            }
+                        }
+                        SysTray {
+                            id: sysTray
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.horizontalCenter: parent.horizontalCenter
                         }
                     }
-                    SysTray {
-                        id: sysTray
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.horizontalCenter: parent.horizontalCenter
+
+                    // Volume
+                    Item {
+                        id: volume_container
+                        implicitHeight: parent.height
+                        implicitWidth: volumeWidget.width + 4
+                        Rectangle {
+                            id: volumebg
+                            anchors.fill: volume_container
+                            Rectangle {
+                                anchors.fill: volumebg
+                                border.width: 0
+                                color: Config.colors.shadow
+                            }
+                            Rectangle {
+                                anchors.fill: volumebg
+                                color: "transparent"
+                                border.width: 2
+                                anchors.margins: -2
+                            }
+                        }
+                        VolumeWidget {
+                            id: volumeWidget
+                        }
                     }
                 }
             }
