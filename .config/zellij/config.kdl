@@ -1,6 +1,14 @@
 keybinds clear-defaults=true {
     locked {
         bind "Ctrl g" { SwitchToMode "normal"; }
+        bind "Alt h" { MoveFocusOrTab "left"; }
+        bind "Alt j" { MoveFocus "down"; }
+        bind "Alt k" { MoveFocus "up"; }
+        bind "Alt l" { MoveFocusOrTab "right"; }
+        bind "Alt i" { MoveTab "left"; }
+        bind "Alt o" { MoveTab "right"; }
+        bind "Alt n" { NewPane; }
+        bind "Alt ;" { ToggleFocusFullscreen; }
     }
     pane {
         bind "left" { MoveFocus "left"; }
