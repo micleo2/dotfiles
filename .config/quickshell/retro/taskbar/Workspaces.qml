@@ -23,8 +23,8 @@ RowLayout {
         model: parent.currentWorkspaces
         Button {
             id: control
-            Layout.fillHeight: true
-            implicitWidth: 32
+            implicitWidth: 28
+            implicitHeight: 24
             padding: 0
 
             contentItem: Text {
