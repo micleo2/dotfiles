@@ -16,6 +16,7 @@ RowLayout {
             anchors.fill: parent
             sourceSize.width: 16
             sourceSize.height: 16
+            smooth: false
         }
     }
 
