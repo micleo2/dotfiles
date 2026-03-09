@@ -1,3 +1,12 @@
 .DS_Store
 .config/fish/conf.d/work.fish
 .config/fish/conf.d/home.fish
+
+tt.*
+.tests
+doc/tags
+debug
+.repro
+foo.*
+*.log
+data
