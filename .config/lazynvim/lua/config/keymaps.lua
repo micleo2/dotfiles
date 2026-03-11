@@ -3,6 +3,10 @@
 -- Add any additional keymaps here
 
 local map = vim.keymap.set
+local del = vim.keymap.del
+
+del("n", "H")
+del("n", "L")
 
 map("n", "Q", "<cmd>q!<cr>", { desc = "Force Quit" })
 map("n", "<leader>q", "<cmd>wqa<cr>", { desc = "Save All and Quit" })
