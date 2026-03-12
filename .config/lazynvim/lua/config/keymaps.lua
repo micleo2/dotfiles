@@ -59,11 +59,11 @@ map("n", "Y", "y$", { desc = "Yank to End of Line" })
 map("n", "g;", ":e ~/tests/", { desc = "Open Tests Dir" })
 
 -- make new lines while staying where you are
-map("n", "<leader>i", "mlo<ESC>`l", { desc = "Insert Line Below" })
-map("n", "<leader>I", "mlO<ESC>`l", { desc = "Insert Line Above" })
+map("n", "<leader>eo", "mlo<ESC>`l", { desc = "Insert Line Below" })
+map("n", "<leader>eO", "mlO<ESC>`l", { desc = "Insert Line Above" })
 
 -- surround current line with newlines above and below
-map("n", "<leader>s", "mlO<ESC>jo<ESC>`l", { desc = "Surround Line with Blanks" })
+map("n", "<leader>es", "mlO<ESC>jo<ESC>`l", { desc = "Surround Line with Blanks" })
 
 -- -- Re-order lines
 -- map('n', 'J', ':let c=col(\".\")<CR>:execute \"normal! ddp\" . c . \"\|\"<CR>')

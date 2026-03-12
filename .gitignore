@@ -10,3 +10,5 @@ debug
 foo.*
 *.log
 data
+
+.claude
