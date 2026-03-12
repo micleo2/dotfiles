@@ -4,3 +4,4 @@
 
 vim.opt.scrolloff = 0
 
+vim.g.snacks_animate = false
