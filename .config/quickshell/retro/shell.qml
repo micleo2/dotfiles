@@ -9,6 +9,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import "taskbar" as Taskbar
+import "osd" as Osd
 
 Scope {
     id: root
@@ -32,6 +33,9 @@ Scope {
     }
 
     Taskbar.Bar {
+    }
+
+    Osd.BrightnessOsd {
     }
 
 }

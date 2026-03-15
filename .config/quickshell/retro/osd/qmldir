@@ -1,0 +1,2 @@
+module Osd
+BrightnessOsd 1.0 BrightnessOsd.qml
