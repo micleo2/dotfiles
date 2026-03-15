@@ -68,7 +68,7 @@ Scope {
                         ctx.clearRect(0, 0, width, height);
                         var f = bucketWrapper.flare;
                         var bw = 4;
-                        var gap = 3;
+                        var gap = 5;
                         var inLeft = gap;
                         var inRight = gap;
                         var segArea = width - inLeft - inRight;
