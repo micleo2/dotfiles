@@ -5,4 +5,5 @@ ClockWidget 1.0 ClockWidget.qml
 FocusedWindowWidget 1.0 FocusedWindowWidget.qml
 Workspaces 1.0 Workspaces.qml
 VolumeWidget 1.0 VolumeWidget.qml
+WeatherWidget 1.0 WeatherWidget.qml
 SysTray 1.0 SysTray.qml

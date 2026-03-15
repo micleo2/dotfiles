@@ -122,33 +122,69 @@ Scope {
                     }
                 }
 
-                /*=== Clock ===*/
-                Item {
-                    id: clock_container
+                /*=== Center (Clock + Weather) ===*/
+                RowLayout {
+                    id: center_comp
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: 11
                     height: parent.height - topMargin
-                    width: clock.width + 4
-                    Rectangle {
-                        id: clockbg
-                        anchors.fill: clock_container
+
+                    // Clock
+                    Item {
+                        id: clock_container
+                        implicitHeight: parent.height
+                        implicitWidth: clock.width + 4
                         Rectangle {
-                            anchors.fill: clockbg
-                            border.width: 0
-                            color: Config.colors.shadow
+                            id: clockbg
+                            anchors.fill: clock_container
+                            Rectangle {
+                                anchors.fill: clockbg
+                                border.width: 0
+                                color: Config.colors.shadow
+                            }
+                            Rectangle {
+                                anchors.fill: clockbg
+                                color: "transparent"
+                                border.width: 2
+                                anchors.margins: -2
+                            }
                         }
-                        Rectangle {
-                            anchors.fill: clockbg
-                            color: "transparent"
-                            border.width: 2
-                            anchors.margins: -2
+                        ClockWidget {
+                            id: clock
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.rightMargin: 5
                         }
                     }
-                    ClockWidget {
-                        id: clock
-                        anchors.right: parent.right
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.rightMargin: 5
+
+                    // Weather
+                    Item {
+                        id: weather_container
+                        visible: Weather.temp !== ""
+                        implicitHeight: parent.height
+                        implicitWidth: weatherWidget.width + 8
+                        Rectangle {
+                            id: weatherbg
+                            anchors.fill: weather_container
+                            color: "transparent"
+                            Rectangle {
+                                anchors.fill: weatherbg
+                                border.width: 0
+                                color: Config.colors.shadow
+                            }
+                            Rectangle {
+                                anchors.fill: weatherbg
+                                color: "transparent"
+                                border.width: 2
+                                anchors.margins: -2
+                            }
+                        }
+                        WeatherWidget {
+                            id: weatherWidget
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.horizontalCenter: parent.horizontalCenter
+                        }
                     }
                 }
 
