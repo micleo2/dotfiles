@@ -1,7 +1,7 @@
-import QtQuick
-import QtQuick.Layouts
-import QtQuick.Effects
 import ".."
+import QtQuick
+import QtQuick.Effects
+import QtQuick.Layouts
 
 Item {
     implicitWidth: row.implicitWidth
@@ -9,10 +9,12 @@ Item {
 
     Row {
         id: row
+
         anchors.centerIn: parent
 
         Text {
             id: iconText
+
             text: Weather.icon
             color: Config.colors.text
             font.pixelSize: Math.round(Config.settings.bar.fontSize * 0.9)
@@ -26,7 +28,7 @@ Item {
             width: iconText.implicitWidth
             height: iconText.implicitHeight
             anchors.verticalCenter: parent.verticalCenter
-            saturation: -1.0
+            saturation: -1
             contrast: 0.7
         }
 
@@ -37,5 +39,7 @@ Item {
             font.family: mainFont.name
             anchors.verticalCenter: parent.verticalCenter
         }
+
     }
+
 }

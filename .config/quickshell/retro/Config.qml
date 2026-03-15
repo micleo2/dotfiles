@@ -1,10 +1,11 @@
-pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+pragma Singleton
 
 Singleton {
     id: root
+
     property var colors: themes.default
     property var themes: {
         "default": {
@@ -63,12 +64,17 @@ Singleton {
             "defaultWallpaperPath": ""
         }
     }
+    property JsonObject settings
 
-    property JsonObject settings: JsonObject {
-        property JsonObject bar: JsonObject {
+    settings: JsonObject {
+        property JsonObject bar
+
+        bar: JsonObject {
             property int fontSize: 22
             property int trayIconSize: 18
             property bool monochromeTrayIcons: true
         }
+
     }
+
 }

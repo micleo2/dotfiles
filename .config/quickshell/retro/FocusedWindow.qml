@@ -1,9 +1,8 @@
-pragma Singleton
-
+import QtQuick
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Wayland
-import QtQuick
+pragma Singleton
 
 Singleton {
     id: root
@@ -14,27 +13,27 @@ Singleton {
             const level = levels[i].wayland;
             if (level === null || level === undefined)
                 continue;
-            if (level.activated) {
+
+            if (level.activated)
                 return String(level.appId);
-            }
+
         }
         return "";
     }
-
     readonly property string application_display_name: {
         if (!should_show)
             return "";
+
         const segments = application_name.split('.');
         return segments[segments.length - 1].toLocaleLowerCase();
     }
-
     readonly property bool should_show: {
         return application_name != "";
     }
-
     readonly property string application_icon_path: {
         if (!should_show)
             return "";
+
         return Quickshell.iconPath(application_name, true);
     }
 }

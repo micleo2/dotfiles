@@ -1,27 +1,29 @@
-pragma Singleton
-
+import QtQuick
 import Quickshell
 import Quickshell.Io
-import QtQuick
+pragma Singleton
 
 Singleton {
     id: root
+
     readonly property string icon: weatherIcon
     readonly property string temp: weatherTemp
-
     property string weatherIcon: ""
     property string weatherTemp: ""
 
     Process {
         id: weatherProc
+
         command: ["curl", "-s", "wttr.in/?format=%c|%t"]
+
         stdout: SplitParser {
-            onRead: data => {
+            onRead: (data) => {
                 const parts = data.trim().split("|");
                 root.weatherIcon = parts[0].replace(/\s+/g, '').trim();
                 root.weatherTemp = (parts[1] || "").replace(/\s+/g, '').trim();
             }
         }
+
     }
 
     Timer {
@@ -31,4 +33,5 @@ Singleton {
         triggeredOnStart: true
         onTriggered: weatherProc.running = true
     }
+
 }
