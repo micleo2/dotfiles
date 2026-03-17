@@ -3,6 +3,16 @@ return {
     "folke/snacks.nvim",
     opts = {
       statuscolumn = { left = { "sign" } },
+      explorer = {
+        replace_netrw = true,
+      },
+      picker = {
+        sources = {
+          explorer = {
+            hidden = true,
+          },
+        },
+      },
     },
     keys = {
       {
