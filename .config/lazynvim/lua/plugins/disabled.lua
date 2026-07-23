@@ -3,4 +3,5 @@ return {
   { "folke/todo-comments.nvim", enabled = false },
   { "lewis6991/gitsigns.nvim", enabled = false },
   { "folke/persistence.nvim", enabled = false },
+  { "nvim-mini/mini.pairs", enabled = false },
 }
