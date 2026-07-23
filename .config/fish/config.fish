@@ -35,7 +35,7 @@ abbr --add ef 'nvim ~/.config/fish/config.fish && source ~/.config/fish/config.f
 abbr --add et 'nvim ~/.tmux.conf'
 abbr --add ev 'nvim ~/.config/nvim/init.vim'
 abbr --add ea 'nvim ~/.aerospace.toml'
-abbr --add eh 'nvim ~/.config/hypr/hyprland.conf'
+abbr --add eh 'nvim ~/.config/hypr/hyprland.lua'
 abbr --add ez 'nvim ~/.config/zellij/config.kdl'
 abbr --add ec 'nvim (fd . ~/.config -t file | fzf)'
 abbr --add ed 'nvim (fd . ~/dotfiles/.config -t file | fzf)'
@@ -65,19 +65,19 @@ abbr --add pi 'sudo pacman -S --needed'
 abbr --add pr 'sudo pacman -Rns'
 
 # --- VARIABLES
-set -Ux EDITOR 'nvim'
+set -Ux EDITOR nvim
 
 # Setup zoxide
 zoxide init fish | source
 
 # yazi
 function y
-	set tmp (mktemp -t "yazi-cwd.XXXXXX")
-	command yazi $argv --cwd-file="$tmp"
-	if read -z cwd < "$tmp"; and [ "$cwd" != "$PWD" ]; and test -d "$cwd"
-		builtin cd -- "$cwd"
-	end
-	rm -f -- "$tmp"
+    set tmp (mktemp -t "yazi-cwd.XXXXXX")
+    command yazi $argv --cwd-file="$tmp"
+    if read -z cwd <"$tmp"; and [ "$cwd" != "$PWD" ]; and test -d "$cwd"
+        builtin cd -- "$cwd"
+    end
+    rm -f -- "$tmp"
 end
 
 # --- Load additional, optional config files.
