@@ -97,6 +97,9 @@ hl.config({
 	},
 })
 
+hl.curve("easeOutQuint", { type = "bezier", points = { { 0.23, 1 }, { 0.32, 1 } } })
+hl.curve("quick", { type = "bezier", points = { { 0.15, 0 }, { 0.1, 1 } } })
+
 hl.animation({ leaf = "fade", enabled = true, speed = 4, bezier = "quick" })
 hl.animation({ leaf = "windows", enabled = true, speed = 2, bezier = "easeOutQuint", style = "slide" })
 hl.animation({ leaf = "workspaces", enabled = false })
