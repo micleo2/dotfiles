@@ -215,6 +215,12 @@ hl.bind(M("S"), hl.dsp.exec_cmd(terminal))
 hl.bind(M("B"), hl.dsp.exec_cmd("~/dotfiles/scripts/launch-browser.sh"))
 hl.bind(M("E"), hl.dsp.exec_cmd(fileManager))
 hl.bind(M("Y"), hl.dsp.exec_cmd("kitty yazi"))
+hl.bind(
+	M("Z"),
+	hl.dsp.exec_cmd(
+		'bash -c \'target=$(zoxide query -l | fuzzel --dmenu --width 60); [ -n "$target" ] && kitty --directory "$target" fish\''
+	)
+)
 
 -- Power menu
 hl.bind(M("P"), hl.dsp.exec_cmd("~/dotfiles/scripts/menus/power-menu.sh"))
@@ -306,8 +312,6 @@ hl.bind(
 	hl.dsp.exec_cmd("qs -c retro ipc call brightness down"),
 	{ locked = true, repeating = true }
 )
-
-hl.bind("PRINT", hl.dsp.exec_cmd("hyprshot -m region"))
 
 --------------------------------
 ---- WINDOWS AND WORKSPACES ----

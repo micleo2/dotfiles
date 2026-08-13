@@ -26,9 +26,8 @@ alias v='nvim'
 abbr --add vim nvim
 abbr --add lnv 'nvim -u ~/.config/nvim/lean_init.vim'
 
-# common dirs
-abbr --add cdc 'cd ~/.config'
-abbr --add cdd 'cd ~/dotfiles/.config'
+# ls
+abbr --add ll 'ls -alh'
 
 # editing rc's
 abbr --add ef 'nvim ~/.config/fish/config.fish && source ~/.config/fish/config.fish'
@@ -63,6 +62,7 @@ abbr --add sdbf 'ln -sf (realpath (fzf)) /tmp/file.js'
 # arch stuff
 abbr --add pi 'sudo pacman -S --needed'
 abbr --add pr 'sudo pacman -Rns'
+abbr --add oc 'OPENCODE_ENABLE_EXA=true opencode'
 
 # --- VARIABLES
 set -Ux EDITOR nvim
