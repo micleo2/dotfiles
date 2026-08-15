@@ -200,7 +200,7 @@ end
 
 -- Window binds
 hl.bind(M("Q"), hl.dsp.window.close())
-hl.bind(M(S("Q")), hl.dsp.window.close())
+hl.bind(M(S("Q")), hl.dsp.window.kill())
 hl.bind(M("F"), hl.dsp.window.fullscreen({ mode = "maximized" }))
 hl.bind(M(S("F")), hl.dsp.window.fullscreen({ mode = "fullscreen" }))
 -- Make the window believe it's fullscreen but it's not.
