@@ -3,20 +3,20 @@
 # Define the options
 items="  Sleep\n  Shutdown\n󰜉  Reboot\n󰍃  Logout"
 
-# Get the choice using Walker in dmenu mode
-choice=$(echo -e "$items" | fuzzel --dmenu --index)
+# Get the choice using rofi
+choice=$(echo -e "$items" | rofi -dmenu -p "Power")
 
 case "$choice" in
-    "0")
+    *Sleep*)
       systemctl suspend
         ;;
-    "1")
+    *Shutdown*)
       systemctl poweroff
         ;;
-    "2")
+    *Reboot*)
       systemctl reboot
         ;;
-    "3")
+    *Logout*)
       loginctl kill-session $XDG_SESSION_ID
         ;;
     *)

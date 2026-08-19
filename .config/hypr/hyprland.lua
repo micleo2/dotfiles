@@ -16,7 +16,6 @@
 -- Set programs that you use
 local terminal = "kitty"
 local fileManager = "nautilus"
-local menu = "fuzzel"
 
 -------------------
 ---- AUTOSTART ----
@@ -211,9 +210,8 @@ hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
 hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
 -- Apps on hotkeys
-hl.bind(M("Space"), hl.dsp.exec_cmd(menu))
+hl.bind(M("Space"), hl.dsp.exec_cmd("rofi -show drun -show-icons"))
 hl.bind(M("S"), hl.dsp.exec_cmd(terminal))
-hl.bind(M("B"), hl.dsp.exec_cmd("firefox"))
 hl.bind(M("E"), hl.dsp.exec_cmd(fileManager))
 hl.bind(M("Y"), hl.dsp.exec_cmd("kitty yazi"))
 
@@ -231,12 +229,15 @@ hl.bind(
 hl.bind(
 	M("Z"),
 	hl.dsp.exec_cmd(
-		'bash -c \'target=$(zoxide query -l | fuzzel --dmenu --width 60); [ -n "$target" ] && kitty --directory "$target" fish\''
+		'bash -c \'target=$(zoxide query -l | rofi -dmenu); [ -n "$target" ] && kitty --directory "$target" fish\''
 	)
 )
 
 -- Power menu
 hl.bind(M("P"), hl.dsp.exec_cmd("~/dotfiles/scripts/menus/power-menu.sh"))
+
+-- Browser menu
+hl.bind(M("B"), hl.dsp.exec_cmd("~/dotfiles/scripts/menus/browser-menu.sh"))
 
 -- Toggle top bar
 hl.bind(M("T"), hl.dsp.exec_cmd("qs -c retro ipc call topbar toggle"))
@@ -290,9 +291,9 @@ hl.bind(M("right"), hl.dsp.window.move({ direction = "right" }))
 hl.bind(M(S("left")), hl.dsp.layout("swapcol l"))
 hl.bind(M(S("right")), hl.dsp.layout("swapcol r"))
 
--- Scroll through existing workspaces with mainMod + scroll
-hl.bind(M("mouse_down"), hl.dsp.focus({ workspace = "e+1" }))
-hl.bind(M("mouse_up"), hl.dsp.focus({ workspace = "e-1" }))
+-- hyprwhspr
+hl.bind(M("V"), hl.dsp.exec_cmd('echo "start" > "$XDG_RUNTIME_DIR/hyprwhspr/recording_control"'))
+hl.bind(M("V"), hl.dsp.exec_cmd('echo "stop" > "$XDG_RUNTIME_DIR/hyprwhspr/recording_control"'), { release = true })
 
 -- Laptop multimedia keys for volume and LCD brightness
 hl.bind(

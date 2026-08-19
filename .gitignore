@@ -12,3 +12,4 @@ foo.*
 data
 
 .claude
+__pycache__
