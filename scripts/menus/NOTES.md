@@ -11,6 +11,7 @@ Menu entries:
 | syncthing | firefox  | http://localhost:8384/           |
 | keybard   | chromium | https://captdeaf.github.io/keybard/ |
 | messenger | firefox  | https://www.messenger.com        |
+| home assistant | firefox | https://ha.michael7.me/    |
 
 Only labels show in rofi; links are resolved in a `case`/table lookup.
 

@@ -105,6 +105,7 @@ menu=(
   "syncthing|firefox|syncthing|http://localhost:8384/"
   "keybard|chromium|keybard|https://captdeaf.github.io/keybard/"
   "messenger|firefox|messenger|https://www.messenger.com"
+  "home assistant|firefox|home assistant|https://ha.michael7.me/"
 )
 
 labels=""
