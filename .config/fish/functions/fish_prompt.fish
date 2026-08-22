@@ -11,12 +11,14 @@ function fish_prompt --description 'Write out the prompt'
     or set -lx fish_prompt_pwd_dir_length 0
 
     # Color the prompt differently when we're root
-    set -l suffix '❯'
+    set -l host $HOSTNAME[1]
+    test -n "$host"; or set host (uname -n)
+    set -l suffix "($host)❯"
     if functions -q fish_is_root_user; and fish_is_root_user
         if set -q fish_color_cwd_root
             set cwd_color (set_color $fish_color_cwd_root)
         end
-        set suffix '#'
+        set suffix "($host)#"
     end
 
     # Color the prompt in red on error
