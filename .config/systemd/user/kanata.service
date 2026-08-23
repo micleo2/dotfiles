@@ -14,7 +14,7 @@ Environment=PATH=/usr/bin
 # IOSchedulingClass=realtime
 # Nice=-20
 Type=simple
-ExecStart=/usr/bin/kanata --cfg /home/mal/dotfiles/.config/kanata/g14.kbd
+ExecStart=/usr/bin/kanata --cfg /home/mal/.config/kanata/config.kbd
 Restart=on-failure
 RestartSec=3
 
