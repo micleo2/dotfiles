@@ -64,6 +64,8 @@ abbr --add pi 'sudo pacman -S --needed'
 abbr --add pr 'sudo pacman -Rns'
 abbr --add oc 'OPENCODE_ENABLE_EXA=true opencode'
 
+abbr --add uz unzip
+
 # --- VARIABLES
 set -Ux EDITOR nvim
 

@@ -377,6 +377,12 @@ hl.window_rule({
 	},
 	workspace = 9,
 })
+hl.window_rule({
+	match = {
+		class = "^(md.obsidian.Obsidian)$",
+	},
+	workspace = 3,
+})
 
 -- Hyprland-run windowrule
 hl.window_rule({
