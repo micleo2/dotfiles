@@ -10,7 +10,7 @@ import Quickshell
 import Quickshell.Io
 import "taskbar" as Taskbar
 import "osd" as Osd
-import "appmap" as Appmap
+import "submap" as Submap
 
 Scope {
     id: root
@@ -39,7 +39,7 @@ Scope {
     Osd.BrightnessOsd {
     }
 
-    Appmap.AppmapOverlay {
+    Submap.SubmapOverlay {
     }
 
 }

@@ -1,7 +1,7 @@
 -- App map: tap SUPER + A to enter a one-key submap; the next plain key
 -- launches or focuses an app. Escape or any unmapped key cancels.
 --
--- While the submap is active, a quickshell overlay (retro/appmap module)
+-- While the submap is active, a quickshell overlay (retro/submap module)
 -- shows every key and its label; it is driven over IPC from the payload
 -- built below, so it can never drift from the actual binds.
 --
@@ -70,7 +70,7 @@ local function appmap_payload()
 			)
 		)
 	end
-	local json = string.format('{"entries":[%s]}', table.concat(parts, ","))
+	local json = string.format('{"submap":"appmap","entries":[%s]}', table.concat(parts, ","))
 	-- The payload is embedded in a single-quoted sh -c command.
 	return json:gsub("'", "'\\''")
 end
@@ -95,7 +95,7 @@ local function cmd_for(app)
 end
 
 hl.bind("SUPER + A", function()
-	hl.dispatch(hl.dsp.exec_cmd("qs -c retro ipc call appmap display '" .. appmap_payload() .. "'"))
+	hl.dispatch(hl.dsp.exec_cmd("qs -c retro ipc call submap display '" .. appmap_payload() .. "'"))
 	hl.dispatch(hl.dsp.submap("appmap"))
 end)
 
