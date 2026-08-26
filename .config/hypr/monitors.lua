@@ -9,7 +9,7 @@ for i = 1, 8 do
 	hl.workspace_rule({ workspace = "" .. i, monitor = "DP-1" })
 end
 -- Hyprland will just reassign this WS when we disable it, so no need to make this conditional
-hl.workspace_rule({ workspace = "9", monitor = "HDMI-A-1" })
+hl.workspace_rule({ workspace = "2", monitor = "HDMI-A-1" })
 
 local hdmi_enabled = true
 local function toggle_hdmi()
@@ -23,13 +23,13 @@ local function toggle_hdmi()
 			transform = 3,
 			disabled = false,
 		})
-		hl.workspace_rule({ workspace = "9", layout_opts = { direction = "down" } })
+		hl.workspace_rule({ workspace = "2", layout_opts = { direction = "down" } })
 	else
 		hl.monitor({
 			output = "HDMI-A-1",
 			disabled = true,
 		})
-		hl.workspace_rule({ workspace = "9", layout_opts = { direction = "right" } })
+		hl.workspace_rule({ workspace = "2", layout_opts = { direction = "right" } })
 	end
 end
 -- start with the monitor turned off

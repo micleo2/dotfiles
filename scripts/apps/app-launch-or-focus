@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# Launch an app, or focus the existing window if one matches.
+# The window is matched on exactly one field:
+#   --class <pattern>  match WM_CLASS (default)
+#   --title <pattern>  match the window title
+# No cross-field fallback. If no window matches, the command is run.
+# Usage: app-launch-or-focus [--class|--title] <pattern> <command...>
+
+if [[ ${1:-} == "-h" || ${1:-} == "--help" ]]; then
+  echo "Usage: app-launch-or-focus [--class|--title] <pattern> <command...>"
+  echo "Focus an existing window matching the pattern on the given field"
+  echo "(class by default), otherwise run the command."
+  exit 0
+fi
+
+FIELD="class"
+case ${1:-} in
+--class) FIELD="class"; shift ;;
+--title) FIELD="title"; shift ;;
+esac
+
+if (($# < 2)); then
+  echo "Usage: app-launch-or-focus [--class|--title] <pattern> <command...>"
+  exit 1
+fi
+
+PATTERN="$1"
+shift
+
+WINDOW_ADDRESS=$(hyprctl clients -j | jq -r --arg p "$PATTERN" --arg f "$FIELD" '.[]|select(.[ $f ]|test("\\b"+$p+"\\b";"i"))|.address' | head -n1)
+
+if [[ -n $WINDOW_ADDRESS ]]; then
+  # Hyprland >= 0.55 parses `hyprctl dispatch` args as a Lua expression.
+  hyprctl dispatch "hl.dsp.focus({ window = \"address:$WINDOW_ADDRESS\" })"
+else
+  exec "$@"
+fi
