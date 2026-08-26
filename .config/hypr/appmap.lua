@@ -14,6 +14,8 @@
 --   singleton    : default true; false runs cmd directly (new instance)
 --   webapp/name/url : use webapp-launch-or-focus instead (Chromium --app)
 --   label        : display name for the overlay (cosmetic only)
+--   icon         : overlay icon, derived from desktop_file (or name for
+--                  webapps); cosmetic only
 --
 -- Absolute paths: Hyprland (launched by the wayland-wm@ session service) has
 -- no ~/.local/bin in its PATH, so bare names would fail to resolve.
@@ -26,7 +28,7 @@ local apps = {
 	b = { label = "Blender", class = "blender", desktop_file = "blender" },
 	d = { label = "Discord", class = "discord", desktop_file = "discord" },
 	f = { label = "FreeCAD", class = "org.freecad.FreeCAD", desktop_file = "org.freecad.FreeCAD" },
-	i = { label = "Inkscape", class = "org.inkscape.Inkscape", desktop_file = "org.inkscape.Inkscape.desktop" },
+	i = { label = "Inkscape", class = "org.inkscape.Inkscape", desktop_file = "org.inkscape.Inkscape" },
 	o = { label = "Obsidian", class = "md.obsidian.Obsidian", desktop_file = "obsidian" },
 	s = { label = "Spotify", class = "Spotify", desktop_file = "spotify-launcher" },
 	t = { label = "Terminal", singleton = false, desktop_file = "kitty" },
@@ -69,13 +71,14 @@ local function appmap_payload()
 	local parts = {}
 	for _, key in ipairs(order) do
 		local app = apps[key]
+		local icon = app.desktop_file or app.name or ""
 		table.insert(
 			parts,
 			string.format(
-				'{"key":"%s","label":"%s","desktop_file":"%s"}',
+				'{"key":"%s","label":"%s","icon":"%s"}',
 				json_escape(key),
 				json_escape(app.label),
-				json_escape(key)
+				json_escape(icon)
 			)
 		)
 	end

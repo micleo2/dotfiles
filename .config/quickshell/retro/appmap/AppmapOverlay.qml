@@ -1,8 +1,10 @@
 import QtQuick
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
 import Quickshell.Hyprland
 import Quickshell.Wayland
+import Quickshell.Widgets
 
 Scope {
     id: root
@@ -13,19 +15,79 @@ Scope {
     readonly property bool shown: active && entries.length > 0
 
     readonly property var default_entries: [
-        { key: "b", label: "Blender" },
-        { key: "d", label: "Discord" },
-        { key: "f", label: "FreeCAD" },
-        { key: "i", label: "Inkscape" },
-        { key: "o", label: "Obsidian" },
-        { key: "s", label: "Spotify" },
-        { key: "t", label: "Terminal" },
-        { key: "y", label: "Yazi" },
-        { key: "k", label: "Makera Studio" },
-        { key: "p", label: "Photoshop 2024" },
-        { key: "m", label: "Messenger" },
-        { key: "w", label: "WhatsApp" }
+        {
+            key: "b",
+            label: "Blender",
+            icon: "blender"
+        },
+        {
+            key: "d",
+            label: "Discord",
+            icon: "discord"
+        },
+        {
+            key: "f",
+            label: "FreeCAD",
+            icon: "org.freecad.FreeCAD"
+        },
+        {
+            key: "i",
+            label: "Inkscape",
+            icon: "org.inkscape.Inkscape"
+        },
+        {
+            key: "o",
+            label: "Obsidian",
+            icon: "obsidian"
+        },
+        {
+            key: "s",
+            label: "Spotify",
+            icon: "spotify-launcher"
+        },
+        {
+            key: "t",
+            label: "Terminal",
+            icon: "kitty"
+        },
+        {
+            key: "y",
+            label: "Yazi",
+            icon: "yazi"
+        },
+        {
+            key: "k",
+            label: "MS",
+            icon: "bottles-MakeraStudio-MakeraStudio"
+        },
+        {
+            key: "p",
+            label: "PS",
+            icon: "bottles-Photoshop-2024-Photoshop"
+        },
+        {
+            key: "m",
+            label: "Messenger",
+            icon: "messenger"
+        },
+        {
+            key: "w",
+            label: "WhatsApp",
+            icon: "whatsapp"
+        }
     ]
+
+    // Same lookup chain as FocusedWindow.qml: try the name as-is, then the
+    // last dot segment (reverse-DNS ids ship their icon under the short name).
+    function iconPath(name) {
+        if (name === undefined || name === null || name === "")
+            return "";
+        const direct = Quickshell.iconPath(name, true);
+        if (direct !== "")
+            return direct;
+        const segments = name.split(".");
+        return Quickshell.iconPath(segments[segments.length - 1].toLocaleLowerCase(), true);
+    }
 
     IpcHandler {
         target: "appmap"
@@ -76,24 +138,75 @@ Scope {
                 left: true
                 right: true
             }
-            implicitHeight: grid.implicitHeight + 40
+            implicitHeight: card.implicitHeight + 40
 
-            Grid {
-                id: grid
+            Item {
+                id: card
 
                 x: Math.max(0, (parent.width - width) / 2)
                 y: parent.height - height - 20
-                columns: 4
-                spacing: 16
 
-                Repeater {
-                    model: root.entries
+                implicitWidth: grid.implicitWidth + 60
+                implicitHeight: grid.implicitHeight + 48
 
-                    Text {
-                        font.pixelSize: 20
-                        color: "white"
-                        text: modelData.key + "\n" + modelData.label
-                        horizontalAlignment: Text.AlignHCenter
+                Rectangle {
+                    anchors.fill: parent
+                    radius: 24
+                    color: "#99000000"
+                }
+
+                Grid {
+                    id: grid
+
+                    x: 30
+                    y: 24
+                    columns: 4
+                    spacing: 16
+
+                    Repeater {
+                        model: root.entries
+
+                        Row {
+                            required property var modelData
+
+                            spacing: 10
+
+                            readonly property string icon: root.iconPath(modelData.icon)
+
+                            Text {
+                                text: "<font color='red'>" + modelData.key + "</font>->" + modelData.label
+                                color: "white"
+                                font.pointSize: 18
+                                font.family: mainFont.name
+                            }
+
+                            // Text {
+                            //     text: modelData.key + " ->"
+                            //     color: "red"
+                            //     anchors.verticalCenter: parent.verticalCenter
+                            //     font.pointSize: 24
+                            //     font.family: mainFont.name
+                            // }
+                            // IconImage {
+                            //     implicitSize: 24
+                            //     source: icon
+                            //     visible: icon !== ""
+                            //     anchors.verticalCenter: parent.verticalCenter
+                            //     layer.effect: MultiEffect {
+                            //         saturation: -1
+                            //         contrast: 0.7
+                            //     }
+                            // }
+                            // Text {
+                            //     text: modelData.label
+                            //     visible: icon === ""
+                            //     color: "white"
+                            //     anchors.verticalCenter: parent.verticalCenter
+                            //     font.pointSize: 24
+                            //     font.family: mainFont.name
+                            // }
+
+                        }
                     }
                 }
             }
