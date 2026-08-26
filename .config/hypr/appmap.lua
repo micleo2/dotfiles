@@ -25,28 +25,28 @@ local webapp_launch_or_focus = bin .. "/webapp-launch-or-focus"
 
 local apps = {
 	-- native apps
-	b = { label = "Blender", class = "blender", desktop_file = "blender" },
-	d = { label = "Discord", class = "discord", desktop_file = "discord" },
-	f = { label = "FreeCAD", class = "org.freecad.FreeCAD", desktop_file = "org.freecad.FreeCAD" },
-	i = { label = "Inkscape", class = "org.inkscape.Inkscape", desktop_file = "org.inkscape.Inkscape" },
-	o = { label = "Obsidian", class = "md.obsidian.Obsidian", desktop_file = "obsidian" },
-	s = { label = "Spotify", class = "Spotify", desktop_file = "spotify-launcher" },
-	t = { label = "Terminal", singleton = false, desktop_file = "kitty" },
-	y = { label = "Yazi", singleton = false, desktop_file = "yazi" },
+	b = { label = "blender", class = "blender", desktop_file = "blender" },
+	d = { label = "discord", class = "discord", desktop_file = "discord" },
+	f = { label = "freecad", class = "org.freecad.FreeCAD", desktop_file = "org.freecad.FreeCAD" },
+	i = { label = "inkscape", class = "org.inkscape.Inkscape", desktop_file = "org.inkscape.Inkscape" },
+	o = { label = "obsidian", class = "md.obsidian.Obsidian", desktop_file = "obsidian" },
+	s = { label = "spotify", class = "Spotify", desktop_file = "spotify-launcher" },
+	t = { label = "terminal", singleton = false, desktop_file = "kitty" },
+	y = { label = "yazi", singleton = false, desktop_file = "yazi" },
 	-- bottles apps
 	k = {
-		label = "MS",
+		label = "makera",
 		title = "MakeraStudio",
 		desktop_file = "bottles-MakeraStudio-MakeraStudio",
 	},
 	p = {
-		label = "PS",
+		label = "photoshop",
 		title = "Adobe Photoshop 2024",
 		desktop_file = "bottles-Photoshop-2024-Photoshop",
 	},
 	-- webapps
-	m = { label = "Messenger", webapp = true, name = "Messenger", url = "https://www.messenger.com/" },
-	w = { label = "WhatsApp", webapp = true, name = "WhatsApp", url = "https://web.whatsapp.com/" },
+	m = { label = "messenger", webapp = true, name = "Messenger", url = "https://www.messenger.com/" },
+	w = { label = "whatsapp", webapp = true, name = "WhatsApp", url = "https://web.whatsapp.com/" },
 }
 
 local function json_escape(s)
@@ -58,19 +58,9 @@ local function json_escape(s)
 	return s
 end
 
--- JSON payload for the overlay: {"entries":[{"key":"b","label":"Blender"}, ...]}
--- The array is wrapped in an object because the qs 0.3.1 CLI tokenizer mangles
--- bare [...] arguments (strips the brackets, splits on commas). The object
--- envelope keeps it a single token. The payload is embedded in a single-quoted
--- sh -c command, so it is returned ' -escaped.
--- Entries are emitted in `order` (pairs() is unordered) so the grid layout is
--- stable across invocations.
-local order = { "b", "d", "f", "i", "o", "s", "t", "y", "k", "p", "m", "w" }
-
 local function appmap_payload()
 	local parts = {}
-	for _, key in ipairs(order) do
-		local app = apps[key]
+	for key, app in pairs(apps) do
 		local icon = app.desktop_file or app.name or ""
 		table.insert(
 			parts,
