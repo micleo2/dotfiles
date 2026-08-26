@@ -15,42 +15,18 @@ Scope {
 
     readonly property bool shown: active && entries.length > 0
 
-    readonly property var sortedEntries: entries.slice().sort(
-        (a, b) => String(a.key).localeCompare(String(b.key))
-    )
+    readonly property var sortedEntries: entries.slice().sort((a, b) => String(a.key).localeCompare(String(b.key)))
 
     // Each column holds up to 4 entries; Grid fills row-major so reading
-// order stays left-to-right, top-to-bottom.
+    // order stays left-to-right, top-to-bottom.
     readonly property int perColumn: 4
-    readonly property int entryColumns: Math.max(
-        1, Math.ceil(sortedEntries.length / perColumn)
-    )
+    readonly property int entryColumns: Math.max(1, Math.ceil(sortedEntries.length / perColumn))
 
     readonly property var default_entries: [
         {
-            key: "b",
-            label: "Blender",
+            key: "t",
+            label: "testing",
             icon: "blender"
-        },
-        {
-            key: "d",
-            label: "Discord",
-            icon: "discord"
-        },
-        {
-            key: "f",
-            label: "FreeCAD",
-            icon: "org.freecad.FreeCAD"
-        },
-        {
-            key: "i",
-            label: "Inkscape",
-            icon: "org.inkscape.Inkscape"
-        },
-        {
-            key: "o",
-            label: "Obsidian",
-            icon: "obsidian"
         },
     ]
 
@@ -131,7 +107,7 @@ Scope {
 
                 Rectangle {
                     anchors.fill: parent
-                    radius: 24
+                    radius: 2
                     color: "#99000000"
                 }
 

@@ -4,6 +4,9 @@ return {
     event = "VeryLazy",
     ---@type Flash.Config
     opts = {
+      modes = { char = {
+        highlight = { backdrop = false, matches = false },
+      } },
       highlight = {
         backdrop = false,
         matches = false,
