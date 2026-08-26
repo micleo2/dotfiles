@@ -29,6 +29,7 @@ local apps = {
 	i = { label = "inkscape", class = "org.inkscape.Inkscape", desktop_file = "org.inkscape.Inkscape" },
 	o = { label = "obsidian", class = "md.obsidian.Obsidian", desktop_file = "obsidian" },
 	s = { label = "spotify", class = "Spotify", desktop_file = "spotify-launcher" },
+	u = { label = "bambustudio", class = "BambuStudio", desktop_file = "com.bambulab.BambuStudio" },
 	x = { label = "firefox", singleton = false, desktop_file = "firefox" },
 	y = { label = "yazi", singleton = false, desktop_file = "yazi" },
 	-- bottles apps
