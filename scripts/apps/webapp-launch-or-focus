@@ -21,14 +21,11 @@ fi
 WINDOW_PATTERN="$1"
 shift
 
-SCRIPT_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
-
 WINDOW_ADDRESS=$(hyprctl clients -j | jq -r --arg p "$WINDOW_PATTERN" '.[]|select((.class|test("\\b"+$p+"\\b";"i")) or (.title|test("\\b"+$p+"\\b";"i")))|.address' | head -n1)
 
 if [[ -n $WINDOW_ADDRESS ]]; then
   # Hyprland >= 0.55 parses `hyprctl dispatch` args as a Lua expression.
   hyprctl dispatch "hl.dsp.focus({ window = \"address:$WINDOW_ADDRESS\" })"
 else
-  # Absolute path: Hyprland's service PATH has no ~/.local/bin.
-  exec "$SCRIPT_DIR/webapp-launch" "$@"
+  exec webapp-launch "$@"
 fi

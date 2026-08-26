@@ -18,6 +18,10 @@ for s in app-launch-or-focus webapp-install webapp-launch webapp-launch-or-focus
   ln -sf ~/dotfiles/scripts/apps/$s ~/.local/bin/
 done
 
+# uwsm session environment
+mkdir -p ~/.config/uwsm
+ln -sf ~/dotfiles/.config/uwsm/env ~/.config/uwsm/
+
 # setup fuzzel config files.
 mkdir ~/.config/fuzzel
 ln -sf ~/dotfiles/.config/fuzzel/fuzzel.ini ~/.config/fuzzel/ &&

@@ -172,11 +172,10 @@ else
 fi
 
 # Use custom exec if provided, otherwise default behavior.
-# Absolute path: desktop spawners (rofi, systemd) don't have ~/.local/bin in PATH.
 if [[ $SINGLETON == "1" ]]; then
-  DEFAULT_EXEC="$HOME/.local/bin/webapp-launch-or-focus $APP_NAME $APP_URL"
+  DEFAULT_EXEC="webapp-launch-or-focus $APP_NAME $APP_URL"
 else
-  DEFAULT_EXEC="$HOME/.local/bin/webapp-launch $APP_URL"
+  DEFAULT_EXEC="webapp-launch $APP_URL"
 fi
 EXEC_COMMAND="${CUSTOM_EXEC:-$DEFAULT_EXEC}"
 

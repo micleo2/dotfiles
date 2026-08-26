@@ -17,21 +17,19 @@
 --   icon         : overlay icon, derived from desktop_file (or name for
 --                  webapps); cosmetic only
 --
--- Absolute paths: Hyprland (launched by the wayland-wm@ session service) has
--- no ~/.local/bin in its PATH, so bare names would fail to resolve.
-local bin = (os.getenv("HOME") or "") .. "/.local/bin"
-local app_launch_or_focus = bin .. "/app-launch-or-focus"
-local webapp_launch_or_focus = bin .. "/webapp-launch-or-focus"
+local app_launch_or_focus = "app-launch-or-focus"
+local webapp_launch_or_focus = "webapp-launch-or-focus"
 
 local apps = {
 	-- native apps
 	b = { label = "blender", class = "blender", desktop_file = "blender" },
+	c = { label = "chromium", singleton = false, desktop_file = "chromium" },
 	d = { label = "discord", class = "discord", desktop_file = "discord" },
 	f = { label = "freecad", class = "org.freecad.FreeCAD", desktop_file = "org.freecad.FreeCAD" },
 	i = { label = "inkscape", class = "org.inkscape.Inkscape", desktop_file = "org.inkscape.Inkscape" },
 	o = { label = "obsidian", class = "md.obsidian.Obsidian", desktop_file = "obsidian" },
 	s = { label = "spotify", class = "Spotify", desktop_file = "spotify-launcher" },
-	t = { label = "terminal", singleton = false, desktop_file = "kitty" },
+	x = { label = "firefox", singleton = false, desktop_file = "firefox" },
 	y = { label = "yazi", singleton = false, desktop_file = "yazi" },
 	-- bottles apps
 	k = {
@@ -87,7 +85,7 @@ local function cmd_for(app)
 	else
 		assert(false, "don't know how to launch this app")
 	end
-	if app.singleton == true then
+	if app.singleton == false then
 		return launch_app_cmd
 	end
 	if app.title == true then

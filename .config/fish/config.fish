@@ -52,8 +52,19 @@ abbr --add tks 'tmux kill-server'
 abbr --add ta 'tmux a -t'
 abbr --add tn 'tmux new -s'
 
-abbr --add rp realpath
-abbr --add rpc --set-cursor 'realpath % | pbcopy'
+# quickly add an absoulte path to clipboard
+abbr --add rp --set-cursor 'realpath % | wl-copy -n'
+function append_wl_copy -d "append wl-copy to current or last command"
+    set -l cmd (commandline)
+    # If the current typed line is empty, grab the last line.
+    if test -z "$cmd"
+        set cmd $history[1]
+    end
+    # Append the pipe and update the command line buffer
+    commandline -r "$cmd | wl-copy -n"
+end
+bind -M insert \ec append_wl_copy
+bind \ec append_wl_copy
 
 # debugging
 abbr --add sdbg 'ln -sf (realpath (fzf)) /tmp/todbg'
