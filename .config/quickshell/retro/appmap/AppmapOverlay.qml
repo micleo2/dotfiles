@@ -18,6 +18,13 @@ Scope {
         (a, b) => String(a.key).localeCompare(String(b.key))
     )
 
+    // Each column holds up to 4 entries; Grid fills row-major so reading
+// order stays left-to-right, top-to-bottom.
+    readonly property int perColumn: 4
+    readonly property int entryColumns: Math.max(
+        1, Math.ceil(sortedEntries.length / perColumn)
+    )
+
     readonly property var default_entries: [
         {
             key: "b",
@@ -129,7 +136,8 @@ Scope {
 
                     x: 30
                     y: 24
-                    columns: 3
+                    rows: Math.min(root.perColumn, root.sortedEntries.length)
+                    columns: root.entryColumns
                     spacing: 16
 
                     Repeater {
