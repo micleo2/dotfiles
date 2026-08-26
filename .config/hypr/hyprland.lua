@@ -199,9 +199,9 @@ hl.bind(M(S("F")), hl.dsp.window.fullscreen({ mode = "fullscreen" }))
 -- Make the window believe it's fullscreen but it's not.
 hl.bind(M(C("F")), hl.dsp.window.fullscreen_state({ internal = 0, client = 2 }))
 
--- Move/resize windows with mouse
-hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
-hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
+-- Move/resize windows
+hl.bind(M("A"), hl.dsp.window.drag(), { mouse = true })
+hl.bind(M(S("A")), hl.dsp.window.resize(), { mouse = true })
 
 -- Apps on hotkeys
 hl.bind(M("Space"), hl.dsp.exec_cmd("rofi -show drun -show-icons"))
@@ -345,43 +345,98 @@ hl.window_rule({
 })
 
 -- Assign apps to workspaces.
+
+-- communication 2
 hl.window_rule({
 	match = {
-		class = "^(steam)$",
+		class = "^(discord)$",
+	},
+	workspace = 2,
+})
+hl.window_rule({
+	match = {
+		title = "WhatsApp Web",
+	},
+	workspace = 2,
+})
+-- todo: messenger
+
+-- notes / research is workspace 3
+hl.window_rule({
+	match = {
+		class = "^(md.obsidian.Obsidian)$",
+	},
+	workspace = 3,
+})
+
+-- 3D creative work is 6
+hl.window_rule({
+	match = {
+		class = "^(blender)$",
 	},
 	workspace = 6,
 })
 hl.window_rule({
 	match = {
-		class = "steam_app_(.*)",
+		class = "^(org.freecad.FreeCAD)$",
+	},
+	workspace = 6,
+})
+hl.window_rule({
+	match = {
+		class = "^(BambuStudio)$",
+	},
+	workspace = 6,
+})
+hl.window_rule({
+	match = {
+		title = "^(MakeraStudio)$",
+	},
+	workspace = 6,
+})
+
+-- 2D creative work is 7
+hl.window_rule({
+	match = {
+		class = "^(org.inkscape.Inkscape)$",
 	},
 	workspace = 7,
+})
+hl.window_rule({
+	match = {
+		title = "^(Adobe Photoshop 2024)$",
+	},
+	workspace = 7,
+})
+
+-- games 8
+hl.window_rule({
+	match = {
+		class = "^(steam)$",
+	},
+	workspace = 8,
+})
+hl.window_rule({
+	match = {
+		class = "steam_app_(.*)",
+	},
+	workspace = 8,
 	fullscreen = true,
 })
 hl.window_rule({
 	match = {
 		class = "^(factorio)$",
 	},
-	workspace = 6,
+	workspace = 8,
 	fullscreen = true,
 })
-hl.window_rule({
-	match = {
-		class = "^(discord)$",
-	},
-	workspace = 9,
-})
+
+-- music/media 9
 hl.window_rule({
 	match = {
 		class = "^(Spotify)$",
 	},
 	workspace = 9,
-})
-hl.window_rule({
-	match = {
-		class = "^(md.obsidian.Obsidian)$",
-	},
-	workspace = 3,
 })
 
 -- Hyprland-run windowrule
