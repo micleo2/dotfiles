@@ -14,6 +14,10 @@ Scope {
 
     readonly property bool shown: active && entries.length > 0
 
+    readonly property var sortedEntries: entries.slice().sort(
+        (a, b) => String(a.key).localeCompare(String(b.key))
+    )
+
     readonly property var default_entries: [
         {
             key: "b",
@@ -40,41 +44,6 @@ Scope {
             label: "Obsidian",
             icon: "obsidian"
         },
-        {
-            key: "s",
-            label: "Spotify",
-            icon: "spotify-launcher"
-        },
-        {
-            key: "t",
-            label: "Terminal",
-            icon: "kitty"
-        },
-        {
-            key: "y",
-            label: "Yazi",
-            icon: "yazi"
-        },
-        {
-            key: "k",
-            label: "MS",
-            icon: "bottles-MakeraStudio-MakeraStudio"
-        },
-        {
-            key: "p",
-            label: "PS",
-            icon: "bottles-Photoshop-2024-Photoshop"
-        },
-        {
-            key: "m",
-            label: "Messenger",
-            icon: "messenger"
-        },
-        {
-            key: "w",
-            label: "WhatsApp",
-            icon: "whatsapp"
-        }
     ]
 
     // Same lookup chain as FocusedWindow.qml: try the name as-is, then the
@@ -160,11 +129,11 @@ Scope {
 
                     x: 30
                     y: 24
-                    columns: 4
+                    columns: 3
                     spacing: 16
 
                     Repeater {
-                        model: root.entries
+                        model: root.sortedEntries
 
                         Row {
                             required property var modelData
