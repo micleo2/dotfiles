@@ -128,11 +128,6 @@ hl.config({
 	},
 })
 
-hl.workspace_rule({ workspace = "4", layout = "scrolling" })
-hl.workspace_rule({ workspace = "6", layout = "monocle" })
-hl.workspace_rule({ workspace = "9", layout = "scrolling" })
-hl.workspace_rule({ workspace = "9", layout_opts = { direction = "right" } })
-
 ----------------
 ----  MISC  ----
 ----------------
@@ -180,7 +175,6 @@ hl.gesture({
 ---------------------
 ---- KEYBINDINGS ----
 ---------------------
-local mainMod = "SUPER"
 local function M(key)
 	return "SUPER + " .. key
 end
@@ -191,6 +185,9 @@ local function C(key)
 	return "CTRL + " .. key
 end
 
+-- One-key app launcher submap (SUPER + A) + web app window rules
+require("appmap")
+
 -- Window binds
 hl.bind(M("Q"), hl.dsp.window.close())
 hl.bind(M(S("Q")), hl.dsp.window.kill())
@@ -200,13 +197,12 @@ hl.bind(M(S("F")), hl.dsp.window.fullscreen({ mode = "fullscreen" }))
 hl.bind(M(C("F")), hl.dsp.window.fullscreen_state({ internal = 0, client = 2 }))
 
 -- Move/resize windows
-hl.bind(M("A"), hl.dsp.window.drag(), { mouse = true })
-hl.bind(M(S("A")), hl.dsp.window.resize(), { mouse = true })
+hl.bind(M("G"), hl.dsp.window.drag(), { mouse = true })
+hl.bind(M(S("G")), hl.dsp.window.resize(), { mouse = true })
 
 -- Apps on hotkeys
 hl.bind(M("Space"), hl.dsp.exec_cmd("rofi -show drun -show-icons"))
 hl.bind(M("S"), hl.dsp.exec_cmd("kitty"))
-hl.bind(M("Y"), hl.dsp.exec_cmd("kitty yazi"))
 
 -- Alt+Tab: standard MRU switching
 hl.bind("ALT + Tab", hl.dsp.exec_cmd("snappy-switcher next --mod alt"), { description = "Snappy Switcher" })
@@ -320,9 +316,9 @@ hl.bind(
 	{ locked = true, repeating = true }
 )
 
---------------------------------
----- WINDOWS AND WORKSPACES ----
---------------------------------
+-----------------------
+---- WINDOWS RULES ----
+-----------------------
 
 hl.window_rule({
 	name = "suppress-maximize-events",
@@ -354,12 +350,13 @@ hl.window_rule({
 	workspace = 2,
 })
 hl.window_rule({
-	match = {
-		title = "WhatsApp Web",
-	},
+	match = { class = ".*whatsapp.com.*" },
 	workspace = 2,
 })
--- todo: messenger
+hl.window_rule({
+	match = { class = ".*messenger.com.*" },
+	workspace = 2,
+})
 
 -- notes / research is workspace 3
 hl.window_rule({
@@ -446,6 +443,15 @@ hl.window_rule({
 	move = "20 monitor_h-120",
 	float = true,
 })
+
+-------------------------
+---- WORKSPACE RULES ----
+-------------------------
+hl.workspace_rule({ workspace = "6", layout = "monocle" })
+hl.workspace_rule({ workspace = "7", layout = "monocle" })
+hl.workspace_rule({ workspace = "4", layout = "scrolling" })
+hl.workspace_rule({ workspace = "2", layout = "scrolling" })
+hl.workspace_rule({ workspace = "2", layout_opts = { direction = "right" } })
 
 -------------------
 ----- DISPLAY -----
