@@ -27,6 +27,7 @@ hl.on("hyprland.start", function()
 	hl.exec_cmd("udiskie -a -n")
 	hl.exec_cmd("wl-paste --type text --watch cliphist store")
 	hl.exec_cmd("wl-paste --type image --watch cliphist store")
+	hl.exec_cmd("kitty +kitten panel -o font_size=20 --edge=background /home/mal/oss/omarchy/plans/ttfx/launch.sh")
 end)
 
 -------------------------------
@@ -186,7 +187,8 @@ local function C(key)
 end
 
 -- One-key app launcher submap (SUPER + A) + web app window rules
-require("appmap")
+require("submap-apps")
+require("submap-power")
 
 -- Window binds
 hl.bind(M("Q"), hl.dsp.window.close())
@@ -215,9 +217,6 @@ hl.bind(
 	)
 )
 
--- Power menu
-hl.bind(M("P"), hl.dsp.exec_cmd("~/dotfiles/scripts/menus/power-menu.sh"))
-
 -- Browser menu
 hl.bind(M("B"), hl.dsp.exec_cmd("~/dotfiles/scripts/menus/browser-menu.sh"))
 
@@ -235,6 +234,7 @@ end
 -- Toggle between last focused workspace
 hl.bind(M("d"), hl.dsp.focus({ workspace = "previous" }))
 hl.bind(M(S("d")), hl.dsp.focus({ urgent_or_last = true }))
+hl.bind(M("Tab"), hl.dsp.focus({ last = true }))
 
 -- Layout-aware hjkl
 local layoutAwareBinds = {
@@ -275,7 +275,10 @@ hl.bind(M(S("right")), hl.dsp.layout("swapcol r"))
 
 -- clipboard
 require("universal-clipboard")
-hl.bind(M(S("V")), hl.dsp.exec_cmd("cliphist list | rofi -dmenu -display-columns 2 | cliphist decode | wl-copy"))
+hl.bind(
+	M(S("V")),
+	hl.dsp.exec_cmd("cliphist list | rofi -dmenu -display-columns 2 | cliphist decode | wl-copy && wl-paste")
+)
 
 -- dictation
 hl.bind(M("R"), hl.dsp.exec_cmd("voxtype record start"))
@@ -366,9 +369,13 @@ hl.window_rule({
 	workspace = 3,
 })
 
--- email is 4
+-- utility apps 4
 hl.window_rule({
 	match = { class = ".*mail.google.com.*" },
+	workspace = 4,
+})
+hl.window_rule({
+	match = { title = ".*Home Assistant.*" },
 	workspace = 4,
 })
 
@@ -450,14 +457,21 @@ hl.window_rule({
 	float = true,
 })
 
+-- ttfx: float and center on the monitor (launch kitty with --class ttfx)
+hl.window_rule({
+	name = "ttfx-center",
+	match = { class = "mal.background" },
+	float = true,
+	center = true,
+})
+
 -------------------------
 ---- WORKSPACE RULES ----
 -------------------------
+hl.workspace_rule({ workspace = "2", layout = "monocle" })
 hl.workspace_rule({ workspace = "6", layout = "monocle" })
 hl.workspace_rule({ workspace = "7", layout = "monocle" })
 hl.workspace_rule({ workspace = "4", layout = "scrolling" })
-hl.workspace_rule({ workspace = "2", layout = "scrolling" })
-hl.workspace_rule({ workspace = "2", layout_opts = { direction = "right" } })
 
 -------------------
 ----- DISPLAY -----
