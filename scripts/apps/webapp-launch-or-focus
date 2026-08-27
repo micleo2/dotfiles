@@ -1,31 +1,54 @@
-#!/bin/bash
+#!/usr/bin/env python3
+"""Launch a web app, or focus the existing window if one matches.
 
-# Launch a web app, or focus the existing window if one matches.
-# Single-instance: an existing window whose class or title matches the pattern
-# is focused instead of launching a duplicate (--app sets the window title to
-# the site name, so matching on the app Name hits the title).
-# Usage: webapp-launch-or-focus <window-pattern> <url-and-flags...>
+Single-instance: a window whose class matches the URL's host is focused
+instead of launching a duplicate. Chromium --app mode ignores --class and
+forces the window class to chrome-<host>__<path>-<profile>, so matching is
+done on that prefix, which is stable across paths and profiles.
 
-if [[ ${1:-} == "-h" || ${1:-} == "--help" ]]; then
-  echo "Usage: webapp-launch-or-focus <window-pattern> <url-and-flags...>"
-  echo "Focus an existing window whose class or title matches the pattern, otherwise"
-  echo "launch the URL as a web app (see webapp-launch)."
-  exit 0
-fi
+Usage: webapp-launch-or-focus <name> <url> [chromium flags...]
+"""
 
-if (($# == 0)); then
-  echo "Usage: webapp-launch-or-focus <window-pattern> <url-and-flags...>"
-  exit 1
-fi
+import argparse
+import json
+import os
+import re
+import subprocess
+from urllib.parse import urlparse
 
-WINDOW_PATTERN="$1"
-shift
 
-WINDOW_ADDRESS=$(hyprctl clients -j | jq -r --arg p "$WINDOW_PATTERN" '.[]|select((.class|test("\\b"+$p+"\\b";"i")) or (.title|test("\\b"+$p+"\\b";"i")))|.address' | head -n1)
+def host_class_prefix(url: str) -> str:
+    """Regex matching any chromium --app window launched from this URL's host."""
+    host = urlparse(url).netloc.split(":")[0].lower()
+    return rf"^(?:chrome|chromium)-{re.escape(host)}__"
 
-if [[ -n $WINDOW_ADDRESS ]]; then
-  # Hyprland >= 0.55 parses `hyprctl dispatch` args as a Lua expression.
-  hyprctl dispatch "hl.dsp.focus({ window = \"address:$WINDOW_ADDRESS\" })"
-else
-  exec webapp-launch "$@"
-fi
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        prog="webapp-launch-or-focus",
+        description="Focus the existing web app window for <url>, or launch it with webapp-launch.",
+    )
+    parser.add_argument("name", help="app name (kept for compatibility; matching is by URL host)")
+    parser.add_argument("url", help="URL the app window was, or will be, launched with")
+    parser.add_argument("rest", nargs="*", metavar="ARG", help="extra chromium flags passed to webapp-launch")
+    args = parser.parse_args()
+
+    pattern = re.compile(host_class_prefix(args.url), re.IGNORECASE)
+    clients = json.loads(subprocess.check_output(["hyprctl", "clients", "-j"], text=True))
+    matches = [c for c in clients if pattern.match(c.get("class") or "")]
+
+    if matches:
+        target = max(matches, key=lambda c: c.get("focusHistoryID", 0))
+        # Hyprland >= 0.55 parses `hyprctl dispatch` args as a Lua expression.
+        subprocess.run(
+            ["hyprctl", "dispatch", f'hl.dsp.focus({{ window = "address:{target["address"]}" }})'],
+            check=True,
+        )
+        return 0
+
+    os.execvp("webapp-launch", ["webapp-launch", args.url, *args.rest])
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

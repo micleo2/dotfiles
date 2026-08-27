@@ -1,38 +1,57 @@
-#!/bin/bash
+#!/usr/bin/env python3
+"""Launch an app, or focus the existing window if one matches.
 
-# Launch an app, or focus the existing window if one matches.
-# The window is matched on exactly one field:
-#   --class <pattern>  match WM_CLASS (default)
-#   --title <pattern>  match the window title
-# No cross-field fallback. If no window matches, the command is run.
-# Usage: app-launch-or-focus [--class|--title] <pattern> <command...>
+The window is matched on exactly one field:
+  (default)  match WM_CLASS
+  --title    match the window title
+No cross-field fallback. If no window matches, the command is run.
 
-if [[ ${1:-} == "-h" || ${1:-} == "--help" ]]; then
-  echo "Usage: app-launch-or-focus [--class|--title] <pattern> <command...>"
-  echo "Focus an existing window matching the pattern on the given field"
-  echo "(class by default), otherwise run the command."
-  exit 0
-fi
+Usage: app-launch-or-focus [--class|--title] <pattern> <command...>
+"""
 
-FIELD="class"
-case ${1:-} in
---class) FIELD="class"; shift ;;
---title) FIELD="title"; shift ;;
-esac
+import argparse
+import json
+import os
+import re
+import subprocess
 
-if (($# < 2)); then
-  echo "Usage: app-launch-or-focus [--class|--title] <pattern> <command...>"
-  exit 1
-fi
 
-PATTERN="$1"
-shift
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        prog="app-launch-or-focus",
+        description="Focus the existing window matching <pattern>, or run <command...>.",
+    )
+    parser.add_argument("--class", dest="by_class", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("--title", dest="by_title", action="store_true", help="match the window title instead of WM_CLASS")
+    parser.add_argument(
+        "rest",
+        nargs=argparse.REMAINDER,
+        metavar="ARG",
+        help="<pattern> followed by <command...> to run when no window matches",
+    )
+    args = parser.parse_args()
 
-WINDOW_ADDRESS=$(hyprctl clients -j | jq -r --arg p "$PATTERN" --arg f "$FIELD" '.[]|select(.[ $f ]|test("\\b"+$p+"\\b";"i"))|.address' | head -n1)
+    if len(args.rest) < 2:
+        parser.print_help()
+        return 1
 
-if [[ -n $WINDOW_ADDRESS ]]; then
-  # Hyprland >= 0.55 parses `hyprctl dispatch` args as a Lua expression.
-  hyprctl dispatch "hl.dsp.focus({ window = \"address:$WINDOW_ADDRESS\" })"
-else
-  exec "$@"
-fi
+    field = "title" if args.by_title else "class"
+    pattern, *command = args.rest
+    rx = re.compile(r"\b" + pattern + r"\b", re.IGNORECASE)
+
+    clients = json.loads(subprocess.check_output(["hyprctl", "clients", "-j"], text=True))
+    matches = [c for c in clients if rx.search(c.get(field) or "")]
+
+    if not matches:
+        os.execvp(command[0], command)
+
+    # Hyprland >= 0.55 parses `hyprctl dispatch` args as a Lua expression.
+    subprocess.run(
+        ["hyprctl", "dispatch", f'hl.dsp.focus({{ window = "address:{matches[0]["address"]}" }})'],
+        check=True,
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
