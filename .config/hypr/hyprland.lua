@@ -358,7 +358,7 @@ hl.window_rule({
 	workspace = 2,
 })
 
--- notes / research is workspace 3
+-- notes / research 3
 hl.window_rule({
 	match = {
 		class = "^(md.obsidian.Obsidian)$",
@@ -366,7 +366,13 @@ hl.window_rule({
 	workspace = 3,
 })
 
--- 3D creative work is 6
+-- email is 4
+hl.window_rule({
+	match = { class = ".*mail.google.com.*" },
+	workspace = 4,
+})
+
+-- 3D creative work 6
 hl.window_rule({
 	match = {
 		class = "^(blender)$",
@@ -392,7 +398,7 @@ hl.window_rule({
 	workspace = 6,
 })
 
--- 2D creative work is 7
+-- 2D creative work 7
 hl.window_rule({
 	match = {
 		class = "^(org.inkscape.Inkscape)$",

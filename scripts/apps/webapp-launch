@@ -1,21 +1,44 @@
-#!/bin/bash
+#!/usr/bin/env python3
+"""Launch a URL as a chromeless chromium web app window.
 
-# Launch a URL as a web app (--app mode, chromeless window) in the default
-# Chromium-based browser, scoped under Uwsm.
-# Usage: webapp-launch <url> [browser flags...]
+Usage: webapp-launch <url> [class] [chromium flags...]
 
-if [[ ${1:-} == "-h" || ${1:-} == "--help" ]]; then
-  echo "Usage: webapp-launch <url> [browser flags...]"
-  echo "Launch a URL as a web app (--app mode, chromeless window) in the default"
-  echo "Chromium-based browser, scoped under Uwsm."
-  exit 0
-fi
+In --app mode chromium ignores --class and forces the window class to
+chrome-<host>__<path>-<profile> (path without leading slash, '/' -> '_',
+fragment dropped; e.g. https://mail.google.com/mail/u/0/#inbox becomes
+chrome-mail.google.com__mail_u_0_-Default). The optional class argument is
+accepted for backwards compatibility but is not used.
+"""
 
-browser=$(xdg-settings get default-web-browser)
+import argparse
+import os
 
-case $browser in
-google-chrome* | brave* | microsoft-edge* | opera* | vivaldi* | helium*) ;;
-*) browser="chromium.desktop" ;;
-esac
 
-exec setsid uwsm-app -- $(sed -n 's/^Exec=\([^ ]*\).*/\1/p' {~/.local,/usr}/share/applications/$browser 2>/dev/null | head -1) --app="$1" "${@:2}"
+def split_rest(rest: list[str]) -> list[str]:
+    """The first non-flag token is the legacy class (ignored); the rest are chromium flags."""
+    if rest and not rest[0].startswith("-"):
+        return rest[1:]
+    return rest
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        prog="webapp-launch",
+        description="Launch a URL as a chromeless chromium web app window (chromium --app).",
+    )
+    parser.add_argument("url", help="URL to open in app mode")
+    parser.add_argument(
+        "rest",
+        nargs="*",
+        metavar="ARG",
+        help="optional legacy class name (ignored: chromium --app forces its own WM_CLASS), followed by extra chromium flags",
+    )
+    args = parser.parse_args()
+
+    flags = split_rest(args.rest)
+    os.execvp("setsid", ["setsid", "uwsm-app", "--", "chromium", f"--app={args.url}", *flags])
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

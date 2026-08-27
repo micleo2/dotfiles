@@ -1,213 +1,237 @@
-#!/bin/bash
+#!/usr/bin/env python3
+"""Create a desktop launcher for a web app.
 
-# Create a desktop launcher for a web app.
-# Usage: webapp-install [--singleton=1|0] <name> <url> [icon-url-or-name [custom-exec] [mime-types]]
-# With fewer than 2 positional arguments, runs an interactive wizard (requires gum).
-# --singleton (default 1): the .desktop uses webapp-launch-or-focus, so activating
-# the launcher focuses an existing window instead of opening a duplicate.
+Usage: webapp-install [--singleton=1|0] <name> <url> [icon-url-or-name [custom-exec] [mime-types]]
+Create a desktop launcher (and icon) for a web app.
+Icons can be found at https://dashboardicons.com/
+With fewer than 2 positional arguments, runs an interactive wizard (requires gum).
+  --singleton=1|0  Use webapp-launch-or-focus (1, default) or webapp-launch (0) in Exec.
 
-if [[ ${1:-} == "-h" || ${1:-} == "--help" ]]; then
-  echo "Usage: webapp-install [--singleton=1|0] <name> <url> [icon-url-or-name [custom-exec] [mime-types]]"
-  echo "Create a desktop launcher (and icon) for a web app."
-  echo "With fewer than 2 positional arguments, runs an interactive wizard (requires gum)."
-  echo "  --singleton=1|0  Use webapp-launch-or-focus (1, default) or webapp-launch (0) in Exec."
-  exit 0
-fi
+The launcher writes StartupWMClass with the WM_CLASS chromium forces in --app
+mode (chrome-<host>__<path>-<profile>), so the window resolves back to this
+desktop entry (name + icon) in the quickshell top bar.
+"""
 
-SINGLETON=1
-POSITIONAL=()
-while (($#)); do
-  case $1 in
-  --singleton=*)
-    SINGLETON="${1#--singleton=}"
-    shift
-    ;;
-  *)
-    POSITIONAL+=("$1")
-    shift
-    ;;
-  esac
-done
-set -- "${POSITIONAL[@]}"
+import argparse
+import os
+import re
+import shutil
+import subprocess
+import sys
+from urllib.parse import urlparse
 
-case $SINGLETON in
-0 | 1) ;;
-*)
-  echo "Error: --singleton must be 0 or 1."
-  exit 1
-  ;;
-esac
+ICON_DIR = os.path.expanduser("~/.local/share/icons/hicolor/256x256/apps")
+ICON_THEME = os.path.expanduser("~/.local/share/icons/hicolor")
+APPS_DIR = os.path.expanduser("~/.local/share/applications")
 
-set -e
 
-ICON_DIR="$HOME/.local/share/icons/hicolor/256x256/apps"
+def safe_name(name: str) -> str:
+    return re.sub(r"^-+|-+$", "", re.sub(r"[^a-z0-9]+", "-", name.lower()))
 
-safe_icon_name() {
-  printf '%s\n' "$1" \
-    | tr '[:upper:]' '[:lower:]' \
-    | sed 's/[^[:alnum:]]\+/-/g; s/^-//; s/-$//'
-}
 
-icon_name_from_ref() {
-  local ref="$1"
-  local name
-  name=$(basename "$ref")
+def chromium_app_class(url: str, profile: str = "Default") -> str:
+    """The WM_CLASS chromium forces on a --app window (the Wayland app-id).
 
-  if [[ $name == *.* ]]; then
-    safe_icon_name "${name%.*}"
-  else
-    printf '%s\n' "$name"
-  fi
-}
+    chrome-<host>__<path>-<profile>: path without leading slash, '/' -> '_',
+    fragment dropped; an empty path leaves a bare '__-'.
+    """
+    parsed = urlparse(url)
+    host = parsed.netloc.split(":")[0]
+    path = parsed.path.lstrip("/").replace("/", "_")
+    if path:
+        return f"chrome-{host}__{path}-{profile}"
+    return f"chrome-{host}__-{profile}"
 
-install_user_icon() {
-  local source="$1"
-  local name="$2"
-  local ext="${source##*.}"
 
-  [[ $ext == "$source" ]] && ext="png"
-  mkdir -p "$ICON_DIR"
-  cp "$source" "$ICON_DIR/$name.$ext"
-  gtk-update-icon-cache "$HOME/.local/share/icons/hicolor" &>/dev/null || true
-  printf '%s\n' "$name"
-}
+def die(msg: str) -> None:
+    print(msg)
+    sys.exit(1)
 
-download_icon() {
-  curl -fsSL --max-time 10 -o "$2" "$1" 2>/dev/null &&
-    [[ -s $2 && $(file -b --mime-type "$2") == image/png ]] ||
-    { rm -f "$2"; return 1; }
-}
 
-fetch_site_icon() {
-  local site_url="$1" dest="$2"
-  local origin page icon_url
-  origin=$(sed -E 's|^(https?://[^/]+).*|\1|' <<<"$site_url")
+def run(cmd: list[str], **kwargs) -> subprocess.CompletedProcess:
+    return subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False, **kwargs)
 
-  # Prefer the site's own high-res icon (apple-touch-icon is typically 180px+),
-  # then the well-known path, then Google's favicon service as a last resort.
-  page=$(curl -fsSL --max-time 5 "$site_url" 2>/dev/null | head -c 100000 | tr '\n' ' ')
-  icon_url=$(grep -oiE "<link[^>]*rel=[\"'][^\"']*apple-touch-icon[^\"']*[\"'][^>]*>" <<<"$page" |
-    grep -oiE "href=[\"'][^\"']+" | head -1 | sed -E "s/^href=[\"']//")
 
-  case $icon_url in
-  http://* | https://*) ;;
-  //*) icon_url="https:$icon_url" ;;
-  /*) icon_url="$origin$icon_url" ;;
-  ?*) icon_url="$origin/$icon_url" ;;
-  esac
+def refresh_icon_cache() -> None:
+    run(["gtk-update-icon-cache", ICON_THEME])
 
-  { [[ -n $icon_url ]] && download_icon "$icon_url" "$dest"; } ||
-    download_icon "$origin/apple-touch-icon.png" "$dest" ||
-    download_icon "https://www.google.com/s2/favicons?domain=${site_url}&sz=256" "$dest"
-}
 
-CREATED=()
+def gum_input(prompt: str, placeholder: str) -> str:
+    result = subprocess.run(
+        ["gum", "input", "--prompt", prompt, "--placeholder", placeholder],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return result.stdout.strip()
 
-if (( $# < 2 )); then
-  echo -e "\e[32mLet's create a new web app you can start with the app launcher.\n\e[0m"
-  APP_NAME=$(gum input --prompt "Name> " --placeholder "My favorite web app")
-  APP_URL=$(gum input --prompt "URL> " --placeholder "https://example.com")
-  if [[ ! $APP_URL =~ ^[a-zA-Z][a-zA-Z0-9+.-]*: ]]; then
-    APP_URL="https://$APP_URL"
-  fi
 
-  # Try to fetch the site's icon automatically first.
-  mkdir -p "$ICON_DIR"
-  ICON_VALUE=$(safe_icon_name "$APP_NAME")
-  if fetch_site_icon "$APP_URL" "$ICON_DIR/$ICON_VALUE.png"; then
-    gtk-update-icon-cache "$HOME/.local/share/icons/hicolor" &>/dev/null || true
-    ICON_REF="$ICON_VALUE"
-    CREATED+=("$ICON_DIR/$ICON_VALUE.png")
-  else
-    ICON_REF=$(gum input --prompt "Icon URL/name> " --placeholder "Could not fetch favicon automatically. Enter PNG icon URL or icon name")
-  fi
+def download_icon(url: str, dest: str) -> bool:
+    run(["curl", "-fsSL", "--max-time", "10", "-o", dest, url])
+    if not os.path.isfile(dest) or os.path.getsize(dest) == 0:
+        if os.path.exists(dest):
+            os.remove(dest)
+        return False
+    mime = subprocess.run(["file", "-b", "--mime-type", dest], capture_output=True, text=True).stdout.strip()
+    if mime != "image/png":
+        os.remove(dest)
+        return False
+    return True
 
-  CUSTOM_EXEC=""
-  MIME_TYPES=""
-  INTERACTIVE_MODE=true
-else
-  APP_NAME="$1"
-  APP_URL="$2"
-  if [[ ! $APP_URL =~ ^[a-zA-Z][a-zA-Z0-9+.-]*: ]]; then
-    APP_URL="https://$APP_URL"
-  fi
-  ICON_REF="$3"
-  CUSTOM_EXEC="$4" # Optional custom exec command
-  MIME_TYPES="$5"  # Optional mime types
-  INTERACTIVE_MODE=false
-fi
 
-# Ensure valid execution
-if [[ -z $APP_NAME || -z $APP_URL ]]; then
-  echo "You must set app name and app URL!"
-  exit 1
-fi
+def resolve_relative(url: str, origin: str) -> str:
+    if re.match(r"^https?://", url):
+        return url
+    if url.startswith("//"):
+        return "https:" + url
+    if url.startswith("/"):
+        return origin + url
+    if url.startswith("?"):
+        return origin + "/" + url
+    return ""
 
-if [[ -z $ICON_REF ]]; then
-  ICON_VALUE=$(safe_icon_name "$APP_NAME")
-  mkdir -p "$ICON_DIR"
-  if ! fetch_site_icon "$APP_URL" "$ICON_DIR/$ICON_VALUE.png"; then
-    echo "Error: Failed to download icon."
-    exit 1
-  fi
-  CREATED+=("$ICON_DIR/$ICON_VALUE.png")
-  gtk-update-icon-cache "$HOME/.local/share/icons/hicolor" &>/dev/null || true
-elif [[ $ICON_REF =~ ^https?:// ]]; then
-  ICON_VALUE=$(safe_icon_name "$APP_NAME")
-  mkdir -p "$ICON_DIR"
-  if ! download_icon "$ICON_REF" "$ICON_DIR/$ICON_VALUE.png"; then
-    echo "Error: Failed to download icon."
-    exit 1
-  fi
-  CREATED+=("$ICON_DIR/$ICON_VALUE.png")
-  gtk-update-icon-cache "$HOME/.local/share/icons/hicolor" &>/dev/null || true
-elif [[ -f $ICON_REF ]]; then
-  ICON_VALUE=$(install_user_icon "$ICON_REF" "$(safe_icon_name "$APP_NAME")")
-  ext="${ICON_REF##*.}"
-  [[ $ext == "$ICON_REF" ]] && ext="png"
-  CREATED+=("$ICON_DIR/$ICON_VALUE.$ext")
-else
-  # Icon name, resolved from the icon theme (accepts "name" or "name.png").
-  ICON_VALUE=$(icon_name_from_ref "$ICON_REF")
-fi
 
-# Use custom exec if provided, otherwise default behavior.
-if [[ $SINGLETON == "1" ]]; then
-  DEFAULT_EXEC="webapp-launch-or-focus $APP_NAME $APP_URL"
-else
-  DEFAULT_EXEC="webapp-launch $APP_URL"
-fi
-EXEC_COMMAND="${CUSTOM_EXEC:-$DEFAULT_EXEC}"
+def fetch_site_icon(site_url: str, dest: str) -> bool:
+    """Prefer the site's own high-res icon (apple-touch-icon is typically 180px+),
+    then the well-known path, then Google's favicon service as a last resort."""
+    parsed = urlparse(site_url)
+    origin = f"{parsed.scheme}://{parsed.netloc}"
 
-# Create application .desktop file
-DESKTOP_FILE="$HOME/.local/share/applications/$APP_NAME.desktop"
-mkdir -p "$(dirname "$DESKTOP_FILE")"
+    page = subprocess.run(
+        ["curl", "-fsSL", "--max-time", "5", site_url], capture_output=True, text=True, check=False
+    ).stdout[:100000]
+    link = re.search(r"<link[^>]*rel=[\"'][^\"']*apple-touch-icon[^\"']*[\"'][^>]*>", page, re.IGNORECASE)
+    icon_url = ""
+    if link:
+        href = re.search(r"href=[\"']([^\"']+)", link.group(0))
+        if href:
+            icon_url = resolve_relative(href.group(1).strip(), origin)
 
-cat >"$DESKTOP_FILE" <<EOF
-[Desktop Entry]
+    candidates = [c for c in (icon_url, f"{origin}/apple-touch-icon.png") if c]
+    candidates.append(f"https://www.google.com/s2/favicons?domain={site_url}&sz=256")
+    for candidate in candidates:
+        if download_icon(candidate, dest):
+            return True
+    return False
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        prog="webapp-install",
+        description="Create a desktop launcher (and icon) for a web app.",
+    )
+    parser.add_argument(
+        "--singleton",
+        choices=("0", "1"),
+        default="1",
+        help="use webapp-launch-or-focus (1, default) or webapp-launch (0) in Exec",
+    )
+    parser.add_argument("name", nargs="?", help="app name")
+    parser.add_argument("url", nargs="?", help="app URL")
+    parser.add_argument("icon_ref", nargs="?", help="icon URL, icon file path, or icon theme name")
+    parser.add_argument("custom_exec", nargs="?", help="custom Exec command (overrides the default)")
+    parser.add_argument("mime_types", nargs="?", help="MimeType= value (optional)")
+    args = parser.parse_args()
+
+    interactive = False
+    custom_exec = ""
+    mime_types = ""
+    icon_ref = ""
+    if args.name is None or args.url is None:
+        print("\x1b[32mLet's create a new web app you can start with the app launcher.\n\x1b[0m")
+        app_name = gum_input("Name> ", "My favorite web app")
+        app_url = gum_input("URL> ", "https://example.com")
+        if not re.match(r"^[a-zA-Z][a-zA-Z0-9+.-]*:", app_url):
+            app_url = "https://" + app_url
+
+        # Try to fetch the site's icon automatically first.
+        os.makedirs(ICON_DIR, exist_ok=True)
+        icon_value = safe_name(app_name)
+        if fetch_site_icon(app_url, f"{ICON_DIR}/{icon_value}.png"):
+            refresh_icon_cache()
+            icon_ref = icon_value
+        else:
+            icon_ref = gum_input(
+                "Icon URL/name> ", "Could not fetch favicon automatically. Enter PNG icon URL or icon name"
+            )
+        interactive = True
+    else:
+        app_name = args.name
+        app_url = args.url
+        if not re.match(r"^[a-zA-Z][a-zA-Z0-9+.-]*:", app_url):
+            app_url = "https://" + app_url
+        icon_ref = args.icon_ref or ""
+        custom_exec = args.custom_exec or ""
+        mime_types = args.mime_types or ""
+
+    if not app_name or not app_url:
+        die("You must set app name and app URL!")
+
+    created = []
+    if not icon_ref:
+        icon_value = safe_name(app_name)
+        os.makedirs(ICON_DIR, exist_ok=True)
+        if not fetch_site_icon(app_url, f"{ICON_DIR}/{icon_value}.png"):
+            die("Error: Failed to download icon.")
+        created.append(f"{ICON_DIR}/{icon_value}.png")
+        refresh_icon_cache()
+    elif re.match(r"^https?://", icon_ref):
+        icon_value = safe_name(app_name)
+        os.makedirs(ICON_DIR, exist_ok=True)
+        if not download_icon(icon_ref, f"{ICON_DIR}/{icon_value}.png"):
+            die("Error: Failed to download icon.")
+        created.append(f"{ICON_DIR}/{icon_value}.png")
+        refresh_icon_cache()
+    elif os.path.isfile(icon_ref):
+        icon_value = safe_name(app_name)
+        ext = os.path.splitext(icon_ref)[1] or ".png"
+        os.makedirs(ICON_DIR, exist_ok=True)
+        shutil.copy(icon_ref, f"{ICON_DIR}/{icon_value}{ext}")
+        created.append(f"{ICON_DIR}/{icon_value}{ext}")
+        refresh_icon_cache()
+    else:
+        # Icon name, resolved from the icon theme (accepts "name" or "name.png").
+        base = os.path.basename(icon_ref)
+        icon_value = safe_name(base[: base.rfind(".")]) if "." in base else base
+
+    # Use custom exec if provided, otherwise default behavior.
+    if args.singleton == "1":
+        default_exec = f"webapp-launch-or-focus {app_name} {app_url}"
+    else:
+        default_exec = f"webapp-launch {app_url}"
+    exec_command = custom_exec or default_exec
+
+    # Create application .desktop file. StartupWMClass is the forced --app
+    # window class, so the window resolves to this entry (name + icon).
+    desktop_file = f"{APPS_DIR}/{app_name}.desktop"
+    os.makedirs(APPS_DIR, exist_ok=True)
+    with open(desktop_file, "w") as f:
+        f.write(
+            f"""[Desktop Entry]
 Version=1.0
-Name=$APP_NAME
-Comment=$APP_NAME
-Exec=$EXEC_COMMAND
+Name={app_name}
+Comment={app_name}
+Exec={exec_command}
 Terminal=false
 Type=Application
-Icon=$ICON_VALUE
+Icon={icon_value}
+StartupWMClass={chromium_app_class(app_url)}
 StartupNotify=true
-EOF
+"""
+        )
+        if mime_types:
+            f.write(f"MimeType={mime_types}\n")
+    os.chmod(desktop_file, 0o755)
+    run(["update-desktop-database", APPS_DIR])
 
-# Add mime types if provided
-if [[ -n $MIME_TYPES ]]; then
-  echo "MimeType=$MIME_TYPES" >>"$DESKTOP_FILE"
-fi
+    created.append(desktop_file)
+    for path in created:
+        print(f"Created: {path}")
 
-chmod +x "$DESKTOP_FILE"
-update-desktop-database "$HOME/.local/share/applications" &>/dev/null
+    if interactive:
+        print(f"You can now find {app_name} using the app launcher (SUPER + SPACE)\n")
+    return 0
 
-CREATED+=("$DESKTOP_FILE")
-for f in "${CREATED[@]}"; do
-  echo "Created: $f"
-done
 
-if [[ $INTERACTIVE_MODE == "true" ]]; then
-  echo -e "You can now find $APP_NAME using the app launcher (SUPER + SPACE)\n"
-fi
+if __name__ == "__main__":
+    raise SystemExit(main())
