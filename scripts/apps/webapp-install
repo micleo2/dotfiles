@@ -147,7 +147,7 @@ def main() -> int:
     )
     parser.add_argument("name", nargs="?", help="app name")
     parser.add_argument("url", nargs="?", help="app URL")
-    parser.add_argument("icon_ref", nargs="?", help="icon URL, icon file path, or icon theme name")
+    parser.add_argument("icon_ref", nargs="?", help="icon URL, icon file path, or icon theme name, https://dashboardicons.com/")
     parser.add_argument("custom_exec", nargs="?", help="custom Exec command (overrides the default)")
     parser.add_argument("mime_types", nargs="?", help="MimeType= value (optional)")
     args = parser.parse_args()

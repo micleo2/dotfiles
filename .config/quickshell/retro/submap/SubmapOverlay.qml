@@ -138,10 +138,9 @@ Scope {
                             }
 
                             // Text {
-                            //     text: modelData.key + " ->"
-                            //     color: "red"
-                            //     anchors.verticalCenter: parent.verticalCenter
-                            //     font.pointSize: 24
+                            //     text: "<font color='red'>" + modelData.key + "</font>->"
+                            //     color: "white"
+                            //     font.pointSize: 18
                             //     font.family: mainFont.name
                             // }
                             // IconImage {
