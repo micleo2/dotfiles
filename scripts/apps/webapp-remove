@@ -48,6 +48,22 @@ def find_webapps() -> list[str]:
     return sorted(names)
 
 
+def pick_with_gum(web_apps: list[str]) -> str:
+    if not shutil.which("gum"):
+        die("Error: gum is required to pick a web app to remove. Web apps:")
+    # gum (bubbletea) renders its TUI on stderr and writes the selection to
+    # stdout, so capture only stdout and let stdin/stderr pass through to the
+    # terminal (capturing stderr is what made the UI invisible and it hang).
+    result = subprocess.run(
+        ["gum", "choose", *web_apps, "--header", "Select web app to remove"],
+        stdout=subprocess.PIPE,
+        text=True,
+    )
+    if result.returncode != 0:
+        die("No web app selected.")
+    return result.stdout.strip()
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         prog="webapp-remove",
@@ -69,25 +85,7 @@ def main() -> int:
 
     if not args.name:
         if web_apps:
-            if shutil.which("rofi"):
-                result = subprocess.run(
-                    ["rofi", "-dmenu", "-prompt", "Select web app to remove"],
-                    input="\n".join(web_apps) + "\n",
-                    capture_output=True,
-                    text=True,
-                )
-                app_name = result.stdout.strip()
-            elif shutil.which("gum"):
-                result = subprocess.run(
-                    ["gum", "choose", *web_apps, "--header", "Select web app to remove"],
-                    capture_output=True,
-                    text=True,
-                )
-                app_name = result.stdout.strip()
-            else:
-                print("No interactive picker found (need rofi or gum). Web apps:")
-                print("\n".join(web_apps))
-                return 1
+            app_name = pick_with_gum(web_apps)
         else:
             print("No web apps to remove.")
             return 1

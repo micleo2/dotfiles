@@ -18,7 +18,6 @@
 --                  webapps); cosmetic only
 --
 local app_launch_or_focus = "app-launch-or-focus"
-local webapp_launch_or_focus = "webapp-launch-or-focus"
 
 local apps = {
 	-- native apps
@@ -44,8 +43,9 @@ local apps = {
 		desktop_file = "bottles-Photoshop-2024-Photoshop",
 	},
 	-- webapps
-	m = { label = "messenger", webapp = true, name = "Messenger", url = "https://www.messenger.com/" },
-	w = { label = "whatsapp", webapp = true, name = "WhatsApp", url = "https://web.whatsapp.com/" },
+	g = { label = "gmail", webapp = true, desktop_file = "Gmail" },
+	m = { label = "messenger", webapp = true, desktop_file = "Messenger" },
+	w = { label = "whatsapp", webapp = true, desktop_file = "WhatsApp" },
 }
 
 local function json_escape(s)
@@ -77,16 +77,10 @@ local function appmap_payload()
 end
 
 local function cmd_for(app)
-	if app.webapp then
-		return string.format("%s '%s' '%s'", webapp_launch_or_focus, app.name, app.url)
-	end
-	local launch_app_cmd = ""
-	if app.desktop_file ~= nil then
-		launch_app_cmd = "gtk-launch " .. app.desktop_file
-	else
-		assert(false, "don't know how to launch this app")
-	end
-	if app.singleton == false then
+	local launch_app_cmd = "gtk-launch " .. app.desktop_file
+	-- .desktop files for webapps already contain the logic for launch or focus if needed,
+	-- so we don't have to call it manually here.
+	if app.webapp or app.singleton == false then
 		return launch_app_cmd
 	end
 	if app.title == true then

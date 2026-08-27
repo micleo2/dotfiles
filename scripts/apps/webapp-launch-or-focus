@@ -39,7 +39,6 @@ def main() -> int:
 
     if matches:
         target = max(matches, key=lambda c: c.get("focusHistoryID", 0))
-        # Hyprland >= 0.55 parses `hyprctl dispatch` args as a Lua expression.
         subprocess.run(
             ["hyprctl", "dispatch", f'hl.dsp.focus({{ window = "address:{target["address"]}" }})'],
             check=True,
