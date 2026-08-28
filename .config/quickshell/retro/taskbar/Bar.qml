@@ -1,3 +1,4 @@
+pragma ComponentBehavior: Bound
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
@@ -7,6 +8,7 @@ import QtQuick.Layouts
 import ".."
 
 Scope {
+    id: barScope
     property bool barVisible: true
     property double topMargin: 8
     property double sideMargin: 8
@@ -14,7 +16,7 @@ Scope {
     IpcHandler {
         target: "topbar"
         function toggle(): void {
-            barVisible = !barVisible;
+            barScope.barVisible = !barScope.barVisible;
         }
     }
     // Taskbar variants, we have one taskber per screen.
@@ -24,9 +26,9 @@ Scope {
             id: root
             required property var modelData
 
-            PanelWindow {
+            PanelWindow { // qmllint disable uncreatable-type
                 id: taskbar
-                visible: barVisible
+                visible: barScope.barVisible
                 screen: root.modelData
                 WlrLayershell.layer: WlrLayer.Bottom
                 WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
@@ -39,7 +41,12 @@ Scope {
                 implicitHeight: 32
 
                 /*=== Taskbar Background ===*/
-                color: Config.colors.base
+                // The bar toggles between an opaque and a fully transparent
+                // color at runtime. The surface format is fixed at window
+                // creation; a window born opaque has no alpha channel and can
+                // never become transparent later, so force the alpha channel.
+                surfaceFormat.opaque: false
+                color: Config.settings.bar.transparent ? "transparent" : Config.colors.base
                 Item {
                     id: taskbarBackground
                     anchors.fill: parent
@@ -53,16 +60,22 @@ Scope {
                         radius: 0
                     }
                 }
+                MouseArea {
+                    id: barClickArea
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: Config.settings.bar.transparent = !Config.settings.bar.transparent
+                }
 
                 /*=== Left portion of bar ===*/
                 RowLayout {
                     id: left_comp
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.left: parent.left
-                    anchors.leftMargin: sideMargin
+                    anchors.leftMargin: barScope.sideMargin
                     layoutDirection: Qt.LeftToRight
                     spacing: 11
-                    height: parent.height - topMargin
+                    height: parent.height - barScope.topMargin
                     // Workspaces
                     Item {
                         id: workspaces_container
@@ -88,6 +101,7 @@ Scope {
                         }
                         Workspaces {
                             id: workspaces
+                            taskbarWindow: taskbar
                         }
                     }
                     // Focused window
@@ -128,7 +142,7 @@ Scope {
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.horizontalCenter: parent.horizontalCenter
                     spacing: 11
-                    height: parent.height - topMargin
+                    height: parent.height - barScope.topMargin
 
                     // Clock
                     Item {
@@ -193,10 +207,10 @@ Scope {
                     id: right_comp
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.right: parent.right
-                    anchors.rightMargin: sideMargin
+                    anchors.rightMargin: barScope.sideMargin
                     layoutDirection: Qt.LeftToRight
                     spacing: 11
-                    height: parent.height - topMargin
+                    height: parent.height - barScope.topMargin
                     // System Tray
                     Item {
                         id: systray_container
@@ -220,6 +234,7 @@ Scope {
                         }
                         SysTray {
                             id: sysTray
+                            taskbarWindow: taskbar
                             anchors.verticalCenter: parent.verticalCenter
                             anchors.horizontalCenter: parent.horizontalCenter
                         }

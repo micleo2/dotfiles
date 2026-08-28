@@ -7,7 +7,6 @@
 
 import QtQuick
 import Quickshell
-import Quickshell.Io
 import "taskbar" as Taskbar
 import "osd" as Osd
 import "submap" as Submap
@@ -22,24 +21,14 @@ Scope {
     }
 
     FontLoader {
-        id: mainFont
-
-        source: "fonts/CozetteVector.ttf"
-    }
-
-    FontLoader {
         id: fontCharcoal
 
         source: "fonts/Charcoal.ttf"
     }
 
-    Taskbar.Bar {
-    }
+    Taskbar.Bar {}
 
-    Osd.BrightnessOsd {
-    }
+    Osd.BrightnessOsd {}
 
-    Submap.SubmapOverlay {
-    }
-
+    Submap.SubmapOverlay {}
 }

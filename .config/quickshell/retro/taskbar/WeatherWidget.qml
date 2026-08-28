@@ -1,7 +1,6 @@
 import ".."
 import QtQuick
 import QtQuick.Effects
-import QtQuick.Layouts
 
 Item {
     implicitWidth: row.implicitWidth
@@ -18,7 +17,7 @@ Item {
             text: Weather.icon
             color: Config.colors.text
             font.pixelSize: Math.round(Config.settings.bar.fontSize * 0.9)
-            font.family: mainFont.name
+            font.family: Config.mainFont
             anchors.verticalCenter: parent.verticalCenter
             visible: false
         }
@@ -36,7 +35,7 @@ Item {
             text: Weather.temp
             color: Config.colors.text
             font.pixelSize: Config.settings.bar.fontSize
-            font.family: mainFont.name
+            font.family: Config.mainFont
             anchors.verticalCenter: parent.verticalCenter
         }
 

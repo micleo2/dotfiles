@@ -1,10 +1,10 @@
+pragma ComponentBehavior: Bound
 import QtQuick
-import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
 import Quickshell.Hyprland
 import Quickshell.Wayland
-import Quickshell.Widgets
+import ".."
 
 Scope {
     id: root
@@ -77,8 +77,8 @@ Scope {
     Variants {
         model: Quickshell.screens
 
-        PanelWindow {
-            id: overlayWindow
+PanelWindow { // qmllint disable uncreatable-type
+                id: overlayWindow
 
             required property var modelData
 
@@ -124,6 +124,7 @@ Scope {
                         model: root.sortedEntries
 
                         Row {
+                            id: entry
                             required property var modelData
 
                             spacing: 10
@@ -131,10 +132,10 @@ Scope {
                             readonly property string icon: root.iconPath(modelData.icon)
 
                             Text {
-                                text: "<font color='red'>" + modelData.key + "</font>->" + modelData.label
+                                text: "<font color='red'>" + entry.modelData.key + "</font>->" + entry.modelData.label
                                 color: "white"
                                 font.pointSize: 18
-                                font.family: mainFont.name
+                                font.family: Config.mainFont
                             }
 
                             // Text {
