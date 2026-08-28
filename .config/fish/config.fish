@@ -34,7 +34,7 @@ abbr --add ef 'nvim ~/.config/fish/config.fish && source ~/.config/fish/config.f
 abbr --add et 'nvim ~/.tmux.conf'
 abbr --add ev 'nvim ~/.config/nvim/init.vim'
 abbr --add ea 'nvim ~/.aerospace.toml'
-abbr --add eh 'nvim ~/.config/hypr/hyprland.lua'
+abbr --add eh 'cd ~/.config/hypr && nvim ~/.config/hypr/hyprland.lua'
 abbr --add ez 'nvim ~/.config/zellij/config.kdl'
 abbr --add ec 'nvim (fd . ~/.config -t file | fzf)'
 abbr --add ed 'nvim (fd . ~/dotfiles/.config -t file | fzf)'
