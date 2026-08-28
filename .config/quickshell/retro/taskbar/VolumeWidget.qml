@@ -8,8 +8,8 @@ RowLayout {
     spacing: 1
 
     Rectangle {
-        height: 24
-        width: height
+        implicitHeight: 24
+        implicitWidth: implicitHeight
         color: "transparent"
 
         Image {
@@ -27,7 +27,7 @@ RowLayout {
         text: Volume.volume
         color: Config.colors.text
         font.pixelSize: Config.settings.bar.fontSize
-        font.family: mainFont.name
+        font.family: Config.mainFont
     }
 
 }

@@ -6,6 +6,13 @@ pragma Singleton
 Singleton {
     id: root
 
+    FontLoader {
+        id: mainFontLoader
+
+        source: "fonts/CozetteVector.ttf"
+    }
+    readonly property string mainFont: mainFontLoader.name
+
     property var colors: themes.default
     property var themes: {
         "default": {
@@ -64,7 +71,7 @@ Singleton {
             "defaultWallpaperPath": ""
         }
     }
-    property JsonObject settings
+    property var settings
 
     settings: JsonObject {
         property JsonObject bar
@@ -73,6 +80,7 @@ Singleton {
             property int fontSize: 22
             property int trayIconSize: 18
             property bool monochromeTrayIcons: true
+            property bool transparent: false
         }
 
     }

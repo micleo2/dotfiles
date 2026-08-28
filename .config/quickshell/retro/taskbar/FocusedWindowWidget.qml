@@ -2,7 +2,6 @@ import ".."
 import QtQuick
 import QtQuick.Effects
 import QtQuick.Layouts
-import Quickshell.Hyprland
 import Quickshell.Widgets
 
 RowLayout {
@@ -28,7 +27,7 @@ RowLayout {
         text: FocusedWindow.application_display_name
         color: Config.colors.text
         font.pixelSize: Config.settings.bar.fontSize
-        font.family: mainFont.name
+        font.family: Config.mainFont
     }
 
 }

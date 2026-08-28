@@ -1,3 +1,4 @@
+pragma ComponentBehavior: Bound
 import ".."
 import QtQuick
 import QtQuick.Effects
@@ -9,6 +10,8 @@ import Quickshell.Widgets
 RowLayout {
     id: sysTrayRow
 
+    required property var taskbarWindow
+
     Repeater {
         id: sysTray
 
@@ -17,6 +20,7 @@ RowLayout {
         MouseArea {
             id: trayItem
 
+            required property var modelData
             property SystemTrayItem item: modelData
 
             implicitWidth: Config.settings.bar.trayIconSize
@@ -40,14 +44,14 @@ RowLayout {
             QsMenuAnchor {
                 id: menu
 
-                menu: trayItem.item.menu
-                anchor.window: taskbar
+                menu: trayItem.item.menu // qmllint disable unresolved-type
+                anchor.window: sysTrayRow.taskbarWindow
                 // Yes I know, this is a confusing way to get the position for the menu, but that's
                 // just how Qt is.
-                anchor.rect.x: taskbar.width - (sysTrayRow.width + trayItem.x)
-                anchor.rect.y: taskbar.height - 10
+                anchor.rect.x: sysTrayRow.taskbarWindow.width - (sysTrayRow.width + trayItem.x)
+                anchor.rect.y: sysTrayRow.taskbarWindow.height - 10
                 anchor.rect.height: trayItem.height
-                anchor.edges: Edges.Bottom
+                anchor.edges: Edges.Bottom // qmllint disable missing-type
             }
 
             IconImage {

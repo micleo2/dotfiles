@@ -1,0 +1,7 @@
+module qs
+singleton Config 1.0 Config.qml
+singleton FocusedWindow 1.0 FocusedWindow.qml
+singleton Weather 1.0 Weather.qml
+singleton Brightness 1.0 Brightness.qml
+singleton Volume 1.0 Volume.qml
+singleton Time 1.0 Time.qml

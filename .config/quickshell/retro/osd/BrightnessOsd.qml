@@ -1,15 +1,16 @@
+pragma ComponentBehavior: Bound
 import ".."
 import QtQuick
-import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
 
 Scope {
+    id: osdRoot
     property bool osdVisible: false
 
     Connections {
         function onBrightnessChanged() {
-            osdVisible = true;
+            osdRoot.osdVisible = true;
             hideTimer.restart();
         }
 
@@ -20,18 +21,18 @@ Scope {
         id: hideTimer
 
         interval: 1500
-        onTriggered: osdVisible = false
+        onTriggered: osdRoot.osdVisible = false
     }
 
     Variants {
         model: Quickshell.screens
 
-        PanelWindow {
+        PanelWindow { // qmllint disable uncreatable-type
             id: osdWindow
 
             required property var modelData
 
-            visible: osdVisible
+            visible: osdRoot.osdVisible
             screen: modelData
             WlrLayershell.layer: WlrLayer.Overlay
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.None

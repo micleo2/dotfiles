@@ -1,8 +1,7 @@
+pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
-import Quickshell.Wayland
-pragma Singleton
 
 Singleton {
     id: root
@@ -16,7 +15,6 @@ Singleton {
 
             if (level.activated)
                 return String(level.appId);
-
         }
         return "";
     }
