@@ -42,6 +42,7 @@ local submap_options_per_key = {
 	-- webapps
 	a = make_submap_entry("homeassistant", "HomeAssistant", { direct = true }),
 	g = make_submap_entry("gmail", "Gmail", { direct = true }),
+	j = make_submap_entry("jellyfin", "Jellyfin", { direct = true }),
 	m = make_submap_entry("messenger", "Messenger", { direct = true }),
 	r = make_submap_entry("calendar", "Calendar", { direct = true }),
 	w = make_submap_entry("whatsapp", "WhatsApp", { direct = true }),

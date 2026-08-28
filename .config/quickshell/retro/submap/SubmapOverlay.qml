@@ -85,6 +85,7 @@ PanelWindow { // qmllint disable uncreatable-type
             visible: root.shown
             screen: modelData
             WlrLayershell.layer: WlrLayer.Overlay
+            WlrLayershell.namespace: "qs-submap-overlay"
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
             exclusiveZone: 0
             color: "transparent"

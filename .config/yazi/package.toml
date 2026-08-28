@@ -1,0 +1,12 @@
+[[plugin.deps]]
+use = "ruudjhuu/f3d-preview"
+rev = "33ce345"
+hash = "5368a9f95ebeb613d9a2614d594a185c"
+
+[[plugin.deps]]
+use = "walldmtd/blender-preview"
+rev = "5d824cb"
+hash = "cf3f2d8fab12595e6f09a6cca4734bf4"
+
+[flavor]
+deps = []
