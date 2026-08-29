@@ -1,36 +1,23 @@
--- This is an example Hyprland Lua config file.
--- Refer to the wiki for more information.
--- https://wiki.hypr.land/Configuring/Start/
-
--- Please note not all available settings / options are set here.
--- For a full list, see the wiki
-
--- You can (and should!!) split this configuration into multiple files
--- Create your files separately and then require them like this:
--- require("myColors")
+-- Hyprland config, split across the files required at the bottom of each
+-- section. Wiki: https://wiki.hypr.land/Configuring/Start/
 
 -------------------
 ---- AUTOSTART ----
 -------------------
 
--- See https://wiki.hypr.land/Configuring/Basics/Autostart/
-
--- Autostart necessary processes (like notifications daemons, status bars, etc.)
--- Or execute your favorite apps at launch like this:
---
+-- Runs once per session (not on reload).
 hl.on("hyprland.start", function()
-	hl.exec_cmd("QT_FONT_DPI= qs -c retro & hyprpaper &")
+	hl.exec_cmd("QT_FONT_DPI= qs -c retro & hyprpaper & qs -c gw-idle &")
 	hl.exec_cmd("hyprpm reload")
-	hl.exec_cmd("hypridle")
 	hl.exec_cmd("swaync")
 	hl.exec_cmd("snappy-switcher --daemon")
 	hl.exec_cmd("udiskie -a -n")
 	hl.exec_cmd("wl-paste --type text --watch cliphist store")
 	hl.exec_cmd("wl-paste --type image --watch cliphist store")
-	hl.exec_cmd("kitty +kitten panel -o font_size=20 --edge=background /home/mal/oss/omarchy/plans/ttfx/launch.sh")
+	hl.exec_cmd("kitty +kitten panel -o font_size=20 --edge=background ~/dotfiles/scripts/hypr/ttfx-background.sh")
 	-- qalc calculator: launched eagerly and pinned into the `calc` special
 	-- workspace by the kitty-float-calc-workspace window rule (silent, so no
-	-- overlay flash at boot). Runs once per session, not on reload.
+	-- overlay flash at boot).
 	hl.exec_cmd("kitty --class kitty-float-calc qalc")
 end)
 
@@ -42,24 +29,6 @@ end)
 
 hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_SIZE", "24")
-
------------------------
------ PERMISSIONS -----
------------------------
-
--- See https://wiki.hypr.land/Configuring/Advanced-and-Cool/Permissions/
--- Please note permission changes here require a Hyprland restart and are not applied on-the-fly
--- for security reasons
-
--- hl.config({
---   ecosystem = {
---     enforce_permissions = true,
---   },
--- })
-
--- hl.permission("/usr/(bin|local/bin)/grim", "screencopy", "allow")
--- hl.permission("/usr/(lib|libexec|lib64)/xdg-desktop-portal-hyprland", "screencopy", "allow")
--- hl.permission("/usr/(bin|local/bin)/hyprpm", "plugin", "allow")
 
 -----------------------
 ---- LOOK AND FEEL ----
@@ -204,6 +173,10 @@ require("submap-apps")
 require("submap-power")
 require("submap-screenshots")
 require("submap-utils")
+require("submap-layout")
+-- SUPER + ? lists the submaps above with their activation keys. Must come
+-- after the requires so every submap is registered.
+require("submap-builder").generate_helper_submap()
 
 -- Window binds
 hl.bind(M("Q"), hl.dsp.window.close())

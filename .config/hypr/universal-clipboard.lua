@@ -79,8 +79,7 @@ local terminalChordOverrides = {
 	kitty = { copy = { "CTRL + SHIFT", "C" }, paste = { "CTRL + SHIFT", "V" } },
 }
 
-local function active_window_is_terminal()
-	local window = hl.get_active_window()
+local function window_is_terminal(window)
 	if not window then
 		return false
 	end
@@ -99,13 +98,15 @@ end
 -- "paste"): a class-specific override wins, then the terminal chord if the
 -- active window is tagged as a terminal, then the GUI chord.
 local function active_window_chord(kind, default_mods, default_key, terminal_mods, terminal_key)
+	-- One lookup per keypress: both the class override and the terminal tag
+	-- come off the same window.
 	local window = hl.get_active_window()
 	local override = window and terminalChordOverrides[window.class]
 	if override and override[kind] then
 		return override[kind][1], override[kind][2]
 	end
 
-	if active_window_is_terminal() then
+	if window_is_terminal(window) then
 		return terminal_mods, terminal_key
 	end
 
@@ -137,4 +138,3 @@ hl.bind(
 	universal_clipboard_shortcut("paste", "CTRL", "V", "SHIFT", "Insert"),
 	{ description = "Universal paste" }
 )
-

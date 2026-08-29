@@ -1,20 +1,26 @@
+-- DP-1: 4K panel at scale 2 -> 1920x1080 logical, offset down by 1195.
+-- HDMI-A-1: rotated 90 deg (transform 3) -> 1440x2560 logical, starting at
+-- x=1920, i.e. flush against DP-1's right edge. Both offsets are hand-tuned to
+-- match how the screens physically sit, so they need revisiting whenever
+-- `scale` changes -- scale is what sets the logical size these offsets assume.
 hl.monitor({
 	output = "DP-1",
 	mode = "3840x2160@240.0",
 	position = "0x1195",
-	scale = "3",
+	scale = "2",
 })
 
-for i = 1, 8 do
+for i = 1, 10 do
 	hl.workspace_rule({ workspace = "" .. i, monitor = "DP-1" })
 end
 -- Hyprland will just reassign this WS when we disable it, so no need to make this conditional
 hl.workspace_rule({ workspace = "2", monitor = "HDMI-A-1" })
 
-local hdmi_enabled = true
-local function toggle_hdmi()
-	hdmi_enabled = not hdmi_enabled
-	if hdmi_enabled then
+local hdmi_enabled = false
+
+local function apply_hdmi(enabled)
+	hdmi_enabled = enabled
+	if enabled then
 		hl.monitor({
 			output = "HDMI-A-1",
 			mode = "2560x1440@143.85",
@@ -32,6 +38,10 @@ local function toggle_hdmi()
 		hl.workspace_rule({ workspace = "2", layout_opts = { direction = "right" } })
 	end
 end
--- start with the monitor turned off
-toggle_hdmi()
-hl.bind("SUPER + M", toggle_hdmi)
+
+-- Start with the second monitor turned off.
+apply_hdmi(false)
+
+hl.bind("SUPER + M", function()
+	apply_hdmi(not hdmi_enabled)
+end)

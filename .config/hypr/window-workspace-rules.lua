@@ -140,14 +140,6 @@ hl.window_rule({
 	float = true,
 })
 
--- ttfx: float and center on the monitor (launch kitty with --class ttfx)
-hl.window_rule({
-	name = "ttfx-center",
-	match = { class = "mal.background" },
-	float = true,
-	center = true,
-})
-
 -- utils submap floats (kitty --class kitty-float-z / kitty-float-calc):
 -- float, center, and size them. One rule matches the shared prefix.
 hl.window_rule({
@@ -175,4 +167,5 @@ hl.window_rule({
 hl.workspace_rule({ workspace = "2", layout = "monocle" })
 hl.workspace_rule({ workspace = "6", layout = "monocle" })
 hl.workspace_rule({ workspace = "7", layout = "monocle" })
+hl.workspace_rule({ workspace = "8", layout = "monocle" })
 hl.workspace_rule({ workspace = "4", layout = "scrolling" })
