@@ -148,6 +148,27 @@ hl.window_rule({
 	center = true,
 })
 
+-- utils submap floats (kitty --class kitty-float-z / kitty-float-calc):
+-- float, center, and size them. One rule matches the shared prefix.
+hl.window_rule({
+	name = "kitty-float-utils",
+	-- class matching is RE2::FullMatch, so the pattern must consume the
+	-- whole class string ("kitty-float-calc" / "kitty-float-z").
+	match = { class = "^kitty-float.*" },
+	float = true,
+	center = true,
+	size = "1200 680",
+})
+
+-- qalc calculator: pin into special workspace `calc` (scratchpad).
+-- `silent` places it there without showing the overlay on map (boot /
+-- relaunch). The generic kitty-float-utils rule still supplies float/center.
+hl.window_rule({
+	name = "kitty-float-calc-workspace",
+	match = { class = "^kitty-float-calc$" },
+	workspace = "special:calc silent",
+})
+
 -------------------------
 ---- WORKSPACE RULES ----
 -------------------------

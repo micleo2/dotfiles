@@ -54,7 +54,7 @@ RowLayout {
             implicitHeight: 24
             padding: 0
             onClicked: {
-                Hyprland.dispatch(`workspace ` + modelData.id);
+                Hyprland.dispatch(`hl.dsp.focus({ workspace = ${modelData.id}, on_current_monitor = true })`);
             }
 
             HoverHandler {

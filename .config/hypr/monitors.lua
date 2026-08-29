@@ -2,7 +2,7 @@ hl.monitor({
 	output = "DP-1",
 	mode = "3840x2160@240.0",
 	position = "0x1195",
-	scale = "2.5",
+	scale = "3",
 })
 
 for i = 1, 8 do
