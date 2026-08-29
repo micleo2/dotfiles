@@ -5,6 +5,25 @@ sudo pacman -S --needed hyprpaper rofi hyprshot unixodbc f3d yazi
 # needed by hyprpm
 sudo pacman -S --needed cmake cpio
 
+# everything hyprland.lua and the submaps shell out to:
+#   quickshell            top bar + submap overlay (`qs -c retro`, `qs -c gw-idle`)
+#   swaync                notification daemon
+#   cliphist              clipboard history behind SUPER+SHIFT+V
+#   libqalculate          `qalc`, the SUPER+U calculator scratchpad
+#   hyprpicker            color picker in the screenshot submap
+#   gpu-screen-recorder-ui  `gsr-ui-cli`, screenshots + recording
+#   wl-clipboard          wl-copy/wl-paste, behind SUPER+V and the cliphist watchers
+#   gtk3                  `gtk-launch`, how every SUPER+A entry starts its app
+#   playerctl, wireplumber  media and volume keys
+#   grim                  screen capture used by the screensaver
+sudo pacman -S --needed quickshell swaync cliphist libqalculate hyprpicker gpu-screen-recorder-ui \
+  wl-clipboard gtk3 playerctl wireplumber grim
+
+# from the AUR (paru is bootstrapped in arch-setup.sh):
+#   snappy-switcher  ALT+Tab switcher daemon
+#   voxtype          push-to-talk dictation on SUPER+R
+paru -S --needed snappy-switcher voxtype
+
 # make xdg-open detect real MIME types (mimetype reads shared-mime-info DB,
 # not libmagic which misclassifies 3D/font files)
 sudo pacman -S --needed perl-file-mimeinfo
@@ -41,6 +60,15 @@ mkdir -p ~/.local/bin
 for s in app-launch-or-focus webapp-install webapp-launch webapp-launch-or-focus webapp-remove; do
   ln -sf ~/dotfiles/scripts/apps/$s ~/.local/bin/
 done
+
+# web app launchers (the SUPER+A webapp entries). The .desktop files live in
+# ~/.local/share/applications and are generated, not tracked -- webapps.tsv is
+# the tracked source of truth.
+TAB=$(printf '\t')
+while IFS="$TAB" read -r name url icon; do
+  case "$name" in '' | '#'*) continue ;; esac
+  ~/dotfiles/scripts/apps/webapp-install "$name" "$url" ~/dotfiles/install/webapp-icons/"$icon"
+done <~/dotfiles/install/webapps.tsv
 
 # uwsm session environment
 mkdir -p ~/.config/uwsm

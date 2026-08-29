@@ -1,0 +1,9 @@
+# Web app launchers recreated by arch-hyprland.sh (name <TAB> url <TAB> icon file).
+# These become the SUPER+A entries a/g/j/m/r/w; keep in sync with submap-apps.lua.
+# Icons live in install/webapp-icons/; more at https://dashboardicons.com/
+Calendar	https://calendar.google.com/calendar	calendar.png
+Gmail	https://mail.google.com/mail/u/0/#inbox	gmail.png
+HomeAssistant	https://ha.michael7.me/dashboard-quickview/0	homeassistant.png
+Jellyfin	https://watch.michael7.me/web/#/home	jellyfin.png
+Messenger	https://www.messenger.com/	messenger.png
+WhatsApp	https://web.whatsapp.com/	whatsapp.png

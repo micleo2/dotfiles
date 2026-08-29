@@ -1,6 +1,6 @@
 -- App map: tap SUPER + A to enter a submap for launching frequently used applications.
 
-local submap_helpers = require("submap-helpers")
+local submap_builder = require("submap-builder")
 
 -- Every entry defines `opts`:
 --  A direct gtk-launch
@@ -48,4 +48,4 @@ local submap_options_per_key = {
 	w = make_submap_entry("whatsapp", "WhatsApp", { direct = true }),
 }
 
-submap_helpers.define_submap("apps", "SUPER+A", submap_options_per_key)
+submap_builder.define_submap("apps", "SUPER+A", submap_options_per_key)

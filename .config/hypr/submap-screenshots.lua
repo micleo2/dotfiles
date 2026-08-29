@@ -1,5 +1,5 @@
 -- Screenshot/record map: tap SUPER+PRINT to enter a submap for capturing screenshots and recordings.
-local submap_helpers = require("submap-helpers")
+local submap_builder = require("submap-builder")
 
 local submap_options_per_key = {
 	-- The 0.1s delay gives the submap time to reset and the (no_anim)
@@ -13,4 +13,4 @@ local submap_options_per_key = {
 	p = { label = "hyprpicker", exec_cmd = "hyprpicker -a" },
 }
 
-submap_helpers.define_submap("screenshots", "SUPER+PRINT", submap_options_per_key)
+submap_builder.define_submap("screenshots", "SUPER+PRINT", submap_options_per_key)

@@ -1,5 +1,5 @@
 -- Power map: tap SUPER + P to enter a submap for managing power states.
-local submap_helpers = require("submap-helpers")
+local submap_builder = require("submap-builder")
 
 local submap_options_per_key = {
 	d = { label = "shutdown", exec_cmd = "systemctl poweroff" },
@@ -8,4 +8,4 @@ local submap_options_per_key = {
 	s = { label = "sleep", exec_cmd = "systemctl suspend" },
 }
 
-submap_helpers.define_submap("power-menu", "SUPER+P", submap_options_per_key)
+submap_builder.define_submap("power-menu", "SUPER+P", submap_options_per_key)
