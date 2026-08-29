@@ -10,6 +10,7 @@ local submap_options_per_key = {
 	r = { label = "start/stop recording", exec_cmd = "sleep 0.1 && gsr-ui-cli toggle-record" },
 	["SHIFT+R"] = { label = "start/stop recording region", exec_cmd = "sleep 0.1 && gsr-ui-cli toggle-record-region" },
 	o = { label = "ocr region", exec_cmd = "~/dotfiles/scripts/ocr-region-select.sh" },
+	p = { label = "hyprpicker", exec_cmd = "hyprpicker -a" },
 }
 
 submap_helpers.define_submap("screenshots", "SUPER+PRINT", submap_options_per_key)

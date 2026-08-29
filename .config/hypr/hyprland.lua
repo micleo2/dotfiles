@@ -28,6 +28,10 @@ hl.on("hyprland.start", function()
 	hl.exec_cmd("wl-paste --type text --watch cliphist store")
 	hl.exec_cmd("wl-paste --type image --watch cliphist store")
 	hl.exec_cmd("kitty +kitten panel -o font_size=20 --edge=background /home/mal/oss/omarchy/plans/ttfx/launch.sh")
+	-- qalc calculator: launched eagerly and pinned into the `calc` special
+	-- workspace by the kitty-float-calc-workspace window rule (silent, so no
+	-- overlay flash at boot). Runs once per session, not on reload.
+	hl.exec_cmd("kitty --class kitty-float-calc qalc")
 end)
 
 -------------------------------
@@ -199,6 +203,7 @@ end
 require("submap-apps")
 require("submap-power")
 require("submap-screenshots")
+require("submap-utils")
 
 -- Window binds
 hl.bind(M("Q"), hl.dsp.window.close())
