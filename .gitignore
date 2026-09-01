@@ -12,4 +12,5 @@ foo.*
 data
 
 .claude
+.opencode
 __pycache__
