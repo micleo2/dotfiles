@@ -152,9 +152,7 @@ hl.window_rule({
 	size = "1200 680",
 })
 
--- qalc calculator: pin into special workspace `calc` (scratchpad).
--- `silent` places it there without showing the overlay on map (boot /
--- relaunch). The generic kitty-float-utils rule still supplies float/center.
+-- qalc calculator: silently pin into special workspace
 hl.window_rule({
 	name = "kitty-float-calc-workspace",
 	match = { class = "^kitty-float-calc$" },

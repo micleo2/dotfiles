@@ -2,10 +2,10 @@
 local submap_builder = require("submap-builder")
 
 local submap_options_per_key = {
-	d = { label = "shutdown", exec_cmd = "systemctl poweroff" },
-	l = { label = "logout", exec_cmd = "uwsm stop" },
+	g = { label = "logout", exec_cmd = "uwsm stop" },
+	l = { label = "sleep", exec_cmd = "systemctl suspend" },
 	r = { label = "reboot", exec_cmd = "systemctl reboot" },
-	s = { label = "sleep", exec_cmd = "systemctl suspend" },
+	s = { label = "shutdown", exec_cmd = "systemctl poweroff" },
 }
 
 submap_builder.define_submap("power-menu", "SUPER+P", submap_options_per_key)

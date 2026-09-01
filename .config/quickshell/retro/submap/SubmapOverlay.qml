@@ -128,12 +128,26 @@ PanelWindow { // qmllint disable uncreatable-type
                             id: entry
                             required property var modelData
 
-                            spacing: 10
+                            readonly property string key: String(modelData.key)
+                            readonly property string label: String(modelData.label)
+                            readonly property bool prefixMatch:
+                                label.toLowerCase().startsWith(key.toLowerCase())
+                            readonly property string redPart: prefixMatch
+                                ? label.substring(0, key.length) : key
+                            readonly property string restPart: prefixMatch
+                                ? label.substring(key.length) : "->" + label
 
                             readonly property string icon: root.iconPath(modelData.icon)
 
                             Text {
-                                text: "<font color='red'>" + entry.modelData.key + "</font>->" + entry.modelData.label
+                                text: entry.redPart
+                                color: "red"
+                                font.pointSize: 18
+                                font.family: Config.mainFont
+                            }
+
+                            Text {
+                                text: entry.restPart
                                 color: "white"
                                 font.pointSize: 18
                                 font.family: Config.mainFont

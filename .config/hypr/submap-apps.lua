@@ -40,7 +40,7 @@ local submap_options_per_key = {
 	k = make_submap_entry("makera", "bottles-MakeraStudio-MakeraStudio", { title = "MakeraStudio" }),
 	p = make_submap_entry("photoshop", "bottles-Photoshop-2024-Photoshop", { title = "Adobe Photoshop 2024" }),
 	-- webapps
-	a = make_submap_entry("homeassistant", "HomeAssistant", { direct = true }),
+	a = make_submap_entry("assistant", "HomeAssistant", { direct = true }),
 	g = make_submap_entry("gmail", "Gmail", { direct = true }),
 	j = make_submap_entry("jellyfin", "Jellyfin", { direct = true }),
 	m = make_submap_entry("messenger", "Messenger", { direct = true }),

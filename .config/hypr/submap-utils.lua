@@ -6,15 +6,15 @@
 local submap_builder = require("submap-builder")
 
 local submap_options_per_key = {
-	p = {
+	c = {
 		label = "copy-path",
 		-- `>/dev/null 2>&1`: wl-copy 2.3.0 daemonizes but only detaches
 		-- stdin/stdout; stderr would keep the kitty pty open forever
 		exec_cmd = "kitty --class kitty-float-z bash -c 'zoxide query -l | fzf | wl-copy -n >/dev/null 2>&1'",
 	},
-	-- qalc calculator: toggle the `calc` special workspace (scratchpad).
-	c = {
-		label = "calculator",
+	-- qalc: toggle the `calc` special workspace (scratchpad).
+	q = {
+		label = "qalculator",
 		exec_cmd = "hyprctl dispatch 'hl.dsp.workspace.toggle_special(\"calc\")'",
 	},
 }

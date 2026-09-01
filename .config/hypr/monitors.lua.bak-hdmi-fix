@@ -16,13 +16,8 @@ end
 -- Hyprland will just reassign this WS when we disable it, so no need to make this conditional
 hl.workspace_rule({ workspace = "2", monitor = "HDMI-A-1" })
 
-local function dp1_present()
-	return hl.get_monitor("DP-1") ~= nil
-end
-
 local hdmi_enabled = false
 
--- Bedroom: HDMI-A-1 as the optional 144Hz rotated side panel, right of DP-1.
 local function apply_hdmi(enabled)
 	hdmi_enabled = enabled
 	if enabled then
@@ -44,34 +39,9 @@ local function apply_hdmi(enabled)
 	end
 end
 
--- Living room: DP-1 is unplugged, so the 60Hz display on HDMI-A-1 is the only
--- output. Drive it as the primary, landscape, at its native 4K@60.
-local function apply_hdmi_primary()
-	hl.monitor({
-		output = "HDMI-A-1",
-		mode = "3840x2160@60.0",
-		position = "0x0",
-		scale = "2.5",
-		transform = 0,
-		disabled = false,
-	})
-end
-
--- At (re)load time the connected monitors are already realized, so this reflects
--- what is actually plugged in. Bedroom keeps the off-by-default side panel; the
--- living room lights the TV as the primary output.
-local function apply_for_current_setup()
-	if dp1_present() then
-		apply_hdmi(hdmi_enabled)
-	else
-		apply_hdmi_primary()
-	end
-end
-
-apply_for_current_setup()
+-- Start with the second monitor turned off.
+apply_hdmi(true)
 
 hl.bind("SUPER + M", function()
-	if dp1_present() then
-		apply_hdmi(not hdmi_enabled)
-	end
+	apply_hdmi(not hdmi_enabled)
 end)
