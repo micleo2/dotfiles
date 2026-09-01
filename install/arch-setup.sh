@@ -3,9 +3,10 @@
 # setup software from pacman
 sudo pacman -S --needed base-devel git
 # (xorg-xhost needed by gparted and rpi-imager)
-sudo pacman -S git github-cli os-prober man-db nvim fish unzip bat fd fzf rustup nautilus less hyprpolkitagent bitwarden nodejs npm zoxide gparted xorg-xhost qmk zellij blueman
-sudo pacman -S noto-fonts noto-fonts-cjk noto-fonts-extra noto-fonts-emoji otf-firamono-nerd ttf-jetbrains-mono-nerd
-sudo pacman -S pavucontrol sunshine syncthing ethtool ddcutil discord gwenview btop
+sudo pacman -S --needed git github-cli os-prober man-db nvim fish unzip bat fd fzf rustup less hyprpolkitagent bitwarden nodejs npm zoxide gparted xorg-xhost
+sudo pacman -S --needed noto-fonts noto-fonts-cjk noto-fonts-extra noto-fonts-emoji otf-firamono-nerd ttf-jetbrains-mono-nerd
+sudo pacman -S --needed pavucontrol sunshine syncthing ethtool ddcutil discord gwenview btop blueman
+sudo pacman -S --needed pavucontrol ethtool ddcutil
 
 # yazi
 sudo pacman -S --needed yazi ffmpeg 7zip jq poppler fd ripgrep fzf zoxide resvg imagemagick
@@ -49,11 +50,11 @@ fisher install PatrickF1/fzf.fish
 # Setup dotfiles
 gh repo clone micleo2/dotfiles
 mkdir ~/.config/nvim
-ln -sf ~/dotfiles/.config/nvim/init.lua ~/.config/nvim/
+ln -s ~/dotfiles/.config/lazynvim ~/.config/nvim
 ln -sf ~/dotfiles/.config/fish/config.fish ~/.config/fish/config.fish 
-ln -sf ~/dotfiles/.config/fish/functions/fish_prompt.fish ~/.config/fish/functions/
-ln -sf ~/dotfiles/.config/kitty/kitty.conf ~/.config/kitty
-ln -sf ~/dotfiles/.config/kitty/current-theme.conf ~/.config/kitty
+ln -s ~/dotfiles/.config/fish/functions/fish_prompt.fish ~/.config/fish/functions/
+ln -s ~/dotfiles/.config/kitty/kitty.conf ~/.config/kitty
+ln -s ~/dotfiles/.config/kitty/current-theme.conf ~/.config/kitty
 
 # Kanata
 # Visit this link https://github.com/jtroo/kanata/wiki/Avoid-using-sudo-on-Linux

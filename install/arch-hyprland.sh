@@ -1,9 +1,12 @@
 #!/bin/sh
 
 # setup software from pacman
-sudo pacman -S --needed hyprpaper rofi hyprshot unixodbc f3d yazi
+sudo pacman -S --needed hyprpaper rofi unixodbc f3d yazi gum
 # needed by hyprpm
 sudo pacman -S --needed cmake cpio
+
+# applications
+sudo pacman -S --needed freecad obsidian blender inkscape spotify-launcher
 
 # everything hyprland.lua and the submaps shell out to:
 #   quickshell            top bar + submap overlay (`qs -c retro`, `qs -c gw-idle`)
@@ -22,7 +25,7 @@ sudo pacman -S --needed quickshell swaync cliphist libqalculate hyprpicker gpu-s
 # from the AUR (paru is bootstrapped in arch-setup.sh):
 #   snappy-switcher  ALT+Tab switcher daemon
 #   voxtype          push-to-talk dictation on SUPER+R
-paru -S --needed snappy-switcher voxtype
+# paru -S --needed snappy-switcher voxtype
 
 # make xdg-open detect real MIME types (mimetype reads shared-mime-info DB,
 # not libmagic which misclassifies 3D/font files)
@@ -37,23 +40,9 @@ for m in model/stl model/step application/vnd.step model/obj model/iges \
   xdg-mime default f3d.desktop "$m"
 done
 
-# default app for .3mf -> Bambu Studio (flatpak); only if the flatpak is installed
-if command -v flatpak >/dev/null 2>&1 && flatpak info com.bambulab.BambuStudio >/dev/null 2>&1; then
-  cat >~/.local/share/applications/bambu-studio-3mf.desktop <<'EOF'
-[Desktop Entry]
-Type=Application
-Name=Bambu Studio
-Exec=flatpak run --filesystem=host --command=entrypoint com.bambulab.BambuStudio %F
-MimeType=model/3mf;application/vnd.ms-3mfdocument;
-NoDisplay=true
-EOF
-  for m in model/3mf application/vnd.ms-3mfdocument; do
-    xdg-mime default bambu-studio-3mf.desktop "$m"
-  done
-fi
-
 # setup hyprland config files.
 ln -s ~/dotfiles/.config/hypr/ ~/.config/
+ln -s ~/dotfiles/ ~/.config/
 
 # app launcher + web app scripts
 mkdir -p ~/.local/bin
@@ -61,23 +50,9 @@ for s in app-launch-or-focus webapp-install webapp-launch webapp-launch-or-focus
   ln -sf ~/dotfiles/scripts/apps/$s ~/.local/bin/
 done
 
-# web app launchers (the SUPER+A webapp entries). The .desktop files live in
-# ~/.local/share/applications and are generated, not tracked -- webapps.tsv is
-# the tracked source of truth.
-TAB=$(printf '\t')
-while IFS="$TAB" read -r name url icon; do
-  case "$name" in '' | '#'*) continue ;; esac
-  ~/dotfiles/scripts/apps/webapp-install "$name" "$url" ~/dotfiles/install/webapp-icons/"$icon"
-done <~/dotfiles/install/webapps.tsv
-
 # uwsm session environment
 mkdir -p ~/.config/uwsm
-ln -sf ~/dotfiles/.config/uwsm/env ~/.config/uwsm/
-
-# setup fuzzel config files.
-mkdir ~/.config/fuzzel
-ln -sf ~/dotfiles/.config/fuzzel/fuzzel.ini ~/.config/fuzzel/ &&
-  ln -sf ~/dotfiles/.config/fuzzel/colors.ini ~/.config/fuzzel/
+ln -s ~/dotfiles/.config/uwsm/env ~/.config/uwsm/
 
 # cursor
 hyprpm add https://github.com/virtcode/hypr-dynamic-cursors &&
