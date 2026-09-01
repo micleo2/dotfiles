@@ -7,17 +7,17 @@
 
 -- Runs once per session (not on reload).
 hl.on("hyprland.start", function()
-	hl.exec_cmd("QT_FONT_DPI= qs -c retro & hyprpaper & qs -c gw-idle &")
+	hl.exec_cmd(
+		"kitty +kitten panel -o clear_all_mouse_actions=no -o default_pointer_shape=arrow -o pointer_shape_when_dragging=arrow -o font_size=20 --edge=background ~/dotfiles/scripts/hypr/ttfx-background.sh"
+	)
+	-- hl.exec_cmd("hyprpaper")
+	hl.exec_cmd("QT_FONT_DPI= qs -c retro & qs -c gw-idle &")
 	hl.exec_cmd("hyprpm reload")
 	hl.exec_cmd("swaync")
 	hl.exec_cmd("snappy-switcher --daemon")
 	hl.exec_cmd("udiskie -a -n")
 	hl.exec_cmd("wl-paste --type text --watch cliphist store")
 	hl.exec_cmd("wl-paste --type image --watch cliphist store")
-	hl.exec_cmd("kitty +kitten panel -o font_size=20 --edge=background ~/dotfiles/scripts/hypr/ttfx-background.sh")
-	-- qalc calculator: launched eagerly and pinned into the `calc` special
-	-- workspace by the kitty-float-calc-workspace window rule (silent, so no
-	-- overlay flash at boot).
 	hl.exec_cmd("kitty --class kitty-float-calc qalc")
 end)
 
@@ -50,6 +50,10 @@ hl.config({
 	},
 
 	decoration = {
+		inactive_opacity = 0.9,
+		blur = {
+			enabled = false,
+		},
 		rounding = 10,
 		rounding_power = 2,
 
@@ -117,8 +121,8 @@ hl.config({
 
 hl.config({
 	misc = {
-		force_default_wallpaper = -1, -- Set to 0 or 1 to disable the anime mascot wallpapers
-		disable_hyprland_logo = false, -- If true disables the random hyprland logo / anime girl background. :(
+		force_default_wallpaper = 0, -- Set to 0 or 1 to disable the anime mascot wallpapers
+		disable_hyprland_logo = true,
 	},
 })
 
@@ -174,6 +178,7 @@ require("submap-power")
 require("submap-screenshots")
 require("submap-utils")
 require("submap-layout")
+require("submap-edit")
 -- SUPER + ? lists the submaps above with their activation keys. Must come
 -- after the requires so every submap is registered.
 require("submap-builder").generate_helper_submap()
