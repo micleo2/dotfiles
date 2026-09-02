@@ -5,3 +5,4 @@ DisplayWidget 1.0 DisplayWidget.qml
 IdleWidget 1.0 IdleWidget.qml
 NetworkWidget 1.0 NetworkWidget.qml
 SystemWidget 1.0 SystemWidget.qml
+NotificationWidget 1.0 NotificationWidget.qml

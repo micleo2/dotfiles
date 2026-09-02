@@ -14,3 +14,4 @@ singleton Popups 1.0 Popups.qml
 singleton Vpn 1.0 Vpn.qml
 singleton Addresses 1.0 Addresses.qml
 singleton SystemStats 1.0 SystemStats.qml
+singleton Notifications 1.0 Notifications.qml

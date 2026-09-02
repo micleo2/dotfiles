@@ -23,6 +23,7 @@ Singleton {
     property alias monitorScales: adapter.monitorScales
     property alias modules: adapter.modules
     property alias theme: adapter.theme
+    property alias doNotDisturb: adapter.doNotDisturb
 
     // JsonAdapter only notices whole-property assignment, so the nested map has
     // to be replaced rather than mutated in place or the write never lands.
@@ -66,6 +67,8 @@ Singleton {
             property string theme: "default"
             property bool stayAwake: false
             property bool barTransparent: false
+            // Notifications: silenced toasts go straight to history.
+            property bool doNotDisturb: false
             // monitor description -> scale
             property var monitorScales: ({})
             // module id -> "auto" | true | false (see Modules)

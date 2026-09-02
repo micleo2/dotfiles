@@ -6,6 +6,7 @@ import QtQuick
 import QtQuick.Layouts
 
 import ".."
+import "../modules" as Modules_
 
 Scope {
     id: barScope
@@ -41,9 +42,7 @@ Scope {
                     left: true
                     right: true
                 }
-                // Grows with the text-size control. At the default 12px the
-                // font is 22 and this is exactly the original 32.
-                implicitHeight: Math.max(32, Config.settings.bar.fontSize + 10)
+                implicitHeight: Config.settings.bar.height
 
                 /*=== Taskbar Background ===*/
                 // The bar toggles between an opaque and a fully transparent
@@ -319,6 +318,13 @@ Scope {
                     // Volume. Brings its own Chip, so it needs no decoration
                     // wrapper here.
                     VolumeWidget {
+                        Layout.fillHeight: true
+                        barScreen: root.modelData
+                        primary: root.modelData === Quickshell.screens[0]
+                    }
+
+                    // Notifications: the bell, silencing, and history.
+                    Modules_.NotificationWidget {
                         Layout.fillHeight: true
                         barScreen: root.modelData
                         primary: root.modelData === Quickshell.screens[0]
