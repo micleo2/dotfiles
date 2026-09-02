@@ -20,7 +20,7 @@ systemctl --user enable --now hyprpolkitagent.service
 #   wl-clipboard          wl-copy/wl-paste, behind SUPER+V and the cliphist watchers
 #   gtk3                  `gtk-launch`, how every SUPER+A entry starts its app
 #   playerctl, wireplumber  media and volume keys
-#   grim                  screen capture used by the screensaver
+#   grim                  screen capture for scripts/ocr-region-select.sh
 sudo pacman -S --needed quickshell cliphist libqalculate hyprpicker gpu-screen-recorder-ui \
   wl-clipboard gtk3 playerctl wireplumber grim
 
@@ -64,18 +64,9 @@ hyprpm add https://github.com/virtcode/hypr-dynamic-cursors &&
 # lock screen (quickshell/retro: Lock.qml, lock/)
 #
 # The locker is part of `qs -c retro` itself (WlSessionLock + PamContext), so
-# there is no hyprlock/hypridle to install. What lives outside the shell:
-#   retro-sleep-lock.service   holds a logind delay inhibitor and asks the
-#                              shell to lock before suspend (scripts/lock/)
-#   logind-inhibit-delay.conf  raises logind's 5s inhibitor window to 15s so
-#                              the shell has time to secure the session
-# Lock manually with SUPER+P, k; idle timeout is `lockAfterSeconds` in
-# ~/.local/state/quickshell/retro/settings.json (0 disables).
-# Needs: jq (sleep-lock status poll), libnotify (notify-send on failure).
-sudo pacman -S --needed jq libnotify
-
-mkdir -p ~/.config/systemd/user
-ln -sf ~/dotfiles/.config/systemd/user/retro-sleep-lock.service ~/.config/systemd/user/
-systemctl --user daemon-reload
-systemctl --user enable --now retro-sleep-lock.service
-sudo install -Dm644 ~/dotfiles/install/logind-inhibit-delay.conf /etc/systemd/logind.conf.d/20-inhibit-delay.conf
+# there is no hyprlock. hypridle (hypr/hypridle.conf) asks the shell to lock on
+# idle, on `loginctl lock-session`, and before suspend, where it holds a logind
+# delay inhibitor until Hyprland reports the session locked. Lock manually
+# with SUPER+P, k; the idle timeout is the listener in hypridle.conf.
+sudo pacman -S --needed hypridle
+systemctl --user enable --now hypridle.service

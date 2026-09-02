@@ -4,21 +4,20 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Pam
-import Quickshell.Wayland
 
 // The lock: state, authentication and the side effects around it. The
 // Wayland session lock itself and the surfaces live in lock/LockScreen.qml,
 // which watches `locked` here; the module drawn on each output is
 // lock/LcdLockView.qml, which only reads this and calls back into it.
 //
-// Three jobs beyond the lock itself, in the shape omarchy uses:
+// Two jobs beyond the lock itself:
 //   * blank the screens after a short while on the lock screen, and wake
 //     them on any input, with a wall-clock guard so a countdown frozen by
 //     suspend does not blank the freshly resumed unlock screen;
-//   * lock on idle, through the compositor's idle-notify protocol, which is
-//     what lets the stay-awake inhibitor (IdleWidget) suppress it;
-//   * answer `qs -c retro ipc call lock ...` so the power submap and the
-//     sleep-lock script can lock and ask whether the lock is secure.
+//   * answer `qs -c retro ipc call lock ...` for the power submap and for
+//     hypridle (hypr/hypridle.conf), which asks for the lock on idle, on
+//     `loginctl lock-session` and before suspend. Whether the lock is secure
+//     hypridle learns from the compositor, not from here.
 //
 // The password never leaves this file: it is held only until PAM answers,
 // cleared on every terminal state, never logged and never taken over IPC.
@@ -40,6 +39,10 @@ Singleton {
     property bool previewVisible: false
     // Set true for a beat before the lock drops so the view can flash.
     property bool unlocking: false
+    // The shell turned the displays off; the next input has to turn them on.
+    // Hyprland lights them on its own for key presses and mouse moves
+    // (misc:key_press_enables_dpms), so this only gates the explicit dispatch.
+    property bool blanked: false
 
     property string hostname: ""
     property string lastEvent: "init"
@@ -111,6 +114,9 @@ Singleton {
         blankTimer.stop();
         root.resetAuth();
         root.logEvent("unlocked");
+        // `blanked` can be stale across a suspend, so always light up here;
+        // the dispatch is skipped anyway when every display is already on.
+        root.blanked = true;
         root.wake();
     }
 
@@ -169,11 +175,13 @@ Singleton {
         deniedTimer.stop();
     }
 
-    // Any input on the lock screen: lights the displays if they are off and
-    // starts the blank countdown over.
+    // Any input on the lock screen: lights the displays if we turned them off
+    // and starts the blank countdown over.
     function wake() {
-        if (!wakeProcess.running)
+        if (root.blanked && !wakeProcess.running) {
+            root.blanked = false;
             wakeProcess.running = true;
+        }
         if (root.locked)
             root.armBlank();
     }
@@ -184,20 +192,19 @@ Singleton {
     }
 
     function blank() {
-        if (!blankProcess.running)
-            blankProcess.running = true;
+        if (blankProcess.running)
+            return;
+        root.blanked = true;
+        blankProcess.running = true;
     }
 
     function status() {
         return JSON.stringify({
             locked: root.locked,
-            requested: root.locked,
             secure: root.secure,
             checking: root.checking,
             failedAttempts: root.failedAttempts,
             preview: root.previewVisible,
-            lockAfterSeconds: Settings.lockAfterSeconds,
-            idle: idleMonitor.isIdle,
             lastEvent: root.lastEvent,
             lastEventAt: root.lastEventAt
         });
@@ -290,24 +297,6 @@ Singleton {
         command: ["bash", "-c", "hyprctl monitors -j 2>/dev/null | jq -e '[.[] | select(.disabled == false)] | length > 0 and all(.dpmsStatus)' >/dev/null 2>&1 && exit 0; hyprctl dispatch 'hl.dsp.dpms({ action = \"enable\" })' >/dev/null 2>&1"]
     }
 
-    // Lock on idle. respectInhibitors is what makes stay-awake work: the
-    // coffee chip holds an idle-inhibit lock on the bar window, and the
-    // compositor then never reports idle.
-    IdleMonitor {
-        id: idleMonitor
-
-        enabled: Settings.lockAfterSeconds > 0 && !root.locked
-        timeout: Settings.lockAfterSeconds
-        respectInhibitors: true
-
-        onIsIdleChanged: {
-            if (isIdle && Settings.lockAfterSeconds > 0) {
-                root.logEvent("idle-timeout");
-                root.lock();
-            }
-        }
-    }
-
     FileView {
         path: "/etc/hostname"
         printErrors: false
@@ -320,7 +309,8 @@ Singleton {
         // `show`, `call`, `wait`, `listen` and `prop` are swallowed by the
         // `qs ipc` CLI parser (see submap/SubmapOverlay.qml), so the names
         // exposed here steer clear of them. There is deliberately no
-        // unlock: the only way out is the password.
+        // unlock: the only way out is the password. `lock` is what hypridle
+        // calls; it is idempotent, so repeated requests are harmless.
         function lock(): string {
             return root.lock() ? "ok" : "failed";
         }

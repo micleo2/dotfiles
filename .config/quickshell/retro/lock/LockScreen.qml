@@ -17,8 +17,6 @@ import ".."
 Scope {
     id: root
 
-    property bool pendingSessionLock: false
-
     function realScreenCount() {
         var screens = Quickshell.screens || [];
         var count = 0;
@@ -30,46 +28,29 @@ Scope {
         return count;
     }
 
-    function queueSessionLock() {
-        root.pendingSessionLock = true;
-        stabilizeTimer.restart();
-        if (!pendingTimer.running)
-            pendingTimer.start();
-    }
-
+    // Runs from retryTimer only, so a lock request is always debounced and a
+    // request that finds no output simply waits for the next tick.
     function requestSessionLock() {
         if (!Lock.locked || sessionLock.locked)
             return;
-        if (stabilizeTimer.running)
-            return;
         if (root.realScreenCount() === 0) {
-            if (!root.pendingSessionLock)
-                Lock.logEvent("lock-pending: no-real-screen");
-            root.pendingSessionLock = true;
-            if (!pendingTimer.running)
-                pendingTimer.start();
+            Lock.logEvent("lock-pending: no-real-screen");
+            retryTimer.restart();
             return;
         }
-        root.pendingSessionLock = false;
-        pendingTimer.stop();
         sessionLock.locked = true;
-    }
-
-    function releaseSessionLock() {
-        root.pendingSessionLock = false;
-        stabilizeTimer.stop();
-        pendingTimer.stop();
-        sessionLock.locked = false;
     }
 
     Connections {
         target: Lock
 
         function onLockedChanged() {
-            if (Lock.locked)
-                root.queueSessionLock();
-            else
-                root.releaseSessionLock();
+            if (Lock.locked) {
+                retryTimer.restart();
+            } else {
+                retryTimer.stop();
+                sessionLock.locked = false;
+            }
         }
     }
 
@@ -78,23 +59,16 @@ Scope {
 
         function onScreensChanged() {
             if (Lock.locked && !sessionLock.locked)
-                root.queueSessionLock();
+                retryTimer.restart();
         }
     }
 
-    // Debounce for hotplug: outputs come and go in bursts.
+    // One timer for both jobs: debounce hotplug bursts, and retry while there
+    // is no real output to draw on.
     Timer {
-        id: stabilizeTimer
+        id: retryTimer
 
         interval: 500
-        onTriggered: root.requestSessionLock()
-    }
-
-    Timer {
-        id: pendingTimer
-
-        interval: 100
-        repeat: true
         onTriggered: root.requestSessionLock()
     }
 
@@ -106,22 +80,14 @@ Scope {
         onSecureStateChanged: {
             Lock.secure = sessionLock.secure;
             Lock.logEvent("secure=" + sessionLock.secure);
-            if (sessionLock.secure) {
-                root.pendingSessionLock = false;
-                stabilizeTimer.stop();
-                pendingTimer.stop();
-            }
         }
 
         onLockStateChanged: {
             Lock.logEvent("session-locked=" + sessionLock.locked);
-            if (sessionLock.locked) {
-                root.pendingSessionLock = false;
-                stabilizeTimer.stop();
-                pendingTimer.stop();
-            } else if (Lock.locked) {
+            if (sessionLock.locked)
+                retryTimer.stop();
+            else if (Lock.locked)
                 Lock.sessionDropped();
-            }
         }
 
         WlSessionLockSurface { // qmllint disable uncreatable-type
