@@ -15,12 +15,18 @@ Scope {
 
     readonly property bool shown: active && entries.length > 0
 
-    readonly property var sortedEntries: entries.slice().sort((a, b) => String(a.key).localeCompare(String(b.key)))
+    readonly property var sortedEntries: entries.slice().sort((a, b) => String(a.label).localeCompare(String(b.label)))
 
-    // Each column holds up to 4 entries; Grid fills row-major so reading
-    // order stays left-to-right, top-to-bottom.
+    // Each column holds up to 4 entries, sliced sequentially out of the
+    // sorted list, so the alphabet runs top-to-bottom down one column and
+    // then continues in the next — like `ls` output.
     readonly property int perColumn: 4
-    readonly property int entryColumns: Math.max(1, Math.ceil(sortedEntries.length / perColumn))
+    readonly property var entryGroups: {
+        const out = [];
+        for (let i = 0; i < root.sortedEntries.length; i += root.perColumn)
+            out.push(root.sortedEntries.slice(i, i + root.perColumn));
+        return out;
+    }
 
     readonly property var default_entries: [
         {
@@ -29,6 +35,28 @@ Scope {
             icon: "blender"
         },
     ]
+
+    function escapeHtml(text) {
+        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    // Highlight the trigger key inside the label: a single-character key is
+    // matched case-sensitively anywhere in the label (k -> ma[k]era), a longer
+    // key still only matches as a case-insensitive prefix. Anything else falls
+    // back to the explicit "key->label" form.
+    function styledLabel(key, label) {
+        const red = k => "<font color=\"red\">" + escapeHtml(k) + "</font>";
+
+        if (key.length === 1) {
+            const at = label.indexOf(key);
+            if (at >= 0)
+                return escapeHtml(label.substring(0, at)) + red(key) + escapeHtml(label.substring(at + 1));
+        } else if (label.toLowerCase().startsWith(key.toLowerCase())) {
+            return red(label.substring(0, key.length)) + escapeHtml(label.substring(key.length));
+        }
+
+        return red(key) + "-&gt;" + escapeHtml(label);
+    }
 
     // Same lookup chain as FocusedWindow.qml: try the name as-is, then the
     // last dot segment (reverse-DNS ids ship their icon under the short name).
@@ -112,72 +140,94 @@ PanelWindow { // qmllint disable uncreatable-type
                     color: "#99000000"
                 }
 
-                Grid {
+                Row {
                     id: grid
 
                     x: 30
                     y: 24
-                    rows: Math.min(root.perColumn, root.sortedEntries.length)
-                    columns: root.entryColumns
-                    spacing: 16
+                    // Half of the 36px column gap; a divider occupies the
+                    // other half, so the rule lands centered between columns.
+                    spacing: 18
 
                     Repeater {
-                        model: root.sortedEntries
+                        id: columnRepeater
+
+                        model: root.entryGroups
 
                         Row {
-                            id: entry
+                            id: entryColumn
                             required property var modelData
+                            required property int index
 
-                            readonly property string key: String(modelData.key)
-                            readonly property string label: String(modelData.label)
-                            readonly property bool prefixMatch:
-                                label.toLowerCase().startsWith(key.toLowerCase())
-                            readonly property string redPart: prefixMatch
-                                ? label.substring(0, key.length) : key
-                            readonly property string restPart: prefixMatch
-                                ? label.substring(key.length) : "->" + label
+                            readonly property var groupEntries: modelData
 
-                            readonly property string icon: root.iconPath(modelData.icon)
+                            spacing: 18
 
-                            Text {
-                                text: entry.redPart
-                                color: "red"
-                                font.pointSize: 18
-                                font.family: Config.mainFont
+                            Column {
+                                id: column
+
+                                spacing: 6
+
+                                Repeater {
+                                    model: entryColumn.groupEntries
+
+                                    Row {
+                                        id: entry
+                                        required property var modelData
+
+                                        readonly property string key: String(modelData.key)
+                                        readonly property string label: String(modelData.label)
+
+                                        readonly property string icon: root.iconPath(modelData.icon)
+
+                                        Text {
+                                            text: root.styledLabel(entry.key, entry.label)
+                                            textFormat: Text.StyledText
+                                            color: "white"
+                                            font.pointSize: 18
+                                            font.family: Config.mainFont
+                                        }
+
+                                        // Text {
+                                        //     text: "<font color='red'>" + modelData.key + "</font>->"
+                                        //     color: "white"
+                                        //     font.pointSize: 18
+                                        //     font.family: mainFont.name
+                                        // }
+                                        // IconImage {
+                                        //     implicitSize: 24
+                                        //     source: icon
+                                        //     visible: icon !== ""
+                                        //     anchors.verticalCenter: parent.verticalCenter
+                                        //     layer.effect: MultiEffect {
+                                        //         saturation: -1
+                                        //         contrast: 0.7
+                                        //     }
+                                        // }
+                                        // Text {
+                                        //     text: modelData.label
+                                        //     visible: icon === ""
+                                        //     color: "white"
+                                        //     anchors.verticalCenter: parent.verticalCenter
+                                        //     font.pointSize: 24
+                                        //     font.family: mainFont.name
+                                        // }
+
+                                    }
+                                }
                             }
 
-                            Text {
-                                text: entry.restPart
-                                color: "white"
-                                font.pointSize: 18
-                                font.family: Config.mainFont
+                            // A column is only ever short when it is the last
+                            // one, and the last one draws no rule, so the
+                            // sibling Column always spans a full stack here.
+                            // Binding to the enclosing Row's height instead
+                            // would be circular.
+                            Rectangle {
+                                width: 1
+                                height: column.implicitHeight
+                                color: "#33ffffff"
+                                visible: entryColumn.index < columnRepeater.count - 1
                             }
-
-                            // Text {
-                            //     text: "<font color='red'>" + modelData.key + "</font>->"
-                            //     color: "white"
-                            //     font.pointSize: 18
-                            //     font.family: mainFont.name
-                            // }
-                            // IconImage {
-                            //     implicitSize: 24
-                            //     source: icon
-                            //     visible: icon !== ""
-                            //     anchors.verticalCenter: parent.verticalCenter
-                            //     layer.effect: MultiEffect {
-                            //         saturation: -1
-                            //         contrast: 0.7
-                            //     }
-                            // }
-                            // Text {
-                            //     text: modelData.label
-                            //     visible: icon === ""
-                            //     color: "white"
-                            //     anchors.verticalCenter: parent.verticalCenter
-                            //     font.pointSize: 24
-                            //     font.family: mainFont.name
-                            // }
-
                         }
                     }
                 }
