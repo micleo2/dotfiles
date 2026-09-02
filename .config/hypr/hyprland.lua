@@ -7,14 +7,13 @@
 
 -- Runs once per session (not on reload).
 hl.on("hyprland.start", function()
-	hl.exec_cmd(
-		"kitty +kitten panel -o clear_all_mouse_actions=no -o default_pointer_shape=arrow -o pointer_shape_when_dragging=arrow -o font_size=20 --edge=background ~/dotfiles/scripts/hypr/ttfx-background.sh"
-	)
-	-- hl.exec_cmd("hyprpaper")
+	-- hl.exec_cmd(
+	-- 	"kitty +kitten panel -o clear_all_mouse_actions=no -o default_pointer_shape=arrow -o pointer_shape_when_dragging=arrow -o font_size=20 --edge=background ~/dotfiles/scripts/hypr/ttfx-background.sh"
+	-- )
+	hl.exec_cmd("hyprpaper")
 	hl.exec_cmd("QT_FONT_DPI= qs -c retro")
 	hl.exec_cmd("QT_FONT_DPI= qs -c gw-idle")
 	hl.exec_cmd("hyprpm reload")
-	-- No notification daemon: the retro shell claims org.freedesktop.Notifications itself.
 	hl.exec_cmd("snappy-switcher --daemon")
 	hl.exec_cmd("udiskie -a -n")
 	hl.exec_cmd("wl-paste --type text --watch cliphist store")

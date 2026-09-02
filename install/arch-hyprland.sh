@@ -12,8 +12,7 @@ sudo pacman -S --needed hyprpolkitagent
 systemctl --user enable --now hyprpolkitagent.service
 
 # everything hyprland.lua and the submaps shell out to:
-#   quickshell            top bar + submap overlay (`qs -c retro`, `qs -c gw-idle`)
-#   swaync                notification daemon
+#   quickshell            top bar, submap overlay and notification daemon (`qs -c retro`, `qs -c gw-idle`)
 #   cliphist              clipboard history behind SUPER+SHIFT+V
 #   libqalculate          `qalc`, the SUPER+U calculator scratchpad
 #   hyprpicker            color picker in the screenshot submap
@@ -22,7 +21,7 @@ systemctl --user enable --now hyprpolkitagent.service
 #   gtk3                  `gtk-launch`, how every SUPER+A entry starts its app
 #   playerctl, wireplumber  media and volume keys
 #   grim                  screen capture used by the screensaver
-sudo pacman -S --needed quickshell swaync cliphist libqalculate hyprpicker gpu-screen-recorder-ui \
+sudo pacman -S --needed quickshell cliphist libqalculate hyprpicker gpu-screen-recorder-ui \
   wl-clipboard gtk3 playerctl wireplumber grim
 
 # from the AUR (paru is bootstrapped in arch-setup.sh):

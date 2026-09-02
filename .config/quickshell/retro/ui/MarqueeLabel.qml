@@ -14,6 +14,9 @@ Item {
 
     property alias text: label.text
     property alias underline: label.font.underline
+    property alias color: label.color
+    property alias size: label.size
+    property alias letterSpacing: label.font.letterSpacing
     // Negative means "no cap": width comes from anchors alone.
     property real maxWidth: -1
 
@@ -23,12 +26,26 @@ Item {
     implicitHeight: label.implicitHeight
     clip: true
 
+    // A text change mid-crawl would otherwise keep animating toward the old
+    // overflow from wherever the label happened to be; start the new text
+    // from the left edge.
+    onTextChanged: {
+        label.x = 0;
+        if (marquee.running)
+            marquee.restart();
+    }
+
     Label {
         id: label
 
         SequentialAnimation on x {
+            id: marquee
+
             running: root.overflow > 0 && root.visible
             loops: Animation.Infinite
+            // Stopping mid-crawl (focus moved to a name that fits) would leave
+            // the label parked off to the left, clipping text that has room.
+            onStopped: label.x = 0
 
             PauseAnimation {
                 duration: 1200

@@ -105,6 +105,9 @@ Singleton {
         bar: JsonObject {
             // Anchored so the default 12px text size reproduces the original 22.
             property int fontSize: Math.round(22 * Settings.textSizePx / 12)
+            // Grows with the text-size control. At the default 12px the
+            // font is 22 and this is exactly the original 32.
+            property int height: Math.max(32, fontSize + 10)
             property int trayIconSize: 18
             property bool monochromeTrayIcons: true
         }

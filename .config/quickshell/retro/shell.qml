@@ -10,6 +10,7 @@ import Quickshell
 import "taskbar" as Taskbar
 import "osd" as Osd
 import "submap" as Submap
+import "notifications" as Notifications_
 
 Scope {
     id: root
@@ -25,4 +26,6 @@ Scope {
     Osd.LcdOsd {}
 
     Submap.SubmapOverlay {}
+
+    Notifications_.Toasts {}
 }

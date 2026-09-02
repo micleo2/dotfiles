@@ -11,6 +11,7 @@ Item {
     property var rows: []
     property int cell: 6
     property real ghost: 0.12
+    property color color: Config.colors.text
 
     readonly property int columns: root.rows.length > 0 ? root.rows[0].length : 0
 
@@ -30,7 +31,7 @@ Item {
             y: row * root.cell
             width: root.cell - 1
             height: root.cell - 1
-            color: Config.colors.text
+            color: root.color
             opacity: root.rows[row].charAt(col) === "#" ? 1 : root.ghost
         }
     }
