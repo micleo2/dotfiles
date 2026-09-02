@@ -7,12 +7,12 @@
 
 -- Runs once per session (not on reload).
 hl.on("hyprland.start", function()
-	-- hl.exec_cmd(
-	-- 	"kitty +kitten panel -o clear_all_mouse_actions=no -o default_pointer_shape=arrow -o pointer_shape_when_dragging=arrow -o font_size=20 --edge=background ~/dotfiles/scripts/hypr/ttfx-background.sh"
-	-- )
-	hl.exec_cmd("hyprpaper")
+	hl.exec_cmd(
+		"kitty +kitten panel -o clear_all_mouse_actions=no -o default_pointer_shape=arrow -o pointer_shape_when_dragging=arrow -o font_size=20 --edge=background ~/dotfiles/scripts/hypr/ttfx-background.sh"
+	)
+	-- hl.exec_cmd("hyprpaper")
 	hl.exec_cmd("QT_FONT_DPI= qs -c retro")
-	-- hl.exec_cmd("QT_FONT_DPI= qs -c gw-idle")
+	hl.exec_cmd("QT_FONT_DPI= qs -c gw-idle")
 	hl.exec_cmd("hyprpm reload")
 	hl.exec_cmd("swaync")
 	hl.exec_cmd("snappy-switcher --daemon")
@@ -282,11 +282,7 @@ hl.bind(M("R"), hl.dsp.exec_cmd("voxtype record stop"), { release = true })
 -- Laptop multimedia keys for volume and LCD brightness.
 -- Volume goes through the shell (taskbar/VolumeWidget.qml) rather than
 -- straight to wpctl so the OSD flashes and the step matches the chip.
-hl.bind(
-	"XF86AudioRaiseVolume",
-	hl.dsp.exec_cmd("qs -c retro ipc call volume up"),
-	{ locked = true, repeating = true }
-)
+hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("qs -c retro ipc call volume up"), { locked = true, repeating = true })
 hl.bind(
 	"XF86AudioLowerVolume",
 	hl.dsp.exec_cmd("qs -c retro ipc call volume down"),
@@ -305,8 +301,16 @@ hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true 
 -- Routed through the shell rather than straight to brightnessctl so that one
 -- place decides the backend (ddcutil on a DDC monitor, the panel backlight
 -- otherwise) and so the OSD reflects every change.
-hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("qs -c retro ipc call brightness up"), { locked = true, repeating = true })
-hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("qs -c retro ipc call brightness down"), { locked = true, repeating = true })
+hl.bind(
+	"XF86MonBrightnessUp",
+	hl.dsp.exec_cmd("qs -c retro ipc call brightness up"),
+	{ locked = true, repeating = true }
+)
+hl.bind(
+	"XF86MonBrightnessDown",
+	hl.dsp.exec_cmd("qs -c retro ipc call brightness down"),
+	{ locked = true, repeating = true }
+)
 
 require("window-workspace-rules")
 
