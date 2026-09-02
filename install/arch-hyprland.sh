@@ -8,6 +8,9 @@ sudo pacman -S --needed cmake cpio
 # applications
 sudo pacman -S --needed freecad obsidian blender inkscape spotify-launcher
 
+sudo pacman -S --needed hyprpolkitagent
+systemctl --user enable --now hyprpolkitagent.service
+
 # everything hyprland.lua and the submaps shell out to:
 #   quickshell            top bar + submap overlay (`qs -c retro`, `qs -c gw-idle`)
 #   swaync                notification daemon

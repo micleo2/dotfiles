@@ -97,6 +97,16 @@ Scope {
                         implicitWidth: workspaces.width
                         Rectangle {
                             id: background2
+                            // 1px button edge, matching Ui.Chip: the frame's silhouette one
+                            // pixel down and right, drawn first so the frame covers the rest.
+                            Rectangle {
+                                anchors.fill: background2
+                                anchors.leftMargin: -1
+                                anchors.topMargin: -1
+                                anchors.rightMargin: -3
+                                anchors.bottomMargin: -3
+                                color: Config.colors.outline
+                            }
                             anchors.fill: workspaces_container
                             color: "transparent"
                             // dark grey fill
@@ -126,6 +136,16 @@ Scope {
                         implicitWidth: focusedwindow.width + 8
                         Rectangle {
                             id: focusedwindow_decoration
+                            // 1px button edge, matching Ui.Chip: the frame's silhouette one
+                            // pixel down and right, drawn first so the frame covers the rest.
+                            Rectangle {
+                                anchors.fill: focusedwindow_decoration
+                                anchors.leftMargin: -1
+                                anchors.topMargin: -1
+                                anchors.rightMargin: -3
+                                anchors.bottomMargin: -3
+                                color: Config.colors.outline
+                            }
                             anchors.fill: focusedwindow_container
                             color: "transparent"
                             // dark grey fill
@@ -165,6 +185,16 @@ Scope {
                         implicitWidth: clock.width + 4
                         Rectangle {
                             id: clockbg
+                            // 1px button edge, matching Ui.Chip: the frame's silhouette one
+                            // pixel down and right, drawn first so the frame covers the rest.
+                            Rectangle {
+                                anchors.fill: clockbg
+                                anchors.leftMargin: -1
+                                anchors.topMargin: -1
+                                anchors.rightMargin: -3
+                                anchors.bottomMargin: -3
+                                color: Config.colors.outline
+                            }
                             anchors.fill: clock_container
                             Rectangle {
                                 anchors.fill: clockbg
@@ -194,6 +224,16 @@ Scope {
                         implicitWidth: weatherWidget.width + 8
                         Rectangle {
                             id: weatherbg
+                            // 1px button edge, matching Ui.Chip: the frame's silhouette one
+                            // pixel down and right, drawn first so the frame covers the rest.
+                            Rectangle {
+                                anchors.fill: weatherbg
+                                anchors.leftMargin: -1
+                                anchors.topMargin: -1
+                                anchors.rightMargin: -3
+                                anchors.bottomMargin: -3
+                                color: Config.colors.outline
+                            }
                             anchors.fill: weather_container
                             color: "transparent"
                             Rectangle {
@@ -235,6 +275,16 @@ Scope {
                         implicitWidth: sysTray.width + 12
                         Rectangle {
                             id: systraybg
+                            // 1px button edge, matching Ui.Chip: the frame's silhouette one
+                            // pixel down and right, drawn first so the frame covers the rest.
+                            Rectangle {
+                                anchors.fill: systraybg
+                                anchors.leftMargin: -1
+                                anchors.topMargin: -1
+                                anchors.rightMargin: -3
+                                anchors.bottomMargin: -3
+                                color: Config.colors.outline
+                            }
                             anchors.fill: systray_container
                             color: "transparent"
                             Rectangle {

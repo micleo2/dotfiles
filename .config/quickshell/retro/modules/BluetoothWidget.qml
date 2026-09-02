@@ -13,10 +13,12 @@ Item {
     required property var barScreen
     required property bool primary
 
-    readonly property var adapter: Bluetooth.defaultAdapter
+    // Quickshell.Bluetooth's type descriptions omit these types, so qmllint
+    // cannot resolve them; they are fine at runtime.
+    readonly property var adapter: Bluetooth.defaultAdapter // qmllint disable unresolved-type
     readonly property bool available: Modules.allow("bluetooth", root.adapter !== null)
 
-    readonly property var devices: Bluetooth.devices ? Bluetooth.devices.values : []
+    readonly property var devices: Bluetooth.devices ? Bluetooth.devices.values : [] // qmllint disable unresolved-type
     readonly property int connectedCount: {
         var n = 0;
         for (var i = 0; i < root.devices.length; i++) {

@@ -107,7 +107,9 @@ Singleton {
             onStreamFinished: root.error = text.trim()
         }
 
-        onExited: (exitCode) => {
+        // Process.exited carries a QProcess::ExitStatus that Quickshell does
+        // not expose to QML, so qmllint cannot type the handler.
+        onExited: (exitCode) => { // qmllint disable signal-handler-parameters
             root.pendingUuid = "";
             // NM reports the connection as activated a beat after nmcli returns.
             settle.restart();

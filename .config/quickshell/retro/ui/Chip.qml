@@ -1,7 +1,8 @@
 import QtQuick
 import ".."
 
-// The bar-slot frame: grey fill with a 2px outline bled 2px outward.
+// The bar-slot frame: grey fill with a 2px outline bled 2px outward, and a
+// 1px button edge below and to the right of that, System 7 style.
 //
 // Bar.qml repeated this block verbatim for each of its five widgets. It is one
 // component now so the module chips do not add five more copies of it.
@@ -20,30 +21,54 @@ Item {
     property color borderColor: Config.colors.outline
     property color fillColor: Config.colors.shadow
 
+    // While a button is held, the face shifts onto its edge, so it reads as
+    // pushed in rather than merely highlighted.
+    readonly property bool pressed: press.pressed
+
     signal clicked(var mouse)
     signal scrolled(var event)
 
     implicitWidth: inner.implicitWidth + root.padding * 2
     implicitHeight: parent ? parent.height : 0
 
+    // The edge: the frame's silhouette one pixel down and right. Drawn first so
+    // the face covers all but that one-pixel L.
     Rectangle {
-        anchors.fill: parent
-        color: root.fillColor
+        visible: !root.pressed
+        x: -1
+        y: -1
+        width: root.width + 4
+        height: root.height + 4
+        color: root.borderColor
     }
 
-    Rectangle {
-        anchors.fill: parent
-        anchors.margins: -2
-        color: "transparent"
-        border.width: 2
-        border.color: root.borderColor
-    }
+    Item {
+        id: face
 
-    Row {
-        id: inner
+        x: root.pressed ? 1 : 0
+        y: root.pressed ? 1 : 0
+        width: root.width
+        height: root.height
 
-        anchors.centerIn: parent
-        spacing: root.spacing
+        Rectangle {
+            anchors.fill: parent
+            color: root.fillColor
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            anchors.margins: -2
+            color: "transparent"
+            border.width: 2
+            border.color: root.borderColor
+        }
+
+        Row {
+            id: inner
+
+            anchors.centerIn: parent
+            spacing: root.spacing
+        }
     }
 
     WheelHandler {
@@ -56,6 +81,8 @@ Item {
     }
 
     MouseArea {
+        id: press
+
         anchors.fill: parent
         enabled: root.interactive
         cursorShape: Qt.PointingHandCursor
