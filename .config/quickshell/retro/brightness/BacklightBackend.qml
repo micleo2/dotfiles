@@ -9,10 +9,19 @@ import Quickshell.Io
 // watchChanges — picks up changes made by anything else on the system for free.
 // Writes still go through brightnessctl, because the sysfs node is root-owned and
 // brightnessctl is what carries the privileges to set it.
+//
+// The backlight only ever drives the internal panel, so it is available only
+// while that panel is the focused output (or no output is known at all). With
+// an external monitor focused it stays out of the way rather than dimming the
+// laptop screen in response to a key meant for the monitor in front of you.
 Item {
     id: root
 
-    readonly property bool available: root.device !== "" && root.maxValue > 0
+    // Connector name of the focused monitor, e.g. "eDP-1"; "" when unknown.
+    property string output: ""
+
+    readonly property bool internalFocused: root.output === "" || /^(eDP|LVDS|DSI)/i.test(root.output)
+    readonly property bool available: root.device !== "" && root.maxValue > 0 && root.internalFocused
     property bool probed: false
 
     property string device: ""
