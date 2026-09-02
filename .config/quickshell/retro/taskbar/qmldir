@@ -6,3 +6,4 @@ Workspaces 1.0 Workspaces.qml
 VolumeWidget 1.0 VolumeWidget.qml
 WeatherWidget 1.0 WeatherWidget.qml
 SysTray 1.0 SysTray.qml
+BarModules 1.0 BarModules.qml

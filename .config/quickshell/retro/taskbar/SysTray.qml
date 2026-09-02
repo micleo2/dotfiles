@@ -12,6 +12,10 @@ RowLayout {
 
     required property var taskbarWindow
 
+    // Lets the bar drop the whole slot — frame included — when nothing is in
+    // the tray, rather than leaving an empty box behind.
+    readonly property bool hasItems: SystemTray.items.values.length > 0
+
     Repeater {
         id: sysTray
 
@@ -45,13 +49,23 @@ RowLayout {
                 id: menu
 
                 menu: trayItem.item.menu // qmllint disable unresolved-type
-                anchor.window: sysTrayRow.taskbarWindow
-                // Yes I know, this is a confusing way to get the position for the menu, but that's
-                // just how Qt is.
-                anchor.rect.x: sysTrayRow.taskbarWindow.width - (sysTrayRow.width + trayItem.x)
-                anchor.rect.y: sysTrayRow.taskbarWindow.height - 10
-                anchor.rect.height: trayItem.height
+
+                // Anchor to the icon itself and let Quickshell resolve where it
+                // is. The previous version measured back from the right edge of
+                // the bar, which only lined up while the tray was the last
+                // widget in the row — adding the module chips to its right threw
+                // every menu into the corner.
+                anchor.item: trayItem
+                // Anchor point: the bottom edge of the icon, horizontally
+                // centred on it (leaving Left/Right unset centres that axis).
                 anchor.edges: Edges.Bottom // qmllint disable missing-type
+                // Grow down and to the right of that point, which puts the
+                // menu's top-left corner on the icon's centre line — how
+                // Windows and macOS drop their tray menus.
+                anchor.gravity: Edges.Bottom | Edges.Right // qmllint disable missing-type
+                // Slide back onto the screen near the edges instead of flipping
+                // to the other side of the icon.
+                anchor.adjustment: PopupAdjustment.Slide // qmllint disable missing-type
             }
 
             IconImage {

@@ -13,6 +13,15 @@ Singleton {
     }
     readonly property string mainFont: mainFontLoader.name
 
+    // Bundled with the config and previously loaded-but-unused in shell.qml.
+    // Has GSUB ligatures, so `text: "wifi"` renders the glyph by name.
+    FontLoader {
+        id: iconFontLoader
+
+        source: "fonts/MaterialSymbolsSharp_Filled_36pt-Regular.ttf"
+    }
+    readonly property string iconFont: iconFontLoader.name
+
     property var colors: themes.default
     property var themes: {
         "default": {
@@ -77,10 +86,10 @@ Singleton {
         property JsonObject bar
 
         bar: JsonObject {
-            property int fontSize: 22
+            // Anchored so the default 12px text size reproduces the original 22.
+            property int fontSize: Math.round(22 * Settings.textSizePx / 12)
             property int trayIconSize: 18
             property bool monochromeTrayIcons: true
-            property bool transparent: false
         }
 
     }

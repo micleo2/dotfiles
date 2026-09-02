@@ -1,0 +1,12 @@
+{
+    "defaults": {
+        "network": "auto",
+        "bluetooth": "auto",
+        "display": "auto",
+        "idle": "auto",
+        "battery": "auto"
+    },
+    "hosts": {
+        "subtractive": {}
+    }
+}

@@ -7,11 +7,12 @@
 
 -- Runs once per session (not on reload).
 hl.on("hyprland.start", function()
-	hl.exec_cmd(
-		"kitty +kitten panel -o clear_all_mouse_actions=no -o default_pointer_shape=arrow -o pointer_shape_when_dragging=arrow -o font_size=20 --edge=background ~/dotfiles/scripts/hypr/ttfx-background.sh"
-	)
-	-- hl.exec_cmd("hyprpaper")
-	hl.exec_cmd("QT_FONT_DPI= qs -c retro & qs -c gw-idle &")
+	-- hl.exec_cmd(
+	-- 	"kitty +kitten panel -o clear_all_mouse_actions=no -o default_pointer_shape=arrow -o pointer_shape_when_dragging=arrow -o font_size=20 --edge=background ~/dotfiles/scripts/hypr/ttfx-background.sh"
+	-- )
+	hl.exec_cmd("hyprpaper")
+	hl.exec_cmd("QT_FONT_DPI= qs -c retro")
+	-- hl.exec_cmd("QT_FONT_DPI= qs -c gw-idle")
 	hl.exec_cmd("hyprpm reload")
 	hl.exec_cmd("swaync")
 	hl.exec_cmd("snappy-switcher --daemon")
@@ -179,6 +180,7 @@ require("submap-screenshots")
 require("submap-utils")
 require("submap-layout")
 require("submap-edit")
+require("submap-topbar")
 -- SUPER + ? lists the submaps above with their activation keys. Must come
 -- after the requires so every submap is registered.
 require("submap-builder").generate_helper_submap()
@@ -213,8 +215,8 @@ hl.bind(
 -- Browser menu
 hl.bind(M("B"), hl.dsp.exec_cmd("~/dotfiles/scripts/menus/browser-menu.sh"))
 
--- Toggle top bar
-hl.bind(M("T"), hl.dsp.exec_cmd("qs -c retro ipc call topbar toggle"))
+-- Toggle top bar (SUPER+T is the top bar submap, see submap-topbar.lua)
+hl.bind(M(S("T")), hl.dsp.exec_cmd("qs -c retro ipc call topbar toggle"))
 
 for i = 1, 10 do
 	local key = i % 10 -- 10 maps to key 0
@@ -298,23 +300,18 @@ hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = tru
 hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true })
 
 -- Brightness
-hl.bind(
-	"XF86MonBrightnessUp",
-	hl.dsp.exec_cmd("qs -c retro ipc call brightness up"),
-	{ locked = true, repeating = true }
-)
-hl.bind(
-	"XF86MonBrightnessDown",
-	hl.dsp.exec_cmd("qs -c retro ipc call brightness down"),
-	{ locked = true, repeating = true }
-)
+-- Routed through the shell rather than straight to brightnessctl so that one
+-- place decides the backend (ddcutil on a DDC monitor, the panel backlight
+-- otherwise) and so the OSD reflects every change.
+hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("qs -c retro ipc call brightness up"), { locked = true, repeating = true })
+hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("qs -c retro ipc call brightness down"), { locked = true, repeating = true })
 
 require("window-workspace-rules")
 
 -------------------
 ----- DISPLAY -----
 -------------------
-require("monitors")
+-- require("monitors")
 hl.env("QT_FONT_DPI", "192")
 -- Unscale XWayland to fix blurry applications
 hl.config({

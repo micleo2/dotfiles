@@ -1,0 +1,6 @@
+module Modules
+BatteryWidget 1.0 BatteryWidget.qml
+BluetoothWidget 1.0 BluetoothWidget.qml
+DisplayWidget 1.0 DisplayWidget.qml
+IdleWidget 1.0 IdleWidget.qml
+NetworkWidget 1.0 NetworkWidget.qml

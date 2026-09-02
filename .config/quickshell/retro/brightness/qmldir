@@ -1,0 +1,3 @@
+module BrightnessBackends
+BacklightBackend 1.0 BacklightBackend.qml
+DdcBackend 1.0 DdcBackend.qml
