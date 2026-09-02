@@ -1,4 +1,5 @@
 import ".."
+import "../ui" as Ui
 import QtQuick
 import QtQuick.Effects
 import QtQuick.Layouts
@@ -23,11 +24,11 @@ RowLayout {
 
     }
 
-    Text {
+    Ui.MarqueeLabel {
+        Layout.alignment: Qt.AlignVCenter
         text: FocusedWindow.application_display_name
-        color: Config.colors.text
-        font.pixelSize: Config.settings.bar.fontSize
-        font.family: Config.mainFont
+        // Beyond this the name scrolls in place instead of widening the bar.
+        maxWidth: 220
     }
 
 }

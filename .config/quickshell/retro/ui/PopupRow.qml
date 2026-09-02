@@ -71,7 +71,7 @@ Item {
         text: root.glyph
     }
 
-    Label {
+    MarqueeLabel {
         id: label
 
         anchors.left: icon.visible ? icon.right : parent.left
@@ -80,8 +80,7 @@ Item {
         anchors.rightMargin: 6
         anchors.verticalCenter: parent.verticalCenter
         text: root.text
-        elide: Text.ElideRight
-        font.underline: root.busy
+        underline: root.busy
     }
 
     Row {
