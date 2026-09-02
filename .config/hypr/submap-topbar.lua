@@ -16,6 +16,7 @@ local submap_options_per_key = {
 	p = { label = "power", exec_cmd = panel("battery") },
 	v = { label = "volume", exec_cmd = panel("volume") },
 	s = { label = "system", exec_cmd = panel("system") },
+	i = { label = "inbox", exec_cmd = panel("notifications") },
 }
 
 submap_builder.define_submap("topbar", "SUPER+T", submap_options_per_key)

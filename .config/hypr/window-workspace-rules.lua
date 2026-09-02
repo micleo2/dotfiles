@@ -39,6 +39,10 @@ hl.window_rule({
 	match = { class = ".*messenger.com.*" },
 	workspace = 2,
 })
+hl.window_rule({
+	match = { class = ".*messages.google.com.*" },
+	workspace = 2,
+})
 
 -- notes / research 3
 hl.window_rule({

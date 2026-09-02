@@ -29,6 +29,7 @@ local submap_options_per_key = {
 	b = make_submap_entry("blender", "blender", { class = "blender" }),
 	c = make_submap_entry("chromium", "chromium", { direct = true }),
 	d = make_submap_entry("discord", "discord", { class = "discord" }),
+	e = make_submap_entry("google-messages", "GoogleMessages", { direct = true }),
 	f = make_submap_entry("freecad", "org.freecad.FreeCAD", { class = "org.freecad.FreeCAD" }),
 	i = make_submap_entry("inkscape", "org.inkscape.Inkscape", { class = "org.inkscape.Inkscape" }),
 	o = make_submap_entry("obsidian", "obsidian", { class = "md.obsidian.Obsidian" }),
