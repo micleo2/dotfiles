@@ -18,6 +18,10 @@ Singleton {
 
     readonly property real level: root.ready ? root.sink.audio.volume : 0
     readonly property int percent: Math.round(root.level * 100)
+    // One keypress or wheel detent moves this much; the OSD draws one bar
+    // per step so every press visibly lands.
+    readonly property int stepPercent: 5
+    readonly property int segments: Math.round(100 / root.stepPercent)
     readonly property bool muted: root.ready && root.sink.audio.muted
 
     // ------------------------------------------------------------- devices --
@@ -46,6 +50,10 @@ Singleton {
     // rebuilding a Repeater from that signal path has crashed Quickshell's
     // PipeWire service — so the rebuild is pushed onto a later tick.
     property var displaySinks: []
+
+    // Fired by the shell's own volume actions (chip scroll, IPC, mute), so
+    // the OSD flashes for those and not for a change made elsewhere.
+    signal changed
     property bool watching: false
 
     onCandidateSinksChanged: {
@@ -151,11 +159,14 @@ Singleton {
 
     function adjust(delta) {
         root.setVolume(root.level + delta);
+        root.changed();
     }
 
     function toggleMute() {
-        if (root.ready)
-            root.sink.audio.muted = !root.sink.audio.muted;
+        if (!root.ready)
+            return;
+        root.sink.audio.muted = !root.sink.audio.muted;
+        root.changed();
     }
 
     // Omarchy pairs this with a CLI that also runs `pactl set-default-sink` and

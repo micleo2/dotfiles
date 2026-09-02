@@ -22,7 +22,7 @@ Scope {
 
     Taskbar.Bar {}
 
-    Osd.BrightnessOsd {}
+    Osd.LcdOsd {}
 
     Submap.SubmapOverlay {}
 }

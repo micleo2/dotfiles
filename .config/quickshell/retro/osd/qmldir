@@ -1,2 +1,5 @@
 module Osd
-BrightnessOsd 1.0 BrightnessOsd.qml
+LcdOsd 1.0 LcdOsd.qml
+LcdBars 1.0 LcdBars.qml
+SevenSegment 1.0 SevenSegment.qml
+PixelGlyph 1.0 PixelGlyph.qml

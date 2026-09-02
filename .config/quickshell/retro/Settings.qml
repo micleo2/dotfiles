@@ -22,6 +22,7 @@ Singleton {
     property alias barTransparent: adapter.barTransparent
     property alias monitorScales: adapter.monitorScales
     property alias modules: adapter.modules
+    property alias theme: adapter.theme
 
     // JsonAdapter only notices whole-property assignment, so the nested map has
     // to be replaced rather than mutated in place or the write never lands.
@@ -61,6 +62,8 @@ Singleton {
             id: adapter
 
             property int textSizePx: 12
+            // Key into Config.themes.
+            property string theme: "default"
             property bool stayAwake: false
             property bool barTransparent: false
             // monitor description -> scale
