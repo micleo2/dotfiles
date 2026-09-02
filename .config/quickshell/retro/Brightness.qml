@@ -3,21 +3,28 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Quickshell.Hyprland
 import "brightness" as Backends
 
-// Display brightness, over whichever backend this machine actually has.
+// Display brightness, on the monitor that currently has focus.
 //
-// The backend is chosen, not configured: ddcutil drives external monitors over
-// DDC/CI and wins when it is installed *and* detects a display; otherwise the
-// internal panel backlight is driven through brightnessctl. That covers the
-// desktop (external monitor) and the laptop (eDP panel) from one checkout with
-// nothing host-specific to set.
+// The backend is chosen, not configured: every backend is told which output is
+// focused, and the first one that can drive it wins. ddcutil takes external
+// monitors over DDC/CI, bus per connector; the internal panel backlight is
+// driven through brightnessctl. That covers the desktop (two external
+// monitors), the laptop (eDP panel) and the laptop docked to a monitor from one
+// checkout with nothing host-specific to set. Moving focus to another monitor
+// moves the brightness keys with it.
 //
-// Each backend exposes the same four members — `available`, `percent`,
+// Each backend exposes the same members — `output`, `available`, `percent`,
 // `apply(percent)` and `refresh()` — so adding a third is one file plus one line
 // in `backends` below.
 Singleton {
     id: root
+
+    // Connector name of the focused monitor ("DP-1", "eDP-1"), or "" when
+    // Hyprland has not told us yet.
+    readonly property string focusedOutput: Hyprland.focusedMonitor ? Hyprland.focusedMonitor.name : ""
 
     readonly property var backends: [ddc, backlight]
 
@@ -66,10 +73,24 @@ Singleton {
 
     Backends.DdcBackend {
         id: ddc
+
+        output: root.focusedOutput
     }
 
     Backends.BacklightBackend {
         id: backlight
+
+        output: root.focusedOutput
+    }
+
+    Connections {
+        target: Hyprland
+
+        // A plugged or unplugged monitor changes which buses exist.
+        function onRawEvent(event) {
+            if (event.name === "monitoradded" || event.name === "monitorremoved")
+                ddc.probe();
+        }
     }
 
     IpcHandler {
@@ -96,7 +117,9 @@ Singleton {
         }
 
         function status(): string {
-            return root.available ? root.percent + "% via " + root.backendName : "no brightness backend";
+            if (!root.available)
+                return "no brightness backend for " + (root.focusedOutput || "unknown output");
+            return root.percent + "% via " + root.backendName + " on " + (root.focusedOutput || "?");
         }
     }
 }
