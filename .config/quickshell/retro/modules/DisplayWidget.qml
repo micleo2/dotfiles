@@ -120,6 +120,28 @@ Item {
             size: Math.round(Config.settings.bar.fontSize * 0.8)
             opacity: 0.6
         }
+
+        Ui.SectionLabel {
+            text: "Theme"
+        }
+
+        // One row per palette in Config.themes; the marker is the one in use.
+        Repeater {
+            model: Config.themeNames
+
+            Ui.PopupRow {
+                required property var modelData
+
+                rowKey: "theme:" + modelData
+                cursorKey: popup.cursorKey
+                onCursorEntered: popup.cursorKey = "theme:" + modelData
+
+                glyph: "palette"
+                text: modelData
+                selected: Settings.theme === modelData
+                onClicked: Settings.theme = modelData
+            }
+        }
     }
 
     IpcHandler {
@@ -157,6 +179,20 @@ Item {
 
         function textDown(): void {
             DisplayScale.setTextSize(DisplayScale.textSizePx - 1);
+        }
+
+        // Switch palette by name, or cycle with "next"; returns the result.
+        function theme(name: string): string {
+            var names = Config.themeNames;
+            var want = String(name || "");
+            if (want === "next" || want === "") {
+                var at = names.indexOf(Settings.theme);
+                want = names[(at + 1) % names.length];
+            }
+            if (names.indexOf(want) === -1)
+                return "unknown theme " + want + " (have " + names.join(" ") + ")";
+            Settings.theme = want;
+            return want;
         }
 
         function textReset(): void {

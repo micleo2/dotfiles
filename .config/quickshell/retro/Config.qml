@@ -22,7 +22,11 @@ Singleton {
     }
     readonly property string iconFont: iconFontLoader.name
 
-    property var colors: themes.default
+    // The palette in use, chosen by name in the display popup and persisted
+    // in Settings. Any entry added to `themes` below shows up there.
+    readonly property var colors: root.themes[Settings.theme] !== undefined ? root.themes[Settings.theme] : root.themes.default
+    readonly property var themeNames: Object.keys(root.themes)
+
     property var themes: {
         "default": {
             "base": "#d8d8d8",
@@ -77,6 +81,19 @@ Singleton {
             "text": "#0d1913",
             "outline": "#21351a",
             "outlineGradientFade": "#284223",
+            "defaultWallpaperPath": ""
+        },
+        // Phosphor on black. Text and outlines share the one green, so every
+        // frame, edge and drop shadow reads as a lit trace on a dark tube.
+        "matrix": {
+            "base": "#000000",
+            "shadow": "#0a3d16",
+            "highlight": "#0f5a22",
+            "urgent": "#ffb000",
+            "accent": "#00ff41",
+            "text": "#00ff41",
+            "outline": "#00ff41",
+            "outlineGradientFade": "#00b32d",
             "defaultWallpaperPath": ""
         }
     }

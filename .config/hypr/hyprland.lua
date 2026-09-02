@@ -279,18 +279,20 @@ hl.bind(
 hl.bind(M("R"), hl.dsp.exec_cmd("voxtype record start"))
 hl.bind(M("R"), hl.dsp.exec_cmd("voxtype record stop"), { release = true })
 
--- Laptop multimedia keys for volume and LCD brightness
+-- Laptop multimedia keys for volume and LCD brightness.
+-- Volume goes through the shell (taskbar/VolumeWidget.qml) rather than
+-- straight to wpctl so the OSD flashes and the step matches the chip.
 hl.bind(
 	"XF86AudioRaiseVolume",
-	hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"),
+	hl.dsp.exec_cmd("qs -c retro ipc call volume up"),
 	{ locked = true, repeating = true }
 )
 hl.bind(
 	"XF86AudioLowerVolume",
-	hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),
+	hl.dsp.exec_cmd("qs -c retro ipc call volume down"),
 	{ locked = true, repeating = true }
 )
-hl.bind("XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"), { locked = true })
+hl.bind("XF86AudioMute", hl.dsp.exec_cmd("qs -c retro ipc call volume mute"), { locked = true })
 hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"), { locked = true })
 
 -- Requires playerctl

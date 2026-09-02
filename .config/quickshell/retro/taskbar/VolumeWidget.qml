@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Effects
 import Quickshell.Io
 import "../ui" as Ui
 import ".."
@@ -16,7 +17,7 @@ Item {
     // does nothing and a fast one jumps.
     property real wheelAccumulator: 0
 
-    readonly property int stepPercent: 5
+    readonly property int stepPercent: Volume.stepPercent
 
     implicitWidth: chip.implicitWidth
     implicitHeight: parent ? parent.height : 0
@@ -48,17 +49,33 @@ Item {
         }
         onScrolled: (event) => root.handleWheel(event)
 
-        Image {
+        Item {
             anchors.verticalCenter: parent.verticalCenter
-            // The hand-drawn source is 16x16 and has always been drawn at 24,
-            // i.e. upscaled 1.5x with nearest-neighbour. sourceSize pins the
-            // decode to native so the upscale stays crisp rather than resampled.
             width: 24
             height: 24
-            source: Volume.muted ? "assets/muted.png" : "assets/unmuted.png"
-            sourceSize.width: 16
-            sourceSize.height: 16
-            smooth: false
+
+            Image {
+                id: speaker
+
+                anchors.fill: parent
+                // The hand-drawn source is 16x16 and has always been drawn at 24,
+                // i.e. upscaled 1.5x with nearest-neighbour. sourceSize pins the
+                // decode to native so the upscale stays crisp rather than resampled.
+                source: Volume.muted ? "assets/muted.png" : "assets/unmuted.png"
+                sourceSize.width: 16
+                sourceSize.height: 16
+                smooth: false
+                // Drawn through the colourised copy below, so the black ink
+                // follows the palette's text colour on a dark theme.
+                visible: false
+            }
+
+            MultiEffect {
+                anchors.fill: parent
+                source: speaker
+                colorization: 1
+                colorizationColor: Config.colors.text
+            }
         }
 
         Ui.Label {
