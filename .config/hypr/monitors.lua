@@ -1,10 +1,13 @@
--- DP-1: 4K panel at scale 2 -> 1920x1080 logical, offset down by 1195.
--- HDMI-A-1: rotated 90 deg (transform 3) -> 1440x2560 logical, starting at
--- x=1920, i.e. flush against DP-1's right edge. Both offsets are hand-tuned to
--- match how the screens physically sit, so they need revisiting whenever
--- `scale` changes -- scale is what sets the logical size these offsets assume.
+-- Catch-all. Never matches a listed display; only used when nothing else does.
 hl.monitor({
-	output = "DP-1",
+	output = "",
+	mode = "preferred",
+	position = "auto",
+	scale = "auto",
+})
+
+hl.monitor({
+	output = "desc:ASUSTek",
 	mode = "3840x2160@240.0",
 	position = "0x1195",
 	scale = "2",
@@ -13,21 +16,14 @@ hl.monitor({
 for i = 1, 10 do
 	hl.workspace_rule({ workspace = "" .. i, monitor = "DP-1" })
 end
--- Hyprland will just reassign this WS when we disable it, so no need to make this conditional
 hl.workspace_rule({ workspace = "2", monitor = "HDMI-A-1" })
 
-local function dp1_present()
-	return hl.get_monitor("DP-1") ~= nil
-end
-
-local hdmi_enabled = false
-
--- Bedroom: HDMI-A-1 as the optional 144Hz rotated side panel, right of DP-1.
-local function apply_hdmi(enabled)
-	hdmi_enabled = enabled
+local side_enabled = false
+local function apply_side(enabled)
+	side_enabled = enabled
 	if enabled then
 		hl.monitor({
-			output = "HDMI-A-1",
+			output = "desc:Microstep",
 			mode = "2560x1440@143.85",
 			position = "1920x0",
 			scale = "1",
@@ -37,41 +33,27 @@ local function apply_hdmi(enabled)
 		hl.workspace_rule({ workspace = "2", layout_opts = { direction = "down" } })
 	else
 		hl.monitor({
-			output = "HDMI-A-1",
+			output = "desc:Microstep",
 			disabled = true,
 		})
 		hl.workspace_rule({ workspace = "2", layout_opts = { direction = "right" } })
 	end
 end
 
--- Living room: DP-1 is unplugged, so the 60Hz display on HDMI-A-1 is the only
--- output. Drive it as the primary, landscape, at its native 4K@60.
-local function apply_hdmi_primary()
-	hl.monitor({
-		output = "HDMI-A-1",
-		mode = "3840x2160@60.0",
-		position = "0x0",
-		scale = "2.5",
-		transform = 0,
-		disabled = false,
-	})
-end
-
--- At (re)load time the connected monitors are already realized, so this reflects
--- what is actually plugged in. Bedroom keeps the off-by-default side panel; the
--- living room lights the TV as the primary output.
-local function apply_for_current_setup()
-	if dp1_present() then
-		apply_hdmi(hdmi_enabled)
-	else
-		apply_hdmi_primary()
+-- Re-runs on every reload, so read the real state instead of resetting to off.
+-- hl.get_monitors() only lists enabled outputs, and config is parsed before
+-- the new rules apply, so this reflects the pre-reload state.
+local function side_is_on()
+	for _, m in ipairs(hl.get_monitors()) do
+		if m.description:find("^Microstep") then
+			return true
+		end
 	end
+	return false
 end
 
-apply_for_current_setup()
+apply_side(side_is_on())
 
 hl.bind("SUPER + M", function()
-	if dp1_present() then
-		apply_hdmi(not hdmi_enabled)
-	end
+	apply_side(not side_enabled)
 end)

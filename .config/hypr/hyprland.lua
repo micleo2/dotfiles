@@ -311,7 +311,7 @@ require("window-workspace-rules")
 -------------------
 ----- DISPLAY -----
 -------------------
--- require("monitors")
+require("monitors")
 hl.env("QT_FONT_DPI", "192")
 -- Unscale XWayland to fix blurry applications
 hl.config({

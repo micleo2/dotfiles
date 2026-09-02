@@ -15,6 +15,7 @@ local submap_options_per_key = {
 	c = { label = "caffeinate", exec_cmd = "qs -c retro ipc call idle toggle" },
 	p = { label = "power", exec_cmd = panel("battery") },
 	v = { label = "volume", exec_cmd = panel("volume") },
+	s = { label = "system", exec_cmd = panel("system") },
 }
 
 submap_builder.define_submap("topbar", "SUPER+T", submap_options_per_key)

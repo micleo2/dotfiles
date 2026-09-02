@@ -258,7 +258,7 @@ Scope {
                     }
 
                     // Laptop modules (wifi, bluetooth, display, idle, battery).
-                    // Which of these appear is decided by modules.json.
+                    // Which of these appear is decided by per-machine state (see Modules).
                     BarModules {
                         Layout.fillHeight: true
                         taskbarWindow: taskbar

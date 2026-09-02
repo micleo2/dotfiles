@@ -2,6 +2,7 @@ module Ui
 Chip 1.0 Chip.qml
 Glyph 1.0 Glyph.qml
 Label 1.0 Label.qml
+MarqueeLabel 1.0 MarqueeLabel.qml
 Popup 1.0 Popup.qml
 PopupField 1.0 PopupField.qml
 PopupRow 1.0 PopupRow.qml
