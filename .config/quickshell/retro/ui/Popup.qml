@@ -28,6 +28,9 @@ Scope {
 
     property int cardWidth: 340
     property int maxCardHeight: 560
+    // Hard offset drop shadow, the System 7 kind: the frame's silhouette
+    // pushed down and right, no blur. 0 turns it off.
+    property int shadowOffset: 4
     // Right-hand chips read better right-aligned to their own edge.
     property bool alignRight: true
 
@@ -205,17 +208,32 @@ Scope {
             top: true
             left: true
         }
+        // PanelWindow's margins group is not described in Quickshell's type
+        // information, so qmllint cannot see it; it works at runtime.
+        // qmllint disable unqualified unresolved-type
         margins {
             top: root.gap
             left: root.cardX - 2
         }
-        implicitWidth: root.cardWidth + 4
-        implicitHeight: card.height + 4
+        // qmllint enable unqualified unresolved-type
+        implicitWidth: root.cardWidth + 4 + root.shadowOffset
+        implicitHeight: card.height + 4 + root.shadowOffset
 
         HyprlandFocusGrab {
             active: root.opened
             windows: root.barWindow ? [win, root.barWindow] : [win]
             onCleared: root.close()
+        }
+
+        Rectangle {
+            id: shadow
+
+            visible: root.shadowOffset > 0
+            x: card.x - 2 + root.shadowOffset
+            y: card.y - 2 + root.shadowOffset
+            width: card.width + 4
+            height: card.height + 4
+            color: Config.colors.outline
         }
 
         Item {

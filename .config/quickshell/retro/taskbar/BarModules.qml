@@ -2,9 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import Quickshell
 import "../modules" as Modules_
-import ".."
 
 // The laptop module group.
 //

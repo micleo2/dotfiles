@@ -1,3 +1,4 @@
+pragma ComponentBehavior: Bound
 pragma Singleton
 
 import QtQuick
@@ -26,17 +27,19 @@ Singleton {
     // to be replaced rather than mutated in place or the write never lands.
     function setMonitorScale(key, scale) {
         var next = {};
-        for (var k in adapter.monitorScales)
-            next[k] = adapter.monitorScales[k];
+        for (var k in root.monitorScales)
+            next[k] = root.monitorScales[k];
         next[key] = scale;
-        adapter.monitorScales = next;
+        root.monitorScales = next;
     }
 
     Process {
         // FileView will not create intermediate directories.
         running: true
         command: ["mkdir", "-p", root.stateDir]
-        onExited: view.reload()
+        // Process.exited carries a QProcess::ExitStatus that Quickshell does
+        // not expose to QML, so qmllint cannot type the handler.
+        onExited: view.reload() // qmllint disable signal-handler-parameters
     }
 
     FileView {
@@ -54,7 +57,7 @@ Singleton {
                 writeAdapter();
         }
 
-        JsonAdapter {
+        JsonAdapter { // qmllint disable unresolved-type
             id: adapter
 
             property int textSizePx: 12
