@@ -12,8 +12,8 @@ import "glyphs.js" as Glyphs
 // hard offset shadow, outlined bezel, dark face. Inside, a pictogram for
 // what kind of thing arrived, a character grid with the app and time on the
 // top row, the summary on the second (scrolling if it does not fit) and up
-// to two rows of body, and a bar of LCD segments draining as the toast's
-// life runs out. Critical toasts light in the urgent colour, blink their
+// to two rows of body, and a bar of LCD segments, one per second of life,
+// draining as the toast's life runs out. Critical toasts light in the urgent colour, blink their
 // pictogram, and have no bar because they never expire.
 //
 // Every toast is the same width whatever it says. That is what makes it read
@@ -25,19 +25,29 @@ Item {
     property int columns: 28
     property int bodyRows: 2
 
-    readonly property bool critical: root.notification.urgency === NotificationUrgency.Critical
+    // What the rules made of the notification; the raw object is only used
+    // for identity and for click handling.
+    readonly property var view: Notifications.viewOf(root.notification)
+
+    readonly property bool critical: root.view.urgency === NotificationUrgency.Critical
     readonly property color ink: root.critical ? Config.colors.urgent : Config.colors.text
     readonly property real ghost: 0.12
     readonly property int pad: 18
 
     readonly property string time: Qt.formatTime(new Date(Notifications.arrivedAt(root.notification)), "HH:mm")
-    readonly property string appLabel: TextUtil.fit(TextUtil.appLabel(root.notification.appName, root.notification.desktopEntry), root.columns - root.time.length - 1)
-    readonly property string summary: TextUtil.plain(root.notification.summary)
-    readonly property var body: TextUtil.wrap(TextUtil.plain(root.notification.body), root.columns, root.bodyRows)
-    readonly property var pictogram: Glyphs.pick(root.notification.appName, root.notification.desktopEntry, root.summary, root.notification.urgency, NotificationUrgency.Critical)
+    readonly property string appLabel: TextUtil.fit(TextUtil.appLabel(root.view.appName, root.view.desktopEntry), root.columns - root.time.length - 1)
+    readonly property string summary: root.view.summary
+    // With no summary the body moves up and gains its row.
+    readonly property bool hasSummary: root.summary !== ""
+    readonly property int bodyRow: root.hasSummary ? 2 : 1
+    readonly property var body: TextUtil.wrap(root.view.body, root.columns, root.bodyRows + (root.hasSummary ? 0 : 1))
+    readonly property var pictogram: Glyphs.pick(root.view.kind, root.view.appName, root.view.desktopEntry, root.summary, root.view.urgency, NotificationUrgency.Critical)
 
     readonly property bool expires: Notifications.expires(root.notification)
     readonly property real remaining: Notifications.remaining(root.notification)
+    // One bar segment per second of life, so the bar drains at a readable
+    // one-per-second.
+    readonly property int seconds: Math.max(1, Math.round(Notifications.duration(root.notification) / 1000))
     readonly property bool hovered: hover.hovered
 
     onHoveredChanged: Notifications.setPaused(root.notification, root.hovered)
@@ -103,9 +113,12 @@ Item {
                     id: grid
 
                     columns: root.columns
-                    rows: 2 + root.body.length
+                    rows: root.bodyRow + root.body.length
                     // The unlit grid stays neutral; only the ink goes urgent.
                     ghost: root.ghost
+                    // A toast carrying on from its withdrawn sender's copy is
+                    // the same module, not a new one.
+                    flashOnCreate: root.notification.withdrawn !== true
 
                     // Row 0: who, and when.
                     Ui.Label {
@@ -132,6 +145,7 @@ Item {
 
                     // Row 1: the summary, crawling if it overflows.
                     Item {
+                        visible: root.hasSummary
                         x: 0
                         y: grid.rowY(1)
                         width: grid.width
@@ -147,7 +161,7 @@ Item {
                         }
                     }
 
-                    // Rows 2+: the body.
+                    // The rows after the summary: the body.
                     Repeater {
                         model: root.body
 
@@ -156,7 +170,7 @@ Item {
                             required property int index
 
                             x: 0
-                            y: grid.rowY(2 + index)
+                            y: grid.rowY(root.bodyRow + index)
                             height: grid.cellHeight
                             text: modelData
                             color: root.ink
@@ -170,7 +184,7 @@ Item {
                 Osd.LcdBars {
                     visible: root.expires
                     totalWidth: grid.width
-                    segments: 20
+                    segments: root.seconds
                     segmentHeight: 6
                     spacing: 3
                     filled: Math.ceil(root.remaining * segments)

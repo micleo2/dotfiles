@@ -24,6 +24,7 @@ Singleton {
     property alias modules: adapter.modules
     property alias theme: adapter.theme
     property alias doNotDisturb: adapter.doNotDisturb
+    property alias lockAfterSeconds: adapter.lockAfterSeconds
 
     // JsonAdapter only notices whole-property assignment, so the nested map has
     // to be replaced rather than mutated in place or the write never lands.
@@ -69,6 +70,8 @@ Singleton {
             property bool barTransparent: false
             // Notifications: silenced toasts go straight to history.
             property bool doNotDisturb: false
+            // Lock screen: seconds of idle before locking, 0 to never.
+            property int lockAfterSeconds: 600
             // monitor description -> scale
             property var monitorScales: ({})
             // module id -> "auto" | true | false (see Modules)

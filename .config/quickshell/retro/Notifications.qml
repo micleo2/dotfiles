@@ -5,6 +5,8 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Hyprland
 import Quickshell.Services.Notifications
+import "notifications/rules.js" as Rules
+import "notifications/text.js" as TextUtil
 
 // The notification daemon. The server below claims
 // org.freedesktop.Notifications on the session bus, so anything speaking the
@@ -16,15 +18,20 @@ import Quickshell.Services.Notifications
 // directly. A replaces_id update rewrites the same object in place with no
 // second signal, so the toasts pick up new text for free. keepOnReload keeps
 // them across a config reload, which is the restart that actually happens.
+//
+// Nothing here reads a notification's text directly. Each one is turned into
+// a plain view and run through notifications/rules.js first, which is where
+// a noisy sender gets rewritten, muted or dropped; the view is kept on the
+// lifetime entry and rebuilt whenever the sender updates its text.
 Singleton {
     id: root
 
     // Live toasts, newest first. Rendered by notifications/Toasts.qml.
     property var popups: []
 
-    // Closed toasts as plain snapshots, newest first, capped. Silenced
-    // notifications are written here too: "what did I miss" is what a
-    // history is for. Mirrored to history.json beside settings.json so a
+    // Unread toasts as plain snapshots, newest first, capped: ones that
+    // expired unseen, and ones silenced by do-not-disturb. Anything dismissed
+    // by hand counts as read and never lands here. Mirrored to history.json beside settings.json so a
     // config reload, which recreates this singleton, does not wipe it.
     readonly property var history: historyStore.entries
     readonly property int historyLimit: 30
@@ -47,23 +54,57 @@ Singleton {
     // the cap if the sender asked for more; critical never expires on its own.
     readonly property int lowDuration: 5000
     readonly property int normalDuration: 8000
-    readonly property int maxDuration: 30000
+    readonly property int maxDuration: 10000
 
-    // One entry per live toast: { notification, arrived, duration, deadline,
-    // paused }. Keyed by object identity rather than notification id, because
-    // ids restart from 1 each server generation and keepOnReload carries the
-    // old generation over. Replaced wholesale on change so bindings notice.
+    // One entry per live toast: { notification, view, arrived, duration,
+    // deadline, paused }. Keyed by object identity rather than notification
+    // id, because ids restart from 1 each server generation and keepOnReload
+    // carries the old generation over. Replaced wholesale on change so
+    // bindings notice.
     property var lifetimes: []
     // Ticks while anything is on screen; the countdown bars bind to it.
     property double now: Date.now()
 
-    function durationFor(notification) {
-        if (notification.urgency === NotificationUrgency.Critical)
+    // The processed view of a notification: what the rules made of it.
+    function buildView(notification) {
+        return Rules.process({
+            appName: String(notification.appName || ""),
+            desktopEntry: String(notification.desktopEntry || ""),
+            summary: TextUtil.plain(notification.summary),
+            body: TextUtil.plain(notification.body),
+            urgency: notification.urgency,
+            expireTimeout: notification.expireTimeout,
+            transient: notification.transient === true
+        });
+    }
+
+    readonly property var blankView: ({
+            appName: "",
+            desktopEntry: "",
+            summary: "",
+            body: "",
+            urgency: NotificationUrgency.Normal,
+            expireTimeout: -1,
+            transient: false
+        })
+
+    // The view kept on the live entry. A toast being torn down can still
+    // evaluate this after its entry is gone, so that case reads blank rather
+    // than touching a notification the server may have destroyed.
+    function viewOf(notification) {
+        var entry = root.entryFor(notification);
+        return entry ? entry.view : root.blankView;
+    }
+
+    function durationFor(view) {
+        if (view.duration !== undefined)
+            return Math.max(0, view.duration);
+        if (view.urgency === NotificationUrgency.Critical)
             return 0;
-        var floor = notification.urgency === NotificationUrgency.Low ? root.lowDuration : root.normalDuration;
+        var floor = view.urgency === NotificationUrgency.Low ? root.lowDuration : root.normalDuration;
         // expireTimeout is milliseconds; -1 asks for the server default and
         // 0 is treated the same way, as omarchy does, rather than as "forever".
-        var asked = notification.expireTimeout > 0 ? notification.expireTimeout : 0;
+        var asked = view.expireTimeout > 0 ? view.expireTimeout : 0;
         return Math.min(root.maxDuration, Math.max(floor, asked));
     }
 
@@ -83,6 +124,12 @@ Singleton {
         return Math.max(0, Math.min(1, (entry.deadline - root.now) / entry.duration));
     }
 
+    // Milliseconds this toast lives, 0 for one that never expires.
+    function duration(notification) {
+        var entry = root.entryFor(notification);
+        return entry ? entry.duration : 0;
+    }
+
     function expires(notification) {
         var entry = root.entryFor(notification);
         return entry !== null && entry.duration > 0;
@@ -94,10 +141,11 @@ Singleton {
     }
 
     // Start, or restart, the clock on a toast. Restarted on a content update:
-    // new text deserves a full look.
+    // new text deserves a full look, and a fresh pass through the rules.
     function arm(notification) {
         root.now = Date.now();
-        var duration = root.durationFor(notification);
+        var view = root.buildView(notification);
+        var duration = root.durationFor(view);
         var next = [];
         var found = false;
         for (var i = 0; i < root.lifetimes.length; i++) {
@@ -106,6 +154,7 @@ Singleton {
                 found = true;
                 next.push({
                     notification: notification,
+                    view: view,
                     arrived: entry.arrived,
                     duration: duration,
                     deadline: root.now + duration,
@@ -118,12 +167,14 @@ Singleton {
         if (!found)
             next.push({
                 notification: notification,
+                view: view,
                 arrived: root.now,
                 duration: duration,
                 deadline: root.now + duration,
                 paused: false
             });
         root.lifetimes = next;
+        return view;
     }
 
     // Hover holds the countdown; the deadline slides forward while paused.
@@ -165,30 +216,19 @@ Singleton {
         onTriggered: root.tick()
     }
 
-    // ---------------------------------------------------------------- rules
+    // -------------------------------------------------------------- history
 
-    // Two kinds punch through do-not-disturb, chosen to be rare and
-    // intentional: critical alerts from the bare CLI. Critical alone is not
-    // enough, because chat apps mark everything critical to force visibility.
-    function bypassesDnd(notification) {
-        return notification.urgency === NotificationUrgency.Critical && notification.appName === "notify-send";
-    }
-
-    // The freedesktop transient hint: not worth looking back at.
-    function ephemeral(notification) {
-        return notification.transient;
-    }
-
-    // A plain copy for the history list, taken before the server destroys
-    // the object.
+    // A plain copy of the view for the history list, taken before the server
+    // destroys the object.
     function snapshot(notification, reason) {
         var arrived = root.arrivedAt(notification);
+        var view = root.viewOf(notification);
         return {
             key: arrived + ":" + notification.id,
-            appName: String(notification.appName || ""),
-            summary: String(notification.summary || ""),
-            body: String(notification.body || ""),
-            urgency: notification.urgency,
+            appName: view.appName,
+            summary: view.summary,
+            body: view.body,
+            urgency: view.urgency,
             arrived: arrived,
             time: Qt.formatTime(new Date(arrived), "HH:mm"),
             reason: reason
@@ -244,16 +284,26 @@ Singleton {
         // handler returns.
         notification.tracked = true;
 
-        if (root.doNotDisturb && !root.bypassesDnd(notification)) {
-            root.arm(notification);
-            if (!root.ephemeral(notification))
+        var view = root.arm(notification);
+
+        // Dropped by a rule: gone as if it never arrived.
+        if (view.drop === true) {
+            root.drop(notification);
+            notification.dismiss();
+            return;
+        }
+
+        // Silenced, by do-not-disturb or by a rule: straight to history.
+        // The transient hint means not worth looking back at, so not even
+        // there.
+        if (view.silent === true || (root.doNotDisturb && view.bypassDnd !== true)) {
+            if (!view.transient)
                 root.record(root.snapshot(notification, "silenced"));
             root.drop(notification);
             notification.dismiss();
             return;
         }
 
-        root.arm(notification);
         notification.closed.connect(function (reason) {
             root.forget(notification, reason);
         });
@@ -272,8 +322,65 @@ Singleton {
         });
     }
 
+    // Only a dismiss — a click here, or a dismiss keybind — means a toast was
+    // read, because those are the only paths that produce that reason. One
+    // that ran out went to the inbox unseen.
+    function unread(reason) {
+        return reason !== NotificationCloseReason.Dismissed;
+    }
+
+    // A sender withdrawing its own notification does not take it off the
+    // screen. Chromium web apps (Google Messages) send CloseNotification about
+    // seven seconds in, before the toast's own life is up, which from this
+    // side looks like it vanished unread. The server destroys the object on
+    // close, so the toast carries on from a plain copy that keeps the same
+    // countdown, expires into the inbox, and still dismisses and focuses the
+    // app on click; only its actions are gone with the sender.
+    function withdraw(notification) {
+        var ghost = {
+            withdrawn: true,
+            id: notification.id,
+            appName: String(notification.appName || ""),
+            desktopEntry: String(notification.desktopEntry || ""),
+            summary: String(notification.summary || ""),
+            body: String(notification.body || ""),
+            urgency: notification.urgency,
+            expireTimeout: notification.expireTimeout,
+            transient: notification.transient,
+            actions: []
+        };
+        ghost.dismiss = function () {
+            root.forget(ghost, NotificationCloseReason.Dismissed);
+        };
+        ghost.expire = function () {
+            root.forget(ghost, NotificationCloseReason.Expired);
+        };
+        root.popups = root.popups.map(function (n) {
+            return n === notification ? ghost : n;
+        });
+        root.lifetimes = root.lifetimes.map(function (entry) {
+            if (entry.notification !== notification)
+                return entry;
+            return {
+                notification: ghost,
+                view: entry.view,
+                arrived: entry.arrived,
+                duration: entry.duration,
+                deadline: entry.deadline,
+                paused: entry.paused
+            };
+        });
+    }
+
     function forget(notification, reason) {
-        if (!root.ephemeral(notification))
+        var entry = root.entryFor(notification);
+        var elapsed = entry ? Math.round((Date.now() - entry.arrived) / 100) / 10 : -1;
+        console.info("notification closed: app=" + notification.appName + " entry=" + notification.desktopEntry + " reason=" + NotificationCloseReason.toString(reason) + " after=" + elapsed + "s transient=" + notification.transient + " timeout=" + notification.expireTimeout);
+        if (reason === NotificationCloseReason.CloseRequested && root.popups.indexOf(notification) >= 0) {
+            root.withdraw(notification);
+            return;
+        }
+        if (root.unread(reason) && !root.viewOf(notification).transient)
             root.record(root.snapshot(notification, reason));
         root.popups = root.popups.filter(function (n) {
             return n !== notification;
@@ -306,7 +413,10 @@ Singleton {
     }
 
     function focusApp(notification) {
-        var wanted = [notification.desktopEntry, notification.appName].map(function (s) {
+        // A rule may name the window outright; otherwise the sender's own
+        // names, which are the raw ones, since a rule's header rewrite (a
+        // site name) is not a window.
+        var wanted = [root.viewOf(notification).appId, notification.desktopEntry, notification.appName].map(function (s) {
             return String(s || "").toLowerCase();
         }).filter(function (s) {
             return s !== "";
