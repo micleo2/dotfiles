@@ -14,7 +14,7 @@ hl.on("hyprland.start", function()
 	hl.exec_cmd("QT_FONT_DPI= qs -c retro")
 	hl.exec_cmd("QT_FONT_DPI= qs -c gw-idle")
 	hl.exec_cmd("hyprpm reload")
-	hl.exec_cmd("swaync")
+	-- No notification daemon: the retro shell claims org.freedesktop.Notifications itself.
 	hl.exec_cmd("snappy-switcher --daemon")
 	hl.exec_cmd("udiskie -a -n")
 	hl.exec_cmd("wl-paste --type text --watch cliphist store")
@@ -99,6 +99,13 @@ hl.window_rule({
 hl.layer_rule({
 	name = "no-anim-qs-submap",
 	match = { namespace = "qs-submap-overlay" },
+	no_anim = true,
+})
+-- Same for the notification stack: an LCD module switches on, it does not
+-- fade in.
+hl.layer_rule({
+	name = "no-anim-qs-notifications",
+	match = { namespace = "qs-notifications" },
 	no_anim = true,
 })
 
@@ -217,6 +224,12 @@ hl.bind(M("B"), hl.dsp.exec_cmd("~/dotfiles/scripts/menus/browser-menu.sh"))
 
 -- Toggle top bar (SUPER+T is the top bar submap, see submap-topbar.lua)
 hl.bind(M(S("T")), hl.dsp.exec_cmd("qs -c retro ipc call topbar toggle"))
+
+-- Notifications (the shell is the daemon, see quickshell/retro/Notifications.qml)
+hl.bind(M("comma"), hl.dsp.exec_cmd("qs -c retro ipc call notifications dismissOne"))
+hl.bind(M(S("comma")), hl.dsp.exec_cmd("qs -c retro ipc call notifications dismissAll"))
+hl.bind(M(C("comma")), hl.dsp.exec_cmd("qs -c retro ipc call notifications toggleDnd"))
+hl.bind(M("ALT + comma"), hl.dsp.exec_cmd("qs -c retro ipc call notifications invokeLast"))
 
 for i = 1, 10 do
 	local key = i % 10 -- 10 maps to key 0
