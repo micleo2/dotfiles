@@ -45,6 +45,7 @@ local submap_options_per_key = {
 	j = make_submap_entry("jellyfin", "Jellyfin", { direct = true }),
 	m = make_submap_entry("messenger", "Messenger", { direct = true }),
 	r = make_submap_entry("calendar", "Calendar", { direct = true }),
+	t = make_submap_entry("youtube", "YouTube", { direct = true }),
 	w = make_submap_entry("whatsapp", "WhatsApp", { direct = true }),
 }
 

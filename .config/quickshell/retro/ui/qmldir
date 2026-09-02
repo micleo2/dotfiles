@@ -1,0 +1,10 @@
+module Ui
+Chip 1.0 Chip.qml
+Glyph 1.0 Glyph.qml
+Label 1.0 Label.qml
+Popup 1.0 Popup.qml
+PopupField 1.0 PopupField.qml
+PopupRow 1.0 PopupRow.qml
+PopupSlider 1.0 PopupSlider.qml
+PopupToggle 1.0 PopupToggle.qml
+SectionLabel 1.0 SectionLabel.qml

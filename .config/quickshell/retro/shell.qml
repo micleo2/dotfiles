@@ -15,12 +15,6 @@ Scope {
     id: root
 
     FontLoader {
-        id: iconFont
-
-        source: "fonts/MaterialSymbolsSharp_Filled_36pt-Regular.ttf"
-    }
-
-    FontLoader {
         id: fontCharcoal
 
         source: "fonts/Charcoal.ttf"

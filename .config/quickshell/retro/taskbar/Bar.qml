@@ -31,14 +31,19 @@ Scope {
                 visible: barScope.barVisible
                 screen: root.modelData
                 WlrLayershell.layer: WlrLayer.Bottom
-                WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
+                // Nothing on the bar reads keys, and a bar that can take them
+                // would steal them from an open popup whenever the pointer
+                // crosses it (Hyprland focuses on-demand layers on hover).
+                WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
                 anchors {
                     top: true
                     left: true
                     right: true
                 }
-                implicitHeight: 32
+                // Grows with the text-size control. At the default 12px the
+                // font is 22 and this is exactly the original 32.
+                implicitHeight: Math.max(32, Config.settings.bar.fontSize + 10)
 
                 /*=== Taskbar Background ===*/
                 // The bar toggles between an opaque and a fully transparent
@@ -46,7 +51,7 @@ Scope {
                 // creation; a window born opaque has no alpha channel and can
                 // never become transparent later, so force the alpha channel.
                 surfaceFormat.opaque: false
-                color: Config.settings.bar.transparent ? "transparent" : Config.colors.base
+                color: Settings.barTransparent ? "transparent" : Config.colors.base
                 Item {
                     id: taskbarBackground
                     anchors.fill: parent
@@ -63,8 +68,17 @@ Scope {
                 MouseArea {
                     id: barClickArea
                     anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: Config.settings.bar.transparent = !Config.settings.bar.transparent
+                    // No cursorShape: the whole bar is clickable for the
+                    // transparency toggle, but it is not a button and should
+                    // not advertise itself as one under the pointer.
+                    onClicked: {
+                        // With a popup open, a click on bare bar is a dismiss,
+                        // not a request to change the bar.
+                        if (Popups.active)
+                            Popups.active = null;
+                        else
+                            Settings.barTransparent = !Settings.barTransparent;
+                    }
                 }
 
                 /*=== Left portion of bar ===*/
@@ -214,6 +228,9 @@ Scope {
                     // System Tray
                     Item {
                         id: systray_container
+                        // No applets, no box: an invisible item is skipped by
+                        // the layout, so the frame goes with it.
+                        visible: sysTray.hasItems
                         implicitHeight: parent.height
                         implicitWidth: sysTray.width + 12
                         Rectangle {
@@ -240,29 +257,21 @@ Scope {
                         }
                     }
 
-                    // Volume
-                    Item {
-                        id: volume_container
-                        implicitHeight: parent.height
-                        implicitWidth: volumeWidget.width + 4
-                        Rectangle {
-                            id: volumebg
-                            anchors.fill: volume_container
-                            Rectangle {
-                                anchors.fill: volumebg
-                                border.width: 0
-                                color: Config.colors.shadow
-                            }
-                            Rectangle {
-                                anchors.fill: volumebg
-                                color: "transparent"
-                                border.width: 2
-                                anchors.margins: -2
-                            }
-                        }
-                        VolumeWidget {
-                            id: volumeWidget
-                        }
+                    // Laptop modules (wifi, bluetooth, display, idle, battery).
+                    // Which of these appear is decided by modules.json.
+                    BarModules {
+                        Layout.fillHeight: true
+                        taskbarWindow: taskbar
+                        barScreen: root.modelData
+                        primary: root.modelData === Quickshell.screens[0]
+                    }
+
+                    // Volume. Brings its own Chip, so it needs no decoration
+                    // wrapper here.
+                    VolumeWidget {
+                        Layout.fillHeight: true
+                        barScreen: root.modelData
+                        primary: root.modelData === Quickshell.screens[0]
                     }
                 }
             }

@@ -5,3 +5,11 @@ singleton Weather 1.0 Weather.qml
 singleton Brightness 1.0 Brightness.qml
 singleton Volume 1.0 Volume.qml
 singleton Time 1.0 Time.qml
+singleton Settings 1.0 Settings.qml
+singleton Host 1.0 Host.qml
+singleton Modules 1.0 Modules.qml
+singleton Idle 1.0 Idle.qml
+singleton DisplayScale 1.0 DisplayScale.qml
+singleton Popups 1.0 Popups.qml
+singleton Vpn 1.0 Vpn.qml
+singleton Addresses 1.0 Addresses.qml

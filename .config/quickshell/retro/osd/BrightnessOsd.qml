@@ -10,6 +10,10 @@ Scope {
 
     Connections {
         function onBrightnessChanged() {
+            // A machine with no backend at all should never flash an OSD that
+            // reports a brightness nothing is driving.
+            if (!Brightness.available)
+                return;
             osdRoot.osdVisible = true;
             hideTimer.restart();
         }
@@ -50,7 +54,10 @@ Scope {
             Item {
                 id: bucketWrapper
 
-                property int filledCount: Math.round(Brightness.percent / 10)
+                // One segment per brightness step, so every keypress moves the
+                // bucket by exactly one block and a full bucket means 100%.
+                property int segmentCount: Brightness.segments
+                property int filledCount: Math.round(Brightness.percent / 100 * bucketWrapper.segmentCount)
                 property real flare: 14
 
                 width: osdWindow.width * 0.35
@@ -61,9 +68,11 @@ Scope {
 
                 Canvas {
                     property int filledCount: bucketWrapper.filledCount
+                    property int segmentCount: bucketWrapper.segmentCount
 
                     anchors.fill: parent
                     onFilledCountChanged: requestPaint()
+                    onSegmentCountChanged: requestPaint()
                     onPaint: {
                         var ctx = getContext("2d");
                         ctx.clearRect(0, 0, width, height);
@@ -72,8 +81,9 @@ Scope {
                         var gap = 5;
                         var inLeft = gap;
                         var inRight = gap;
+                        var segCount = Math.max(1, segmentCount);
                         var segArea = width - inLeft - inRight;
-                        var segW = (segArea - gap * 9) / 10;
+                        var segW = (segArea - gap * (segCount - 1)) / segCount;
                         // Bucket body fill
                         ctx.fillStyle = "#000000";
                         ctx.beginPath();
@@ -84,7 +94,7 @@ Scope {
                         ctx.closePath();
                         ctx.fill();
                         // Trapezoid segments
-                        for (var i = 0; i < 10; i++) {
+                        for (var i = 0; i < segCount; i++) {
                             var x1 = inLeft + i * (segW + gap);
                             var x2 = x1 + segW;
                             var topAtX1 = f * (1 - x1 / width) + gap;
