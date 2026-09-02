@@ -21,6 +21,7 @@ Item {
     property real ghost: 0.12
     // Every cell lit: the power-on blink, run once when the module appears.
     property bool flash: false
+    property bool flashOnCreate: true
 
     default property alias content: overlay.data
 
@@ -65,7 +66,10 @@ Item {
         anchors.fill: parent
     }
 
-    Component.onCompleted: root.flash = true
+    Component.onCompleted: {
+        if (root.flashOnCreate)
+            root.flash = true;
+    }
 
     Timer {
         running: root.flash

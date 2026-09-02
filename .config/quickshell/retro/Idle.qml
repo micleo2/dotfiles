@@ -8,9 +8,8 @@ import Quickshell.Io
 //
 // Two locks are needed because they cover different things:
 //   * a Wayland idle-inhibit lock, held by IdleWidget because it has a surface
-//     to attach one to, suppresses compositor-side idling. Nothing consumes it
-//     today — no idle daemon is installed — but hypridle would honour it the
-//     moment one is.
+//     to attach one to, suppresses compositor-side idling. Lock's IdleMonitor
+//     honours it, so stay-awake also means no auto-lock.
 //   * a logind inhibitor blocks suspend and lid-close, which is what actually
 //     puts this machine to sleep right now. This is the half that does work.
 Singleton {

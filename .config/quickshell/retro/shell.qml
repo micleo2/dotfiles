@@ -11,6 +11,7 @@ import "taskbar" as Taskbar
 import "osd" as Osd
 import "submap" as Submap
 import "notifications" as Notifications_
+import "lock" as Lock_
 
 Scope {
     id: root
@@ -28,4 +29,6 @@ Scope {
     Submap.SubmapOverlay {}
 
     Notifications_.Toasts {}
+
+    Lock_.LockScreen {}
 }

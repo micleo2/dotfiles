@@ -1,0 +1,8 @@
+#%PAM-1.0
+# The lock screen's own stack, loaded by Lock.qml through PamContext's
+# configDirectory so nothing has to be written under /etc. pam_unix checks
+# the password as the user through unix_chkpwd. Kept apart from the system
+# `login` stack on purpose: that one carries pam_faillock, and a lock screen
+# should not lock the account out after three typos.
+auth     required pam_unix.so
+account  required pam_unix.so

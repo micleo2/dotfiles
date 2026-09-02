@@ -130,6 +130,12 @@ hl.config({
 	misc = {
 		force_default_wallpaper = 0, -- Set to 0 or 1 to disable the anime mascot wallpapers
 		disable_hyprland_logo = true,
+		-- Let a restarted `qs -c retro` take over a session lock left behind
+		-- by a crashed one (`qs -c retro ipc call lock lock` from a TTY).
+		allow_session_lock_restore = true,
+		-- The lock screen blanks the displays; any input brings them back.
+		key_press_enables_dpms = true,
+		mouse_move_enables_dpms = true,
 	},
 })
 

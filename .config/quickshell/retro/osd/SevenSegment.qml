@@ -15,6 +15,7 @@ Item {
     property int digit: -1
     property real ghost: 0.12
     property int thickness: 5
+    property color color: Config.colors.text
 
     readonly property var table: [[1, 1, 1, 1, 1, 1, 0], [0, 1, 1, 0, 0, 0, 0], [1, 1, 0, 1, 1, 0, 1], [1, 1, 1, 1, 0, 0, 1], [0, 1, 1, 0, 0, 1, 1], [1, 0, 1, 1, 0, 1, 1], [1, 0, 1, 1, 1, 1, 1], [1, 1, 1, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 0, 1, 1]]
 
@@ -35,7 +36,7 @@ Item {
         y: 0
         width: root.width - 2 * root.t
         height: root.t
-        color: Config.colors.text
+        color: root.color
         opacity: root.lit(0)
     }
 
@@ -44,7 +45,7 @@ Item {
         y: root.t
         width: root.t
         height: root.half - root.t
-        color: Config.colors.text
+        color: root.color
         opacity: root.lit(1)
     }
 
@@ -53,7 +54,7 @@ Item {
         y: root.half + root.t
         width: root.t
         height: root.half - root.t
-        color: Config.colors.text
+        color: root.color
         opacity: root.lit(2)
     }
 
@@ -62,7 +63,7 @@ Item {
         y: root.height - root.t
         width: root.width - 2 * root.t
         height: root.t
-        color: Config.colors.text
+        color: root.color
         opacity: root.lit(3)
     }
 
@@ -71,7 +72,7 @@ Item {
         y: root.half + root.t
         width: root.t
         height: root.half - root.t
-        color: Config.colors.text
+        color: root.color
         opacity: root.lit(4)
     }
 
@@ -80,7 +81,7 @@ Item {
         y: root.t
         width: root.t
         height: root.half - root.t
-        color: Config.colors.text
+        color: root.color
         opacity: root.lit(5)
     }
 
@@ -89,7 +90,7 @@ Item {
         y: root.half
         width: root.width - 2 * root.t
         height: root.t
-        color: Config.colors.text
+        color: root.color
         opacity: root.lit(6)
     }
 }

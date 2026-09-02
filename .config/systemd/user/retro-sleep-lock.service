@@ -1,0 +1,18 @@
+[Unit]
+Description=Lock the retro shell before suspend
+# The monitor talks to the running `qs -c retro` over its IPC socket, which
+# only exists once the session is up; wait for uwsm to have imported the
+# session environment, but stay inside graphical-session.target's lifetime.
+After=dbus.socket graphical-session-pre.target
+Requires=dbus.socket
+PartOf=graphical-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+
+[Service]
+Type=simple
+ExecStart=%h/dotfiles/scripts/lock/retro-sleep-monitor.sh
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=graphical-session.target
