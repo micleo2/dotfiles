@@ -1,6 +1,7 @@
 .DS_Store
 .config/fish/conf.d/work.fish
 .config/fish/conf.d/home.fish
+.config/hypr/local.lua
 
 tt.*
 .tests

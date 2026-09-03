@@ -14,6 +14,12 @@ import ".."
 // output at all, because a lock taken over an empty screen set has nowhere
 // to draw and Hyprland has crashed on exactly that. Both guards are from
 // omarchy's locker.
+//
+// Started with RETRO_LOCK_ON_START=1 (hyprland.lua's session start, where
+// greetd auto-login makes this the login screen) the shell locks itself on
+// its first load, the way quickshell's own lockscreen example does. The
+// flag below survives config reloads, so a save does not lock again, and a
+// shell restarted by hand carries no such variable.
 Scope {
     id: root
 
@@ -28,16 +34,21 @@ Scope {
         return count;
     }
 
-    // Runs from retryTimer only, so a lock request is always debounced and a
-    // request that finds no output simply waits for the next tick.
+    // Takes the lock at once when there is a real output and the screen set
+    // has been still for a moment; otherwise it is retried from the timers
+    // below. Nothing debounces a plain request, so a lock at session start
+    // lands as soon as the shell is up rather than a timer tick later.
     function requestSessionLock() {
         if (!Lock.locked || sessionLock.locked)
+            return;
+        if (stabilizeTimer.running)
             return;
         if (root.realScreenCount() === 0) {
             Lock.logEvent("lock-pending: no-real-screen");
             retryTimer.restart();
             return;
         }
+        retryTimer.stop();
         sessionLock.locked = true;
     }
 
@@ -46,8 +57,9 @@ Scope {
 
         function onLockedChanged() {
             if (Lock.locked) {
-                retryTimer.restart();
+                root.requestSessionLock();
             } else {
+                stabilizeTimer.stop();
                 retryTimer.stop();
                 sessionLock.locked = false;
             }
@@ -57,18 +69,45 @@ Scope {
     Connections {
         target: Quickshell
 
+        // A monitor being toggled or the machine resuming: hold the lock
+        // until the outputs have settled, then take it.
         function onScreensChanged() {
             if (Lock.locked && !sessionLock.locked)
-                retryTimer.restart();
+                stabilizeTimer.restart();
         }
     }
 
-    // One timer for both jobs: debounce hotplug bursts, and retry while there
-    // is no real output to draw on.
+    PersistentProperties {
+        id: startup
+
+        reloadableId: "lockStartup"
+        property bool handled: false
+
+        // Runs once the tree is built, on the first load and every reload.
+        onLoaded: {
+            if (startup.handled)
+                return;
+            startup.handled = true;
+            if (Quickshell.env("RETRO_LOCK_ON_START") === "1") {
+                Lock.logEvent("lock-on-start");
+                Lock.lock();
+            }
+        }
+    }
+
+    // Debounces hotplug bursts; only ever armed by a screen-set change.
+    Timer {
+        id: stabilizeTimer
+
+        interval: 500
+        onTriggered: root.requestSessionLock()
+    }
+
+    // Retries while there is no real output to draw on.
     Timer {
         id: retryTimer
 
-        interval: 500
+        interval: 100
         onTriggered: root.requestSessionLock()
     }
 
