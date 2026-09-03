@@ -1,0 +1,4 @@
+module Launcher
+singleton Launcher 1.0 Launcher.qml
+LauncherOverlay 1.0 LauncherOverlay.qml
+LcdLauncherView 1.0 LcdLauncherView.qml

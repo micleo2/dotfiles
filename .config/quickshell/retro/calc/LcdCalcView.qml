@@ -64,13 +64,7 @@ Item {
         return out.slice(-root.previewRows);
     }
 
-    // The draft, windowed so the cursor is always on the grid.
     readonly property string draft: Calculator.draft
-    readonly property int avail: root.columns - 2
-    readonly property int cursorPos: Math.min(input.cursorPosition, root.draft.length)
-    readonly property int start: root.cursorPos >= root.avail ? root.cursorPos - root.avail + 1 : 0
-    readonly property string shownDraft: root.draft.substr(root.start, root.avail)
-    readonly property int cursorCell: 2 + root.cursorPos - root.start
 
     function pushRows(out, text) {
         var alarm = /^(error|warning):/i.test(text);
@@ -300,46 +294,15 @@ Item {
             }
 
             // Row: the prompt and the draft, with the cursor as a lit cell.
-            Lcd.CharGrid {
+            Lcd.PromptRow {
                 id: inputGrid
 
                 columns: root.columns
-                rows: 1
                 ghost: root.ghost
-
-                Ui.Label {
-                    x: 0
-                    y: inputGrid.rowY(0)
-                    height: inputGrid.cellHeight
-                    text: "> " + root.shownDraft
-                    color: root.ink
-                    size: inputGrid.size
-                    font.letterSpacing: inputGrid.letterSpacing
-                    textFormat: Text.PlainText
-                }
-
-                // The cursor is a lit cell, so it sits on the cell layer.
-                marks: Rectangle {
-                    x: root.cursorCell * inputGrid.cellWidth
-                    y: 0
-                    width: inputGrid.cellWidth - 1
-                    height: inputGrid.cellHeight - 1
-                    color: root.ink
-                    visible: root.inputEnabled && root.cursorOn
-
-                    // The character under the cursor, in the face colour,
-                    // nudged the way the text layer is.
-                    Ui.Label {
-                        x: -inputGrid.inkShift
-                        y: 0
-                        height: inputGrid.cellHeight
-                        text: root.cursorPos < root.draft.length ? root.draft.charAt(root.cursorPos) : ""
-                        color: Config.colors.shadow
-                        size: inputGrid.size
-                        font.letterSpacing: inputGrid.letterSpacing
-                        textFormat: Text.PlainText
-                    }
-                }
+                ink: root.ink
+                text: root.draft
+                cursorPosition: input.cursorPosition
+                cursorOn: root.inputEnabled && root.cursorOn
             }
 
             // Rows: qalc's answer to the draft, dimmed until it is committed.
