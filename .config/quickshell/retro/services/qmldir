@@ -1,0 +1,13 @@
+module Services
+singleton Volume 1.0 Volume.qml
+singleton Brightness 1.0 Brightness.qml
+singleton Time 1.0 Time.qml
+singleton Weather 1.0 Weather.qml
+singleton FocusedWindow 1.0 FocusedWindow.qml
+singleton Vpn 1.0 Vpn.qml
+singleton Addresses 1.0 Addresses.qml
+singleton SystemStats 1.0 SystemStats.qml
+singleton DisplayScale 1.0 DisplayScale.qml
+singleton Idle 1.0 Idle.qml
+singleton Host 1.0 Host.qml
+singleton Modules 1.0 Modules.qml

@@ -3,8 +3,9 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Effects
 import Quickshell.Io
-import "../ui" as Ui
-import ".."
+import "../../ui" as Ui
+import "../.."
+import "../../services"
 
 Item {
     id: root
@@ -61,7 +62,7 @@ Item {
                 // The hand-drawn source is 16x16 and has always been drawn at 24,
                 // i.e. upscaled 1.5x with nearest-neighbour. sourceSize pins the
                 // decode to native so the upscale stays crisp rather than resampled.
-                source: Volume.muted ? "assets/muted.png" : "assets/unmuted.png"
+                source: Volume.muted ? "../assets/muted.png" : "../assets/unmuted.png"
                 sourceSize.width: 16
                 sourceSize.height: 16
                 smooth: false

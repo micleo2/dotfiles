@@ -6,7 +6,9 @@ import QtQuick
 import QtQuick.Layouts
 
 import ".."
-import "../modules" as Modules_
+import "widgets" as Widgets
+import "../services"
+import "../ui" as Ui
 
 Scope {
     id: barScope
@@ -73,8 +75,8 @@ Scope {
                     onClicked: {
                         // With a popup open, a click on bare bar is a dismiss,
                         // not a request to change the bar.
-                        if (Popups.active)
-                            Popups.active = null;
+                        if (Ui.Popups.active)
+                            Ui.Popups.active = null;
                         else
                             Settings.barTransparent = !Settings.barTransparent;
                     }
@@ -122,7 +124,7 @@ Scope {
                                 anchors.margins: -2
                             }
                         }
-                        Workspaces {
+                        Widgets.Workspaces {
                             id: workspaces
                             taskbarWindow: taskbar
                         }
@@ -161,7 +163,7 @@ Scope {
                                 anchors.margins: -2
                             }
                         }
-                        FocusedWindowWidget {
+                        Widgets.FocusedWindowWidget {
                             id: focusedwindow
                             anchors.verticalCenter: parent.verticalCenter
                             anchors.horizontalCenter: parent.horizontalCenter
@@ -207,7 +209,7 @@ Scope {
                                 anchors.margins: -2
                             }
                         }
-                        ClockWidget {
+                        Widgets.ClockWidget {
                             id: clock
                             anchors.right: parent.right
                             anchors.verticalCenter: parent.verticalCenter
@@ -247,7 +249,7 @@ Scope {
                                 anchors.margins: -2
                             }
                         }
-                        WeatherWidget {
+                        Widgets.WeatherWidget {
                             id: weatherWidget
                             anchors.verticalCenter: parent.verticalCenter
                             anchors.horizontalCenter: parent.horizontalCenter
@@ -298,7 +300,7 @@ Scope {
                                 anchors.margins: -2
                             }
                         }
-                        SysTray {
+                        Widgets.SysTray {
                             id: sysTray
                             taskbarWindow: taskbar
                             anchors.verticalCenter: parent.verticalCenter
@@ -317,14 +319,14 @@ Scope {
 
                     // Volume. Brings its own Chip, so it needs no decoration
                     // wrapper here.
-                    VolumeWidget {
+                    Widgets.VolumeWidget {
                         Layout.fillHeight: true
                         barScreen: root.modelData
                         primary: root.modelData === Quickshell.screens[0]
                     }
 
                     // Notifications: the bell, silencing, and history.
-                    Modules_.NotificationWidget {
+                    Widgets.NotificationWidget {
                         Layout.fillHeight: true
                         barScreen: root.modelData
                         primary: root.modelData === Quickshell.screens[0]

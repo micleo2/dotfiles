@@ -1,6 +1,6 @@
 .pragma library
 
-// 9x9 pixel maps for the toast's icon slot, drawn by osd/PixelGlyph: '#' is
+// 9x9 pixel maps for the toast's icon slot, drawn by lcd/PixelGlyph: '#' is
 // lit, everything else is a ghost cell. Real app icons never look right on an
 // LCD, so the slot shows what kind of thing arrived rather than who sent it.
 

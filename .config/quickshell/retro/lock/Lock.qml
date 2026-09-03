@@ -6,9 +6,9 @@ import Quickshell.Io
 import Quickshell.Services.Pam
 
 // The lock: state, authentication and the side effects around it. The
-// Wayland session lock itself and the surfaces live in lock/LockScreen.qml,
+// Wayland session lock itself and the surfaces live in LockScreen.qml,
 // which watches `locked` here; the module drawn on each output is
-// lock/LcdLockView.qml, which only reads this and calls back into it.
+// LcdLockView.qml, which only reads this and calls back into it.
 //
 // Two jobs beyond the lock itself:
 //   * blank the screens after a short while on the lock screen, and wake

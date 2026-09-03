@@ -2,8 +2,10 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell.Services.Notifications
-import "../ui" as Ui
-import ".."
+import "../../ui" as Ui
+import "../.."
+import "../../services"
+import "../../notifications"
 
 // The bell: do-not-disturb state and the count of what has come and gone,
 // with a popup holding the switch and the history. Right-clicking the chip

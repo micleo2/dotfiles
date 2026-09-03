@@ -1,5 +1,5 @@
 pragma ComponentBehavior: Bound
-import ".."
+import "../.."
 import QtQuick
 import QtQuick.Effects
 import QtQuick.Layouts

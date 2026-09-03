@@ -17,12 +17,6 @@ import "calc" as Calc
 Scope {
     id: root
 
-    FontLoader {
-        id: fontCharcoal
-
-        source: "fonts/Charcoal.ttf"
-    }
-
     Taskbar.Bar {}
 
     Osd.LcdOsd {}

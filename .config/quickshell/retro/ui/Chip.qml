@@ -4,7 +4,7 @@ import ".."
 // The bar-slot frame: grey fill with a 2px outline bled 2px outward, and a
 // 1px button edge below and to the right of that, System 7 style.
 //
-// Bar.qml repeated this block verbatim for each of its five widgets. It is one
+// taskbar/Bar.qml repeated this block verbatim for each of its five widgets. It is one
 // component now so the module chips do not add five more copies of it.
 //
 // Content goes into an inner Row, which derives its own implicit size from its
@@ -88,7 +88,7 @@ Item {
         cursorShape: Qt.PointingHandCursor
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         onClicked: (mouse) => {
-            // Bar.qml's full-width click area toggles bar transparency on any
+            // taskbar/Bar.qml's full-width click area toggles bar transparency on any
             // click, so a chip has to swallow its own or every interaction
             // fires that too.
             mouse.accepted = true;

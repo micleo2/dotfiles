@@ -3,7 +3,7 @@
 -- copy-path launches kitty with a `kitty-float-*` class; a window rule
 -- (see window-workspace-rules.lua) floats + centers any window whose class
 -- matches the `^kitty-float` prefix. The calculator is the shell's own
--- (quickshell/retro/Calculator.qml), driven by qalc underneath.
+-- (quickshell/retro/calc/Calculator.qml), driven by qalc underneath.
 local submap_builder = require("submap-builder")
 
 local submap_options_per_key = {

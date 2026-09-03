@@ -1,5 +1,6 @@
-import ".."
+import "../.."
 import QtQuick
+import "../../services"
 
 Text {
     text: Time.time
