@@ -14,7 +14,8 @@ import ".."
 // Enter accepts, Shift+Enter hands back the typed text (dmenu only),
 // Escape and Ctrl+C cancel. Up/Down, Ctrl+J/K, Ctrl+N/P and Tab walk the
 // rows, PageUp/PageDown by a page, Alt+1..9,0 pick a visible row. Ctrl+U
-// clears the query. A click picks a row, the wheel moves the selection.
+// clears the query, the rest of the line editing is readline's
+// (Ui.Readline). A click picks a row, the wheel moves the selection.
 Item {
     id: root
 
@@ -221,7 +222,7 @@ Item {
                     Launcher.select(root.first + row);
                     Launcher.accept();
                 }
-            } else {
+            } else if (!Ui.Readline.handle(input, event)) {
                 return;
             }
             event.accepted = true;

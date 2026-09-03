@@ -16,7 +16,8 @@ import ".."
 //
 // Enter commits the line; Ctrl+V commits it, copies its result and closes;
 // Escape closes. Ctrl+C clears the line, Ctrl+L the console. Up and Down
-// walk the committed lines, PageUp and PageDown scroll the console.
+// walk the committed lines, PageUp and PageDown scroll the console. The
+// rest of the line editing is readline's (Ui.Readline).
 Item {
     id: root
 
@@ -189,7 +190,7 @@ Item {
                 root.scroll = Math.min(root.maxScroll, root.scroll + Math.floor(root.consoleRows / 2));
             } else if (event.key === Qt.Key_PageDown) {
                 root.scroll = Math.max(0, root.scroll - Math.floor(root.consoleRows / 2));
-            } else {
+            } else if (!Ui.Readline.handle(input, event)) {
                 return;
             }
             event.accepted = true;
