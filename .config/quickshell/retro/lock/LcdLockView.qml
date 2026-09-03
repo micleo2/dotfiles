@@ -124,6 +124,8 @@ Item {
                 Lock.password = "";
                 Lock.clearDenied();
                 event.accepted = true;
+            } else if (Ui.Readline.handle(input, event)) {
+                event.accepted = true;
             }
         }
     }

@@ -63,6 +63,8 @@ Item {
             if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
                 root.accepted(input.text);
                 event.accepted = true;
+            } else if (Readline.handle(input, event)) {
+                event.accepted = true;
             }
         }
     }
