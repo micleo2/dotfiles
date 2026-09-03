@@ -18,6 +18,10 @@ local submap_options_per_key = {
 		label = "calculator",
 		exec_cmd = "qs -c retro ipc call calc toggle",
 	},
+	s = {
+		label = "ssh",
+		exec_cmd = "retro-ssh",
+	},
 }
 
 submap_builder.define_submap("utils", "SUPER+U", submap_options_per_key)

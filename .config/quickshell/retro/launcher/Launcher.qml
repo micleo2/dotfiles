@@ -7,30 +7,13 @@ import Quickshell.Io
 import Quickshell.Hyprland
 import ".."
 
-// The launcher: rofi's two jobs, `-show drun` and `-dmenu`, as one LCD
-// module. State and both sources live here; LauncherOverlay.qml draws it.
-//
-// Apps mode lists the desktop entries Quickshell already parses, ranked by
-// how often each has been launched from here (launcher.json beside
-// settings.json), and runs the chosen one through gtk-launch, the way the
-// apps submap does.
-//
-// Dmenu mode is driven by scripts/retro-launcher: the script writes its
-// stdin to a file, makes a FIFO beside it, calls `launcher dmenu <dir>
-// <prompt>` and blocks reading the FIFO. The chosen line goes back through
-// the FIFO untouched (cliphist wants its own line back, tab and all); a
-// cancel sends an empty line and the script exits 1, rofi's code for it.
-//
-// Matching is the real `fzf --filter`, not a scorer of our own: every item
-// goes in as `index<TAB>text` with the index kept out of the match by
-// --nth, and the indices that come back are the ranking. An empty query is
-// the source's own order (stdin order for dmenu, launch count for apps),
-// which is what lets cliphist's recency and zoxide's ranking show through.
+// rofi's `-show drun` and `-dmenu` as one LCD module. Dmenu mode is driven
+// by scripts/retro-launcher over a file and a FIFO; matching is `fzf
+// --filter`. Drawn by LauncherOverlay.qml.
 Singleton {
     id: root
 
     property bool shown: false
-    // The output to show on, by name; chosen when the window opens.
     property string screenName: ""
     // "apps" or "dmenu".
     property string mode: "apps"
@@ -38,22 +21,18 @@ Singleton {
     // The dmenu call being served: its directory, or "" for none.
     property string dmenuDir: ""
 
-    // Everything on offer: {text, detail, icon, id, line, search}. `text`
-    // and `detail` are what a row shows, `search` is what fzf sees, `line`
-    // is what dmenu hands back, `id` is the desktop entry to launch.
+    // {text, detail, icon, id, line, search}: `search` is what fzf sees,
+    // `line` is what dmenu hands back.
     property var items: []
     property string query: ""
     // Indices into items, best first.
     property var matches: []
     property int selected: 0
-    // A match run is pending or under way.
     readonly property bool busy: matchTimer.running || matcher.running
-    // The query the running matcher answers.
     property string matchFor: ""
 
-    // Desktop entry id -> launches from here. Owned here and mirrored to
-    // the store: a JsonAdapter property read straight back after assignment
-    // still returns the old value.
+    // Desktop entry id -> launches. Owned here and mirrored to the store: a
+    // JsonAdapter property read straight back after assignment is stale.
     property var counts: ({})
     property bool restored: false
 
@@ -71,7 +50,6 @@ Singleton {
         root.opened();
     }
 
-    // Closing answers an open dmenu with nothing, so the script exits 1.
     function dismiss() {
         root.shown = false;
         root.answer("");
@@ -85,8 +63,7 @@ Singleton {
         root.answer("");
         root.mode = "apps";
         root.prompt = "APPS";
-        // Matches index into items, so they go first or a row would look
-        // up an index the new list does not have.
+        // Matches index into items, so they are cleared first.
         root.matches = [];
         root.items = root.appItems();
         root.open();
@@ -104,7 +81,6 @@ Singleton {
         reader.running = true;
     }
 
-    // Every index, in source order.
     function everything() {
         var out = [];
         for (var i = 0; i < root.items.length; i++)
@@ -114,7 +90,6 @@ Singleton {
 
     readonly property var current: root.matches.length > 0 && root.selected < root.matches.length ? root.items[root.matches[root.selected]] : null
 
-    // Enter: the selected item.
     function accept() {
         var item = root.current;
         if (item === null)
@@ -129,8 +104,7 @@ Singleton {
         }
     }
 
-    // Shift+Enter: the typed text itself, rofi's custom entry. Apps have no
-    // use for it, so it is a plain accept there.
+    // Shift+Enter: the typed text itself, rofi's custom entry.
     function acceptCustom() {
         if (root.mode === "apps") {
             root.accept();
@@ -150,9 +124,6 @@ Singleton {
         root.select(root.selected + delta);
     }
 
-    // The one write into the FIFO the script is blocked on. Its reader is
-    // already there, so the open never blocks, but the write is detached
-    // anyway: nothing of the shell waits on the pipe.
     function answer(line) {
         if (root.dmenuDir === "")
             return;
@@ -161,7 +132,6 @@ Singleton {
         Quickshell.execDetached(["sh", "-c", "printf '%s\\n' \"$1\" > \"$2\"", "_", line, fifo]);
     }
 
-    // The desktop entries, most launched first, then by name.
     function appItems() {
         var entries = DesktopEntries.applications.values;
         var out = [];
@@ -201,8 +171,7 @@ Singleton {
         root.persist();
     }
 
-    // What fzf reads: one item per line, its index in front and kept out
-    // of the match. Newlines and tabs in the text would break the framing.
+    // `index<TAB>search`; --nth keeps the index out of the match.
     function feed() {
         var lines = [];
         for (var i = 0; i < root.items.length; i++)
@@ -224,8 +193,6 @@ Singleton {
         matchTimer.restart();
     }
 
-    // A beat after the query stops changing, so a fast typist runs one fzf
-    // rather than one per key.
     Timer {
         id: matchTimer
 
@@ -254,7 +221,7 @@ Singleton {
 
         onStarted: {
             matcher.write(root.feed());
-            // Closes stdin so fzf sees the end of its input.
+            // Closes stdin; fzf reads to EOF.
             matcher.stdinEnabled = false;
         }
 
@@ -276,14 +243,11 @@ Singleton {
                 root.matches = out;
                 root.selected = 0;
             }
-            // The query moved on while fzf ran: answer the new one.
             if (root.query !== root.matchFor)
                 root.runMatch();
         }
     }
 
-    // The dmenu lines. cat rather than a FileView: the file is read once,
-    // on a call, and never watched.
     Process {
         id: reader
 
@@ -338,7 +302,6 @@ Singleton {
         }
     }
 
-    // Mirror to disk, once per event-loop turn however many changes.
     function persist() {
         Qt.callLater(root.writeStore);
     }
@@ -354,8 +317,7 @@ Singleton {
         if (root.restored)
             return;
         root.restored = true;
-        // The adapter hands back a QVariantMap; a round trip through JSON
-        // makes a plain object.
+        // A JSON round trip turns the adapter's QVariantMap into a plain object.
         var raw = store.counts;
         var out = {};
         if (raw !== null && raw !== undefined) {
@@ -377,7 +339,6 @@ Singleton {
         id: storeFile
 
         path: Settings.stateDir + "/launcher.json"
-        // Only ever read at startup; writes go through writeStore().
         watchChanges: false
         printErrors: false
 
