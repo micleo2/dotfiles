@@ -127,6 +127,13 @@ hl.window_rule({
 	workspace = 8,
 	fullscreen = true,
 })
+hl.window_rule({
+	match = {
+		class = "^(com.moonlight_stream.Moonlight)$",
+	},
+	workspace = 8,
+	fullscreen = true,
+})
 
 -- music/media 9
 hl.window_rule({
