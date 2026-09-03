@@ -116,9 +116,6 @@ Item {
                     rows: root.bodyRow + root.body.length
                     // The unlit grid stays neutral; only the ink goes urgent.
                     ghost: root.ghost
-                    // A toast carrying on from its withdrawn sender's copy is
-                    // the same module, not a new one.
-                    flashOnCreate: root.notification.withdrawn !== true
 
                     // Row 0: who, and when.
                     Ui.Label {

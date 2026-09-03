@@ -49,8 +49,7 @@ Scope {
 
                 Repeater {
                     // Diffed by identity, so adding or removing a toast
-                    // leaves the others' delegates (and their marquees and
-                    // power-on flash) alone.
+                    // leaves the others' delegates (and their marquees) alone.
                     model: ScriptModel {
                         values: Notifications.popups
                     }
