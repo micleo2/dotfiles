@@ -3,13 +3,12 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell.Io
 import "../../ui" as Ui
-import "../.."
 import "../../services"
 
 // System overview. The chip is just VRAM used ("2.4G") — the one number worth
 // a permanent glance; CPU and GPU utilization live in the popup. It all rides
 // on SystemStats.gpuAvailable, so a machine with no GPU (the laptop) shows no
-// chip at all. The readout goes urgent when VRAM is 90% full.
+// chip at all.
 Item {
     id: root
 
@@ -21,10 +20,6 @@ Item {
     implicitWidth: chip.implicitWidth
     implicitHeight: parent ? parent.height : 0
     visible: root.available && SystemStats.gpuAvailable
-
-    function loadColor(percent) {
-        return percent >= 90 ? Config.colors.urgent : Config.colors.text;
-    }
 
     function gib(mib) {
         return (mib / 1024).toFixed(1);
@@ -45,7 +40,6 @@ Item {
 
         Ui.Label {
             anchors.verticalCenter: parent.verticalCenter
-            color: root.loadColor(SystemStats.vramPercent)
             text: root.gib(SystemStats.vramUsedMib) + "G"
         }
     }

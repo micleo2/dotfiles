@@ -20,6 +20,18 @@ Item {
 
     readonly property int stepPercent: Volume.stepPercent
 
+    // One block per step of *volume*, so the blocks read as a level rather
+    // than as a position: silence lights nothing, and full lights every
+    // block. Starting the stops at 0 instead would make the leftmost block
+    // the "0%" position and leave it lit at silence, which is what a
+    // magnitude bar should never do.
+    readonly property var steps: {
+        var out = [];
+        for (var v = root.stepPercent; v <= 100; v += root.stepPercent)
+            out.push(v);
+        return out;
+    }
+
     implicitWidth: chip.implicitWidth
     implicitHeight: parent ? parent.height : 0
 
@@ -97,31 +109,60 @@ Item {
         onOpenedChanged: Volume.watching = popup.opened
 
         Ui.PopupSlider {
-            // One block per step of *volume*, so the blocks read as a level
-            // rather than as a position: silence lights nothing, and full
-            // lights every block. Starting the stops at 0 instead would make
-            // the leftmost block the "0%" position and leave it lit at
-            // silence, which is what a magnitude bar should never do.
-            readonly property var steps: {
-                var out = [];
-                for (var v = root.stepPercent; v <= 100; v += root.stepPercent)
-                    out.push(v);
-                return out;
-            }
-
             rowKey: "level"
             cursorKey: popup.cursorKey
             onCursorEntered: popup.cursorKey = "level"
 
-            stops: steps
+            stops: root.steps
             index: Math.round(Volume.percent / root.stepPercent) - 1
-            onMoved: (index) => Volume.setVolume(steps[index] / 100)
+            onMoved: (index) => Volume.setVolume(root.steps[index] / 100)
         }
 
         Ui.PopupRow {
             interactive: false
             text: Volume.muted ? "Muted" : "Volume"
             detail: Volume.percent + "%"
+        }
+
+        Ui.SectionLabel {
+            visible: Volume.displayStreams.length > 0
+            text: "Apps"
+        }
+
+        Repeater {
+            model: Volume.displayStreams
+
+            // Two cursor stops per app: the row (Enter or a click mutes it)
+            // and the slider under it (h/l or a drag sets its level).
+            Column {
+                id: stream
+
+                required property var modelData
+
+                width: parent ? parent.width : 0
+
+                Ui.PopupRow {
+                    rowKey: "app:" + stream.modelData.id
+                    cursorKey: popup.cursorKey
+                    onCursorEntered: popup.cursorKey = "app:" + stream.modelData.id
+
+                    glyph: "graphic_eq"
+                    text: Volume.streamLabel(stream.modelData)
+                    detail: Volume.streamMuted(stream.modelData) ? "Muted" : Math.round(Volume.streamVolume(stream.modelData) * 100) + "%"
+                    onClicked: Volume.toggleStreamMute(stream.modelData)
+                }
+
+                Ui.PopupSlider {
+                    rowKey: "appvol:" + stream.modelData.id
+                    cursorKey: popup.cursorKey
+                    onCursorEntered: popup.cursorKey = "appvol:" + stream.modelData.id
+
+                    implicitHeight: 16
+                    stops: root.steps
+                    index: Math.round(Volume.streamVolume(stream.modelData) / (root.stepPercent / 100)) - 1
+                    onMoved: (index) => Volume.setStreamVolume(stream.modelData, root.steps[index] / 100)
+                }
+            }
         }
 
         Ui.SectionLabel {

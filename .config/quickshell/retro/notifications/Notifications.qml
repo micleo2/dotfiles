@@ -250,6 +250,13 @@ Singleton {
         historyStore.entries = [];
     }
 
+    // Dismissed toasts count as read and never reach history, so the order
+    // here only keeps the log readable.
+    function reset() {
+        root.dismissAll();
+        root.clearHistory();
+    }
+
     Process {
         // FileView will not create intermediate directories.
         running: true
@@ -497,6 +504,10 @@ Singleton {
 
         function clearHistory(): void {
             root.clearHistory();
+        }
+
+        function reset(): void {
+            root.reset();
         }
 
         // The bar's history popup; `focus` opens it with the keyboard cursor

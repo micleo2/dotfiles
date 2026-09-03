@@ -37,11 +37,28 @@ Singleton {
         return out;
     }
 
+    // Playback streams publish as stream sinks; capture streams as stream
+    // sources.
+    readonly property var candidateStreams: {
+        var out = [];
+        var nodes = Pipewire.nodes ? Pipewire.nodes.values : [];
+        for (var i = 0; i < nodes.length; i++) {
+            var node = nodes[i];
+            if (node.isSink && node.isStream)
+                out.push(node);
+        }
+        return out;
+    }
+
     // Binding the nodes is what makes `properties` and `audio` valid on them.
     // Tracking only the default sink is enough to show a level, but not to
     // build a device list.
     PwObjectTracker {
         objects: root.candidateSinks
+    }
+
+    PwObjectTracker {
+        objects: root.candidateStreams
     }
 
     // The Repeater is fed from this snapshot rather than from candidateSinks
@@ -50,6 +67,7 @@ Singleton {
     // rebuilding a Repeater from that signal path has crashed Quickshell's
     // PipeWire service — so the rebuild is pushed onto a later tick.
     property var displaySinks: []
+    property var displayStreams: []
 
     // Fired by the shell's own volume actions (chip scroll, IPC, mute), so
     // the OSD flashes for those and not for a change made elsewhere.
@@ -61,18 +79,28 @@ Singleton {
             snapshotDebounce.restart();
     }
 
-    onWatchingChanged: {
+    onCandidateStreamsChanged: {
         if (root.watching)
             snapshotDebounce.restart();
-        else
+    }
+
+    onWatchingChanged: {
+        if (root.watching) {
+            snapshotDebounce.restart();
+        } else {
             root.displaySinks = [];
+            root.displayStreams = [];
+        }
     }
 
     Timer {
         id: snapshotDebounce
 
         interval: 75
-        onTriggered: root.displaySinks = root.candidateSinks.slice()
+        onTriggered: {
+            root.displaySinks = root.candidateSinks.slice();
+            root.displayStreams = root.candidateStreams.slice();
+        }
     }
 
     // -------------------------------------------------------------- labels --
@@ -131,6 +159,27 @@ Singleton {
         return resolved !== undefined ? resolved : root.baseLabel(node);
     }
 
+    function streamLabel(node) {
+        if (!node)
+            return "";
+        var props = root.nodeProps(node);
+        var candidates = [props["application.name"], node.description, props["media.name"], node.name];
+        for (var i = 0; i < candidates.length; i++) {
+            var text = root.tidy(candidates[i]);
+            if (text !== "")
+                return text;
+        }
+        return "Unknown";
+    }
+
+    function streamVolume(node) {
+        return node && node.audio ? node.audio.volume : 0;
+    }
+
+    function streamMuted(node) {
+        return node && node.audio ? node.audio.muted : false;
+    }
+
     function glyphFor(node) {
         if (!node)
             return "speaker";
@@ -153,8 +202,21 @@ Singleton {
         if (!root.ready)
             return;
         // No over-amplification: the output slider stops at 100%, as omarchy's
-        // does. Only its per-stream sliders go above.
+        // does. Its per-stream sliders go above; the ones here do not.
         root.sink.audio.volume = Math.max(0, Math.min(1, value));
+    }
+
+    // Per-stream moves stay off the OSD: `changed` is for the output level.
+    function setStreamVolume(node, value) {
+        if (!node || !node.audio)
+            return;
+        node.audio.volume = Math.max(0, Math.min(1, value));
+    }
+
+    function toggleStreamMute(node) {
+        if (!node || !node.audio)
+            return;
+        node.audio.muted = !node.audio.muted;
     }
 
     function adjust(delta) {
