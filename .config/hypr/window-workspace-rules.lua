@@ -151,8 +151,6 @@ hl.window_rule({
 	float = true,
 })
 
--- utils submap floats (kitty --class kitty-float-z): float, center, and
--- size them. One rule matches the shared prefix.
 hl.window_rule({
 	name = "kitty-float-utils",
 	-- class matching is RE2::FullMatch, so the pattern must consume the

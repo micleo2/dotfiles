@@ -240,17 +240,8 @@ hl.bind(
 	)
 )
 
--- Browser menu
-hl.bind(M("B"), hl.dsp.exec_cmd("~/dotfiles/scripts/menus/browser-menu.sh"))
-
 -- Toggle top bar (SUPER+T is the top bar submap, see submap-topbar.lua)
 hl.bind(M(S("T")), hl.dsp.exec_cmd("qs -c retro ipc call topbar toggle"))
-
--- Notifications (the shell is the daemon, see quickshell/retro/notifications/Notifications.qml)
-hl.bind(M("comma"), hl.dsp.exec_cmd("qs -c retro ipc call notifications dismissOne"))
-hl.bind(M(S("comma")), hl.dsp.exec_cmd("qs -c retro ipc call notifications dismissAll"))
-hl.bind(M(C("comma")), hl.dsp.exec_cmd("qs -c retro ipc call notifications toggleDnd"))
-hl.bind(M("ALT + comma"), hl.dsp.exec_cmd("qs -c retro ipc call notifications invokeLast"))
 
 for i = 1, 10 do
 	local key = i % 10 -- 10 maps to key 0
@@ -304,10 +295,7 @@ hl.bind(M(S("right")), hl.dsp.layout("swapcol r"))
 
 -- clipboard
 require("universal-clipboard")
-hl.bind(
-	M(S("V")),
-	hl.dsp.exec_cmd("cliphist list | rofi -dmenu -display-columns 2 | cliphist decode | wl-copy && wl-paste")
-)
+hl.bind(M(S("V")), hl.dsp.exec_cmd("cliphist list | rofi -dmenu | cliphist decode | wl-copy && wl-paste"))
 
 -- dictation
 hl.bind(M("R"), hl.dsp.exec_cmd("voxtype record start"))
@@ -332,9 +320,6 @@ hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = tru
 hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true })
 
 -- Brightness
--- Routed through the shell rather than straight to brightnessctl so that one
--- place decides the backend (ddcutil on a DDC monitor, the panel backlight
--- otherwise) and so the OSD reflects every change.
 hl.bind(
 	"XF86MonBrightnessUp",
 	hl.dsp.exec_cmd("qs -c retro ipc call brightness up"),
