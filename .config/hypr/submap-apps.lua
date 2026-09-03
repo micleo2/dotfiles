@@ -36,7 +36,6 @@ local submap_options_per_key = {
 	o = make_submap_entry("obsidian", "obsidian", { class = "md.obsidian.Obsidian" }),
 	s = make_submap_entry("spotify", "spotify-launcher", { class = "Spotify" }),
 	u = make_submap_entry("bambustudio", "com.bambulab.BambuStudio", { class = "BambuStudio" }),
-	x = make_submap_entry("firefox", "firefox", { direct = true }),
 	y = make_submap_entry("yazi", "yazi", { direct = true }),
 	-- bottles apps
 	k = make_submap_entry("makera", "bottles-MakeraStudio-MakeraStudio", { title = "MakeraStudio" }),
