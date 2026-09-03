@@ -1,7 +1,8 @@
 -- Top bar map: tap SUPER + T, then a letter to open that bar popup with the
 -- keyboard cursor on its first control (see ui/Popup.qml `openWithCursor`).
 -- The submap resets after the keypress, so from there the popup owns the
--- keyboard: j/k move, h/l adjust, Enter activates, Escape closes.
+-- keyboard: j/k move, h/l adjust, Enter activates, Escape closes. A few keys
+-- act outright instead of opening anything (caffeinate, reset inbox).
 local submap_builder = require("submap-builder")
 
 local function panel(target)
@@ -17,6 +18,7 @@ local submap_options_per_key = {
 	v = { label = "volume", exec_cmd = panel("volume") },
 	s = { label = "system", exec_cmd = panel("system") },
 	i = { label = "inbox", exec_cmd = panel("notifications") },
+	r = { label = "reset inbox", exec_cmd = "qs -c retro ipc call notifications reset" },
 }
 
 submap_builder.define_submap("topbar", "SUPER+T", submap_options_per_key)
