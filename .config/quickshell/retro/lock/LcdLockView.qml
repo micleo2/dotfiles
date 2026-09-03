@@ -298,7 +298,8 @@ Item {
                 rows: 1
                 ghost: root.ghost
 
-                Repeater {
+                // Lit cells, not text, so they go on the cell layer.
+                marks: Repeater {
                     model: passwordGrid.columns
 
                     Rectangle {

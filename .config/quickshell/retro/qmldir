@@ -16,3 +16,4 @@ singleton Addresses 1.0 Addresses.qml
 singleton SystemStats 1.0 SystemStats.qml
 singleton Notifications 1.0 Notifications.qml
 singleton Lock 1.0 Lock.qml
+singleton Calculator 1.0 Calculator.qml

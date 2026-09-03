@@ -12,6 +12,7 @@ import "osd" as Osd
 import "submap" as Submap
 import "notifications" as Notifications_
 import "lock" as Lock_
+import "calc" as Calc
 
 Scope {
     id: root
@@ -31,4 +32,6 @@ Scope {
     Notifications_.Toasts {}
 
     Lock_.LockScreen {}
+
+    Calc.CalcOverlay {}
 }

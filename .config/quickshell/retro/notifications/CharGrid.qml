@@ -8,9 +8,12 @@ import ".."
 // font's own advance, so a glyph lands exactly on its cell; the one-pixel
 // gutter between cells is what shows the grid.
 //
-// Children go into the overlay above the cells. Rows are addressed with
+// Children go into the text layer above the cells. Rows are addressed with
 // rowY(n), and text should be sized with `size` and spaced with
-// `letterSpacing` so it stays on the pitch.
+// `letterSpacing` so it stays on the pitch. The text layer is nudged left
+// by the font's side bearing so ink sits centred on its cell; anything that
+// should sit on a cell itself (a lit cell, a cursor block) goes in `marks`,
+// which is not nudged.
 Item {
     id: root
 
@@ -24,7 +27,9 @@ Item {
     property bool flashOnCreate: true
 
     default property alias content: overlay.data
+    property alias marks: marksLayer.data
 
+    // Row pitch from the font's line height.
     FontMetrics {
         id: metrics
 
@@ -32,7 +37,25 @@ Item {
         font.pixelSize: root.size
     }
 
-    readonly property real advance: metrics.advanceWidth("M")
+    // Column pitch from one glyph's advance. This is a TextMetrics rather
+    // than FontMetrics.advanceWidth(): that is a method call, which a binding
+    // runs once at creation and never again, so a grid built before the
+    // font had loaded kept the fallback font's pitch for good and its text
+    // walked off the cells. TextMetrics.advanceWidth is a property and
+    // follows the font.
+    TextMetrics {
+        id: glyph
+
+        font.family: Config.mainFont
+        font.pixelSize: root.size
+        text: "M"
+    }
+
+    readonly property real advance: glyph.advanceWidth
+    // Cozette carries a one-pixel left bearing and none on the right, so a
+    // glyph drawn at its cell's origin lands off-centre. How far left the
+    // text layer moves so the ink is centred in the drawn cell.
+    readonly property real inkShift: glyph.tightBoundingRect.x - ((root.cellWidth - 1) - glyph.tightBoundingRect.width) / 2
     readonly property real cellWidth: Math.max(1, Math.round(root.advance))
     readonly property real cellHeight: Math.max(1, Math.ceil(metrics.height))
     // Pads a fractional advance out to the integer cell.
@@ -61,9 +84,18 @@ Item {
     }
 
     Item {
-        id: overlay
+        id: marksLayer
 
         anchors.fill: parent
+    }
+
+    Item {
+        id: overlay
+
+        x: -root.inkShift
+        y: 0
+        width: parent.width
+        height: parent.height
     }
 
     Component.onCompleted: {
