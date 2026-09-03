@@ -83,13 +83,6 @@ Item {
             input.forceActiveFocus();
     }
 
-    function powerOn() {
-        headerGrid.flash = true;
-        consoleGrid.flash = true;
-        inputGrid.flash = true;
-        previewGrid.flash = true;
-    }
-
     function blink() {
         root.cursorOn = true;
         blinkTimer.restart();
@@ -121,7 +114,6 @@ Item {
     onInputEnabledChanged: {
         if (root.inputEnabled) {
             root.scroll = 0;
-            root.powerOn();
             Qt.callLater(root.focusInput);
         }
     }

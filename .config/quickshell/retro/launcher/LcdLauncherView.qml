@@ -81,12 +81,6 @@ Item {
             input.forceActiveFocus();
     }
 
-    function powerOn() {
-        headerGrid.flash = true;
-        queryGrid.flash = true;
-        listGrid.flash = true;
-    }
-
     function blink() {
         root.cursorOn = true;
         blinkTimer.restart();
@@ -103,10 +97,8 @@ Item {
     }
 
     onInputEnabledChanged: {
-        if (root.inputEnabled) {
-            root.powerOn();
+        if (root.inputEnabled)
             Qt.callLater(root.focusInput);
-        }
     }
 
     Component.onCompleted: Qt.callLater(root.focusInput)

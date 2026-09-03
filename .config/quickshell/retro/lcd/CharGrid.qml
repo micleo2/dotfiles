@@ -22,9 +22,6 @@ Item {
     property int size: Config.settings.bar.fontSize
     property color color: Config.colors.text
     property real ghost: 0.12
-    // Every cell lit: the power-on blink, run once when the module appears.
-    property bool flash: false
-    property bool flashOnCreate: true
 
     default property alias content: overlay.data
     property alias marks: marksLayer.data
@@ -79,7 +76,7 @@ Item {
             width: root.cellWidth - 1
             height: root.cellHeight - 1
             color: root.color
-            opacity: root.flash ? 1 : root.ghost
+            opacity: root.ghost
         }
     }
 
@@ -96,16 +93,5 @@ Item {
         y: 0
         width: parent.width
         height: parent.height
-    }
-
-    Component.onCompleted: {
-        if (root.flashOnCreate)
-            root.flash = true;
-    }
-
-    Timer {
-        running: root.flash
-        interval: 70
-        onTriggered: root.flash = false
     }
 }

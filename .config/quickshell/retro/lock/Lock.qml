@@ -37,8 +37,6 @@ Singleton {
     // The module shown in an ordinary overlay window, input live, so PAM and
     // the look can be tried without taking a real session lock.
     property bool previewVisible: false
-    // Set true for a beat before the lock drops so the view can flash.
-    property bool unlocking: false
     // The shell turned the displays off; the next input has to turn them on.
     // Hyprland lights them on its own for key presses and mouse moves
     // (misc:key_press_enables_dpms), so this only gates the explicit dispatch.
@@ -56,8 +54,6 @@ Singleton {
     readonly property string userName: Quickshell.env("USER") || Quickshell.env("LOGNAME")
     readonly property bool inputActive: root.locked || root.previewVisible
     readonly property int blankAfterMs: 10000
-
-    signal unlocked()
 
     function logEvent(event) {
         root.lastEvent = event;
@@ -81,28 +77,19 @@ Singleton {
             return true;
         root.previewVisible = false;
         root.resetAuth();
-        root.unlocking = false;
-        unlockTimer.stop();
         root.locked = true;
         root.armBlank();
         root.logEvent("lock-requested");
         return true;
     }
 
-    // Success: give the view one frame of flash, then drop the lock.
+    // Success: drop the lock at once.
     function unlock() {
         if (!root.locked && !root.previewVisible)
             return;
         root.checking = false;
         root.password = "";
         root.pendingPassword = "";
-        root.unlocking = true;
-        root.unlocked();
-        unlockTimer.restart();
-    }
-
-    function finishUnlock() {
-        root.unlocking = false;
         if (root.previewVisible) {
             root.previewVisible = false;
             root.resetAuth();
@@ -245,13 +232,6 @@ Singleton {
 
         interval: 1500
         onTriggered: root.denied = false
-    }
-
-    Timer {
-        id: unlockTimer
-
-        interval: 150
-        onTriggered: root.finishUnlock()
     }
 
     Timer {

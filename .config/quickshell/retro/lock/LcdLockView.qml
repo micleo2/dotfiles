@@ -15,9 +15,7 @@ import "../services"
 //
 // Checking sweeps one lit cell along the password row until PAM answers.
 // Denied turns the ink urgent, spells DENIED on the row and blinks the
-// module the way a critical toast does; typing again clears it. The
-// power-on flash of the character grids fires when the surface appears,
-// and once more on the way out.
+// module the way a critical toast does; typing again clears it.
 Item {
     id: root
 
@@ -58,11 +56,6 @@ Item {
             input.forceActiveFocus();
     }
 
-    function powerOn() {
-        infoGrid.flash = true;
-        passwordGrid.flash = true;
-    }
-
     onInputEnabledChanged: {
         if (root.inputEnabled)
             Qt.callLater(root.focusInput);
@@ -74,14 +67,6 @@ Item {
     }
 
     Component.onCompleted: Qt.callLater(root.focusInput)
-
-    Connections {
-        target: Lock
-
-        function onUnlocked() {
-            root.powerOn();
-        }
-    }
 
     Timer {
         running: root.denied
@@ -207,12 +192,11 @@ Item {
                     spacing: 10
 
                     ClockDigit {
-                        // Every segment lit during the power-on flash.
-                        digit: infoGrid.flash ? 8 : (root.hour12 >= 10 ? Math.floor(root.hour12 / 10) : -1)
+                        digit: root.hour12 >= 10 ? Math.floor(root.hour12 / 10) : -1
                     }
 
                     ClockDigit {
-                        digit: infoGrid.flash ? 8 : root.hour12 % 10
+                        digit: root.hour12 % 10
                     }
 
                     // Colon: two dots on the digit's own thickness.
@@ -226,7 +210,7 @@ Item {
                             width: 10
                             height: 10
                             color: root.ink
-                            opacity: infoGrid.flash || root.colonOn ? 1 : root.ghost
+                            opacity: root.colonOn ? 1 : root.ghost
                         }
 
                         Rectangle {
@@ -235,16 +219,16 @@ Item {
                             width: 10
                             height: 10
                             color: root.ink
-                            opacity: infoGrid.flash || root.colonOn ? 1 : root.ghost
+                            opacity: root.colonOn ? 1 : root.ghost
                         }
                     }
 
                     ClockDigit {
-                        digit: infoGrid.flash ? 8 : Math.floor(root.minutes / 10)
+                        digit: Math.floor(root.minutes / 10)
                     }
 
                     ClockDigit {
-                        digit: infoGrid.flash ? 8 : root.minutes % 10
+                        digit: root.minutes % 10
                     }
                 }
 
