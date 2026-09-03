@@ -226,7 +226,7 @@ hl.bind(M("G"), hl.dsp.window.drag(), { mouse = true })
 hl.bind(M(S("G")), hl.dsp.window.resize(), { mouse = true })
 
 -- Apps on hotkeys
-hl.bind(M("Space"), hl.dsp.exec_cmd("rofi -show drun -show-icons"))
+hl.bind(M("Space"), hl.dsp.exec_cmd("qs -c retro ipc call launcher apps"))
 hl.bind(M("S"), hl.dsp.exec_cmd("kitty"))
 
 -- Alt+Tab: standard MRU switching
@@ -236,7 +236,7 @@ hl.bind("ALT + Tab", hl.dsp.exec_cmd("snappy-switcher next --mod alt"), { descri
 hl.bind(
 	M("Z"),
 	hl.dsp.exec_cmd(
-		'bash -c \'target=$(zoxide query -l | rofi -dmenu); [ -n "$target" ] && kitty --directory "$target" fish\''
+		'bash -c \'target=$(zoxide query -l | retro-launcher -p cd); [ -n "$target" ] && kitty --directory "$target" fish\''
 	)
 )
 
@@ -295,7 +295,7 @@ hl.bind(M(S("right")), hl.dsp.layout("swapcol r"))
 
 -- clipboard
 require("universal-clipboard")
-hl.bind(M(S("V")), hl.dsp.exec_cmd("cliphist list | rofi -dmenu | cliphist decode | wl-copy && wl-paste"))
+hl.bind(M(S("V")), hl.dsp.exec_cmd("cliphist list | retro-launcher -p clip | cliphist decode | wl-copy && wl-paste"))
 
 -- dictation
 hl.bind(M("R"), hl.dsp.exec_cmd("voxtype record start"))

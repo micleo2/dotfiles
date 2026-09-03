@@ -3,3 +3,4 @@ CharGrid 1.0 CharGrid.qml
 PixelGlyph 1.0 PixelGlyph.qml
 SevenSegment 1.0 SevenSegment.qml
 LcdBars 1.0 LcdBars.qml
+PromptRow 1.0 PromptRow.qml

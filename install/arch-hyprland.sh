@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # setup software from pacman
-sudo pacman -S --needed hyprpaper rofi unixodbc f3d yazi gum
+sudo pacman -S --needed hyprpaper fzf unixodbc f3d yazi gum
 # needed by hyprpm
 sudo pacman -S --needed cmake cpio
 
@@ -33,15 +33,6 @@ sudo pacman -S --needed quickshell cliphist libqalculate hyprpicker gpu-screen-r
 # not libmagic which misclassifies 3D/font files)
 sudo pacman -S --needed perl-file-mimeinfo
 
-# default app for 3D model files -> f3d
-for m in model/stl model/step application/vnd.step model/obj model/iges \
-  application/vnd.ply application/vnd.3ds application/vnd.dae \
-  application/vnd.drc application/vnd.fbx application/vnd.off \
-  application/vnd.vtk application/vnd.vtp model/gltf+json \
-  model/gltf-binary application/vnd.usd application/vnd.usdc; do
-  xdg-mime default f3d.desktop "$m"
-done
-
 # setup hyprland config files.
 ln -s ~/dotfiles/.config/hypr/ ~/.config/
 ln -s ~/dotfiles/ ~/.config/
@@ -51,6 +42,8 @@ mkdir -p ~/.local/bin
 for s in app-launch-or-focus webapp-install webapp-launch webapp-launch-or-focus webapp-remove; do
   ln -sf ~/dotfiles/scripts/apps/$s ~/.local/bin/
 done
+
+ln -sf ~/dotfiles/scripts/retro-launcher ~/.local/bin/
 
 # uwsm session environment
 mkdir -p ~/.config/uwsm

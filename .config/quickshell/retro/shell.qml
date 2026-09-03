@@ -13,6 +13,7 @@ import "submap" as Submap
 import "notifications" as Notifications_
 import "lock" as Lock_
 import "calc" as Calc
+import "launcher" as Launcher_
 
 Scope {
     id: root
@@ -28,4 +29,6 @@ Scope {
     Lock_.LockScreen {}
 
     Calc.CalcOverlay {}
+
+    Launcher_.LauncherOverlay {}
 }
