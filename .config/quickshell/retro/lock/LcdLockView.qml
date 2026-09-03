@@ -36,7 +36,7 @@ Item {
     readonly property bool pm: root.now.getHours() >= 12
     readonly property bool colonOn: root.now.getSeconds() % 2 === 0
     readonly property string dateLabel: Qt.formatDate(root.now, "ddd MMM dd").toUpperCase()
-    readonly property string whoLabel: Lock.failedAttempts > 0 ? "ERR " + (Lock.failedAttempts < 10 ? "0" : "") + Lock.failedAttempts : (Lock.userName + "@" + Lock.hostname).toUpperCase()
+    readonly property string whoLabel: root.denied ? "ERR " + (Lock.failedAttempts < 10 ? "0" : "") + Lock.failedAttempts : (Lock.userName + "@" + Lock.hostname).toUpperCase()
     readonly property int litCells: Math.min(root.columns, Lock.password.length)
 
     // The critical-toast alarm blink while denied.

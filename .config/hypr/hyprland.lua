@@ -5,13 +5,26 @@
 ---- AUTOSTART ----
 -------------------
 
+-- Per-machine settings: local.lua when present, else the tracked defaults.
+local machine = package.searchpath("local", package.path) and require("local") or require("default-local")
+
 -- Runs once per session (not on reload).
 hl.on("hyprland.start", function()
 	-- hl.exec_cmd(
 	-- 	"kitty +kitten panel -o clear_all_mouse_actions=no -o default_pointer_shape=arrow -o pointer_shape_when_dragging=arrow -o font_size=20 --edge=background ~/dotfiles/scripts/hypr/ttfx-background.sh"
 	-- )
-	hl.exec_cmd("hyprpaper")
-	hl.exec_cmd("QT_FONT_DPI= qs -c retro")
+	if machine.lock_on_start then
+		hl.exec_cmd("RETRO_LOCK_ON_START=1 QT_FONT_DPI= qs -c retro")
+		-- Hold the wallpaper back until that lock is up, so the only thing on
+		-- screen before the lock is the compositor's black background. Falls back
+		-- to starting anyway after 3s.
+		hl.exec_cmd(
+			[[sh -c 'for _ in $(seq 30); do [ "$(qs -c retro ipc call lock isLocked 2>/dev/null)" = true ] && break; sleep 0.1; done; exec hyprpaper']]
+		)
+	else
+		hl.exec_cmd("QT_FONT_DPI= qs -c retro")
+		hl.exec_cmd("hyprpaper")
+	end
 	hl.exec_cmd("QT_FONT_DPI= qs -c gw-idle")
 	hl.exec_cmd("hyprpm reload")
 	hl.exec_cmd("snappy-switcher --daemon")
@@ -129,6 +142,10 @@ hl.config({
 	misc = {
 		force_default_wallpaper = 0, -- Set to 0 or 1 to disable the anime mascot wallpapers
 		disable_hyprland_logo = true,
+		disable_splash_rendering = true, -- no random quote on the background
+		-- Black, like the lock screen's backdrop, so the frames between session
+		-- start and the lock landing look like the lock screen still loading.
+		background_color = "0x000000",
 		-- Let a restarted `qs -c retro` take over a session lock left behind
 		-- by a crashed one (`qs -c retro ipc call lock lock` from a TTY).
 		allow_session_lock_restore = true,
