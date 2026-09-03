@@ -1,8 +1,8 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import "../notifications" as Lcd
-import "../notifications/text.js" as TextUtil
+import "../lcd" as Lcd
+import "../lcd/text.js" as TextUtil
 import "../ui" as Ui
 import ".."
 

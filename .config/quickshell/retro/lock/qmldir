@@ -1,0 +1,4 @@
+module Lock
+singleton Lock 1.0 Lock.qml
+LockScreen 1.0 LockScreen.qml
+LcdLockView 1.0 LcdLockView.qml

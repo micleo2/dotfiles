@@ -4,7 +4,7 @@ import QtQuick
 import ".."
 
 // A stepped slider drawn as discrete blocks, in the register of the segmented
-// bucket in osd/BrightnessOsd.qml rather than as a smooth track.
+// bucket in osd/LcdOsd.qml rather than as a smooth track.
 Item {
     id: root
 

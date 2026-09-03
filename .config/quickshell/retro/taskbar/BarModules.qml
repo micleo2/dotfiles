@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import "../modules" as Modules_
+import "widgets" as Widgets
 
 // The laptop module group.
 //
@@ -29,35 +29,35 @@ RowLayout {
     // false the moment this row hides, which would latch the row hidden.
     visible: system.available || network.available || bluetooth.available || display.available || idle.available || battery.available
 
-    Modules_.SystemWidget {
+    Widgets.SystemWidget {
         id: system
         Layout.fillHeight: true
         barScreen: root.barScreen
         primary: root.primary
     }
 
-    Modules_.NetworkWidget {
+    Widgets.NetworkWidget {
         id: network
         Layout.fillHeight: true
         barScreen: root.barScreen
         primary: root.primary
     }
 
-    Modules_.BluetoothWidget {
+    Widgets.BluetoothWidget {
         id: bluetooth
         Layout.fillHeight: true
         barScreen: root.barScreen
         primary: root.primary
     }
 
-    Modules_.DisplayWidget {
+    Widgets.DisplayWidget {
         id: display
         Layout.fillHeight: true
         barScreen: root.barScreen
         primary: root.primary
     }
 
-    Modules_.IdleWidget {
+    Widgets.IdleWidget {
         id: idle
         Layout.fillHeight: true
         barScreen: root.barScreen
@@ -65,7 +65,7 @@ RowLayout {
         taskbarWindow: root.taskbarWindow
     }
 
-    Modules_.BatteryWidget {
+    Widgets.BatteryWidget {
         id: battery
         Layout.fillHeight: true
         barScreen: root.barScreen

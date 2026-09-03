@@ -3,8 +3,9 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell.Io
 import Quickshell.Services.UPower
-import "../ui" as Ui
-import ".."
+import "../../ui" as Ui
+import "../.."
+import "../../services"
 
 Item {
     id: root

@@ -2,8 +2,9 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell.Io
-import "../ui" as Ui
-import ".."
+import "../../ui" as Ui
+import "../.."
+import "../../services"
 
 // System overview. The chip is just VRAM used ("2.4G") — the one number worth
 // a permanent glance; CPU and GPU utilization live in the popup. It all rides

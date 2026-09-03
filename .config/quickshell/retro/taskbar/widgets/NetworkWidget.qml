@@ -3,8 +3,9 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell.Io
 import Quickshell.Networking
-import "../ui" as Ui
-import ".."
+import "../../ui" as Ui
+import "../.."
+import "../../services"
 
 // Wifi and VPN.
 //

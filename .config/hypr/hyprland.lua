@@ -246,7 +246,7 @@ hl.bind(M("B"), hl.dsp.exec_cmd("~/dotfiles/scripts/menus/browser-menu.sh"))
 -- Toggle top bar (SUPER+T is the top bar submap, see submap-topbar.lua)
 hl.bind(M(S("T")), hl.dsp.exec_cmd("qs -c retro ipc call topbar toggle"))
 
--- Notifications (the shell is the daemon, see quickshell/retro/Notifications.qml)
+-- Notifications (the shell is the daemon, see quickshell/retro/notifications/Notifications.qml)
 hl.bind(M("comma"), hl.dsp.exec_cmd("qs -c retro ipc call notifications dismissOne"))
 hl.bind(M(S("comma")), hl.dsp.exec_cmd("qs -c retro ipc call notifications dismissAll"))
 hl.bind(M(C("comma")), hl.dsp.exec_cmd("qs -c retro ipc call notifications toggleDnd"))

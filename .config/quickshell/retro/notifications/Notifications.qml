@@ -5,8 +5,9 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Hyprland
 import Quickshell.Services.Notifications
-import "notifications/rules.js" as Rules
-import "notifications/text.js" as TextUtil
+import "rules.js" as Rules
+import "../lcd/text.js" as TextUtil
+import ".."
 
 // The notification daemon. The server below claims
 // org.freedesktop.Notifications on the session bus, so anything speaking the
@@ -20,13 +21,13 @@ import "notifications/text.js" as TextUtil
 // them across a config reload, which is the restart that actually happens.
 //
 // Nothing here reads a notification's text directly. Each one is turned into
-// a plain view and run through notifications/rules.js first, which is where
+// a plain view and run through rules.js first, which is where
 // a noisy sender gets rewritten, muted or dropped; the view is kept on the
 // lifetime entry and rebuilt whenever the sender updates its text.
 Singleton {
     id: root
 
-    // Live toasts, newest first. Rendered by notifications/Toasts.qml.
+    // Live toasts, newest first. Rendered by Toasts.qml.
     property var popups: []
 
     // Unread toasts as plain snapshots, newest first, capped: ones that

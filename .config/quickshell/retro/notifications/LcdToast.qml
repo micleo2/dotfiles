@@ -2,10 +2,10 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell.Services.Notifications
-import "../osd" as Osd
+import "../lcd" as Lcd
 import "../ui" as Ui
 import ".."
-import "text.js" as TextUtil
+import "../lcd/text.js" as TextUtil
 import "glyphs.js" as Glyphs
 
 // One notification as a Game & Watch style LCD module, in the OSD's frame:
@@ -97,7 +97,7 @@ Item {
             anchors.centerIn: parent
             spacing: 16
 
-            Osd.PixelGlyph {
+            Lcd.PixelGlyph {
                 anchors.verticalCenter: parent.verticalCenter
                 rows: root.pictogram
                 cell: 5
@@ -109,7 +109,7 @@ Item {
             Column {
                 spacing: 6
 
-                CharGrid {
+                Lcd.CharGrid {
                     id: grid
 
                     columns: root.columns
@@ -181,7 +181,7 @@ Item {
                     }
                 }
 
-                Osd.LcdBars {
+                Lcd.LcdBars {
                     visible: root.expires
                     totalWidth: grid.width
                     segments: root.seconds

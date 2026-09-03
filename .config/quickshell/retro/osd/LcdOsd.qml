@@ -4,6 +4,8 @@ import QtQuick
 import QtQuick.Effects
 import Quickshell
 import Quickshell.Wayland
+import "../lcd" as Lcd
+import "../services"
 
 // The on-screen display: one Game & Watch style LCD panel with two modes,
 // volume and brightness. Every segment is always drawn as a faint ghost and
@@ -151,7 +153,7 @@ Scope {
                             }
                         }
 
-                        PixelGlyph {
+                        Lcd.PixelGlyph {
                             anchors.centerIn: parent
                             visible: !osdRoot.volume
                             rows: osdRoot.sun
@@ -160,7 +162,7 @@ Scope {
                         }
                     }
 
-                    LcdBars {
+                    Lcd.LcdBars {
                         anchors.verticalCenter: parent.verticalCenter
                         segments: osdRoot.segments
                         filled: osdRoot.muted ? 0 : osdRoot.filled
@@ -184,7 +186,7 @@ Scope {
                             Repeater {
                                 model: 3
 
-                                SevenSegment {
+                                Lcd.SevenSegment {
                                     required property int index
 
                                     // Leading zeros are left as ghosts.

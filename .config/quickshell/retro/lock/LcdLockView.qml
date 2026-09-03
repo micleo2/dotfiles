@@ -1,10 +1,10 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import "../osd" as Osd
-import "../notifications" as Lcd
+import "../lcd" as Lcd
 import "../ui" as Ui
 import ".."
+import "../services"
 
 // The lock screen as one Game & Watch LCD module in the OSD's frame: hard
 // offset shadow, outlined bezel, dark face. Inside, a seven-segment clock,
@@ -45,7 +45,7 @@ Item {
     property int sweep: 0
 
     // One clock digit: the OSD's seven-segment at twice the size.
-    component ClockDigit: Osd.SevenSegment {
+    component ClockDigit: Lcd.SevenSegment {
         width: 44
         height: 80
         thickness: 10

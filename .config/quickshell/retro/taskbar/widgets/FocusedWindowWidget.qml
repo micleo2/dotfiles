@@ -1,9 +1,10 @@
-import ".."
-import "../ui" as Ui
+import "../.."
+import "../../ui" as Ui
 import QtQuick
 import QtQuick.Effects
 import QtQuick.Layouts
 import Quickshell.Widgets
+import "../../services"
 
 RowLayout {
     anchors.verticalCenter: parent.verticalCenter

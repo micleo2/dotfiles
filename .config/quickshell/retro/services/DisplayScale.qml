@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Hyprland
+import ".."
 
 // Monitor scale and the one global text-size knob.
 Singleton {

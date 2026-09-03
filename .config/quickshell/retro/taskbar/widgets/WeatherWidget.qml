@@ -1,6 +1,7 @@
-import ".."
+import "../.."
 import QtQuick
 import QtQuick.Effects
+import "../../services"
 
 Item {
     implicitWidth: row.implicitWidth

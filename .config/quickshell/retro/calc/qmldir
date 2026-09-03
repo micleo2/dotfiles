@@ -1,3 +1,4 @@
 module Calc
+singleton Calculator 1.0 Calculator.qml
 CalcOverlay 1.0 CalcOverlay.qml
 LcdCalcView 1.0 LcdCalcView.qml

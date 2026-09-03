@@ -1,4 +1,10 @@
-module Modules
+module TaskbarWidgets
+ClockWidget 1.0 ClockWidget.qml
+FocusedWindowWidget 1.0 FocusedWindowWidget.qml
+Workspaces 1.0 Workspaces.qml
+VolumeWidget 1.0 VolumeWidget.qml
+WeatherWidget 1.0 WeatherWidget.qml
+SysTray 1.0 SysTray.qml
 BatteryWidget 1.0 BatteryWidget.qml
 BluetoothWidget 1.0 BluetoothWidget.qml
 DisplayWidget 1.0 DisplayWidget.qml

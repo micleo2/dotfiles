@@ -5,11 +5,12 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Hyprland
+import ".."
 
 // The calculator. Nothing here does arithmetic: every evaluation is the
 // real `qalc` binary, so whatever the CLI accepts (units, variables, `to`,
 // `base 16`, `exact`, `help sin`) works the same way here, with the same
-// output. Rendered by calc/CalcOverlay.qml.
+// output. Rendered by CalcOverlay.qml.
 //
 // qalc is stateful (`x = 5` then `x * 2`) and a one-shot run is not, so the
 // session's committed lines are replayed in front of every evaluation
@@ -219,7 +220,7 @@ Singleton {
     function copyResult(lines) {
         var text = root.resultOf(lines);
         // wl-copy forks a child that stays alive to serve pastes, so it must
-        // not be a Process the shell would wait on (see Addresses.qml).
+        // not be a Process the shell would wait on (see services/Addresses.qml).
         if (text !== "")
             Quickshell.execDetached(["wl-copy", "--", text]);
     }

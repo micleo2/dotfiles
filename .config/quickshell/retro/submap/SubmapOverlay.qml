@@ -58,7 +58,7 @@ Scope {
         return red(key) + "-&gt;" + escapeHtml(label);
     }
 
-    // Same lookup chain as FocusedWindow.qml: try the name as-is, then the
+    // Same lookup chain as services/FocusedWindow.qml: try the name as-is, then the
     // last dot segment (reverse-DNS ids ship their icon under the short name).
     function iconPath(name) {
         if (name === undefined || name === null || name === "")

@@ -61,7 +61,7 @@ hyprpm add https://github.com/virtcode/hypr-dynamic-cursors &&
   hyprpm enable dynamic-cursors
 
 # ---------------------------------------------------------------------------
-# lock screen (quickshell/retro: Lock.qml, lock/)
+# lock screen (quickshell/retro: lock/)
 #
 # The locker is part of `qs -c retro` itself (WlSessionLock + PamContext), so
 # there is no hyprlock. hypridle (hypr/hypridle.conf) asks the shell to lock on

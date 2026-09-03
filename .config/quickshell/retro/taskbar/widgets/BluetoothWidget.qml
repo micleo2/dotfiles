@@ -4,8 +4,9 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Bluetooth
-import "../ui" as Ui
-import ".."
+import "../../ui" as Ui
+import "../.."
+import "../../services"
 
 Item {
     id: root
