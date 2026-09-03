@@ -9,15 +9,7 @@ import "../lcd/text.js" as TextUtil
 import "../ui" as Ui
 import ".."
 
-// The launcher as one Game & Watch LCD module in the OSD's frame: hard
-// offset shadow, outlined bezel, dark face. Inside, a header row with the
-// mode on the left and a pager count on the right, the query row with its
-// block cursor, and a page of result rows. The selected row is a solid bar
-// of ink with its text in the bezel colour. In apps mode each row leads with the app's icon, drained to
-// the ink colour so it reads as a printed glyph rather than a picture.
-//
-// While fzf is running one lit cell sweeps the header, the lock's checking
-// sweep. No match spells NO MATCH in the urgent ink.
+// The launcher module: header, query row, a page of result rows.
 //
 // Enter accepts, Shift+Enter hands back the typed text (dmenu only),
 // Escape and Ctrl+C cancel. Up/Down, Ctrl+J/K, Ctrl+N/P and Tab walk the
@@ -33,18 +25,16 @@ Item {
     readonly property int columns: 48
     readonly property int listRows: 10
     readonly property color ink: Config.colors.text
-    // Text on the selected row: the bezel colour, not the face, so it
-    // stands off the lit bar the way the bezel stands off the face.
+    // Selected-row text: the face colour was unreadable on the ink bar.
     readonly property color face: Config.colors.base
 
     readonly property bool apps: Launcher.mode === "apps"
-    // Cells the icon column takes, and where a row's text begins.
     readonly property int iconCells: root.apps ? 2 : 0
     readonly property int textStart: root.apps ? 3 : 0
 
     property bool cursorOn: true
     property int sweep: 0
-    // First visible match.
+    // First visible match. Not `top`: that is a FINAL Item property.
     property int first: 0
 
     readonly property string label: TextUtil.fit(String(Launcher.prompt !== "" ? Launcher.prompt : (root.apps ? "APPS" : "MENU")).toUpperCase(), 20)
@@ -70,8 +60,6 @@ Item {
         return s;
     }
 
-    // A row's text: the name, and the detail right-aligned and dimmed when
-    // there is room for both.
     function rowText(item) {
         var avail = root.columns - root.textStart;
         return TextUtil.fit(String(item.text), avail);
@@ -104,7 +92,6 @@ Item {
         blinkTimer.restart();
     }
 
-    // Keeps the selection on the page.
     function follow() {
         var s = Launcher.selected;
         if (s < root.first)
@@ -156,10 +143,9 @@ Item {
         onTriggered: root.cursorOn = !root.cursorOn
     }
 
-    // The sweep only starts once a match has been running for a beat: a
-    // keystroke's fzf is back within a tick, and a cell lit for that long
-    // reads as the label flashing. It runs in the empty span between the
-    // label and the counter, so nothing it crosses is text.
+    // The sweep waits a beat: a keystroke's fzf is back within a tick, and
+    // a cell lit that briefly read as the label flashing. It runs in the
+    // blank span between the label and the counter.
     readonly property int sweepFrom: root.label.length + 1
     readonly property int sweepTo: root.columns - root.counter.length - 1
     property bool sweeping: false
@@ -199,7 +185,6 @@ Item {
     implicitWidth: bezel.width + 4
     implicitHeight: bezel.height + 4
 
-    // Keys land here. Nothing of it is drawn; the grids below are the echo.
     TextInput {
         id: input
 
@@ -259,7 +244,6 @@ Item {
         }
     }
 
-    // The frame language: hard offset shadow, outlined bezel, dark face.
     Rectangle {
         x: bezel.x + 4
         y: bezel.y + 4
@@ -277,7 +261,6 @@ Item {
         border.width: 2
         border.color: Config.colors.outline
 
-        // The LCD face.
         Rectangle {
             anchors.fill: parent
             anchors.margins: 8
@@ -292,7 +275,6 @@ Item {
             anchors.centerIn: parent
             spacing: 6
 
-            // Row: the mode, the pager count, and the sweep while matching.
             Lcd.CharGrid {
                 id: headerGrid
 
@@ -332,7 +314,6 @@ Item {
                 }
             }
 
-            // Row: the query, with the cursor as a lit cell.
             Lcd.PromptRow {
                 id: queryGrid
 
@@ -344,7 +325,6 @@ Item {
                 cursorOn: root.inputEnabled && root.cursorOn
             }
 
-            // The page of results.
             Lcd.CharGrid {
                 id: listGrid
 
@@ -352,9 +332,7 @@ Item {
                 rows: root.listRows
                 ghost: root.ghost
 
-                // The selected row: one solid bar of ink across the row.
-                // Not a run of cells: the gutters would cut through every
-                // glyph drawn over it.
+                // One solid bar, not lit cells: the gutters cut through the glyphs.
                 marks: Item {
                     anchors.fill: parent
 
@@ -369,8 +347,6 @@ Item {
                         visible: root.count > 0 && row >= 0 && row < root.listRows
                     }
 
-                    // Icons sit on the cell layer: they are ink on the
-                    // face, not text.
                     Repeater {
                         model: root.apps ? root.visibleRows : []
 

@@ -4,13 +4,8 @@ import QtQuick
 import "../ui" as Ui
 import ".."
 
-// One character-grid row with a prompt, a line being typed and a block
-// cursor: the calculator's draft row and the launcher's query row. The
-// line is windowed so the cursor always lands on the grid. The cursor is a
-// lit cell with the character under it in the face colour, the lock's
-// typed-cell language, so it sits on the cell layer rather than the text
-// layer. Nothing here takes keys; the owner's TextInput does, and its text
-// and cursorPosition are mirrored in.
+// A prompt, a line being typed and a block cursor. Takes no keys; the
+// owner's TextInput does, and its text and cursorPosition are mirrored in.
 CharGrid {
     id: root
 
@@ -48,8 +43,6 @@ CharGrid {
         color: root.ink
         visible: root.cursorOn
 
-        // The character under the cursor, in the face colour, nudged the
-        // way the text layer is.
         Ui.Label {
             x: -root.inkShift
             y: 0

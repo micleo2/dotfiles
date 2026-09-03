@@ -1,0 +1,92 @@
+#!/usr/bin/env python3
+"""Pick an ssh host in the retro launcher and open it in kitty's ssh kitten.
+
+Hosts: $XDG_STATE_HOME/quickshell/retro/ssh-hosts, one target per line.
+"""
+
+import argparse
+import os
+import re
+import shlex
+import subprocess
+import sys
+from pathlib import Path
+
+HEADER = """\
+# ssh hosts for retro-ssh (SUPER+U, s). One target per line, split like a
+# shell command line: `host`, `user@host`, `-p 2222 user@host`.
+"""
+
+
+def state_dir() -> Path:
+    base = os.environ.get("XDG_STATE_HOME") or str(Path.home() / ".local" / "state")
+    path = Path(base) / "quickshell" / "retro"
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
+def seed_from_known_hosts() -> list[str]:
+    path = Path.home() / ".ssh" / "known_hosts"
+    if not path.is_file():
+        return []
+    seen: list[str] = []
+    for line in path.read_text().splitlines():
+        line = line.strip()
+        if not line or line[0] in "#|":
+            continue
+        for name in line.split()[0].split(","):
+            if name.startswith("@"):
+                continue
+            port = ""
+            match = re.fullmatch(r"\[(.+)\]:(\d+)", name)
+            if match:
+                name, port = match.groups()
+            if not re.search(r"[A-Za-z]", name) or name == "github.com":
+                continue
+            target = f"-p {port} {name}" if port else name
+            if target not in seen:
+                seen.append(target)
+    return seen
+
+
+def load_hosts(path: Path) -> list[str]:
+    if not path.exists():
+        path.write_text(HEADER + "".join(f"{host}\n" for host in seed_from_known_hosts()))
+    lines = (line.strip() for line in path.read_text().splitlines())
+    return [line for line in lines if line and not line.startswith("#")]
+
+
+def pick(hosts: list[str]) -> str | None:
+    result = subprocess.run(
+        ["retro-launcher", "-p", "ssh"],
+        input="".join(f"{host}\n" for host in hosts),
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        return None
+    return result.stdout.strip() or None
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        prog="retro-ssh",
+        description="Pick an ssh host in the retro launcher and open it in kitty's ssh kitten.",
+    )
+    parser.parse_args()
+
+    hosts_file = state_dir() / "ssh-hosts"
+    choice = pick(load_hosts(hosts_file))
+    if choice is None:
+        return 1
+    try:
+        args = shlex.split(choice)
+    except ValueError as error:
+        print(f"retro-ssh: bad line in {hosts_file}: {choice!r}: {error}", file=sys.stderr)
+        return 1
+    # `kitty +kitten ssh` runs in the current terminal; this opens a window.
+    os.execvp("kitty", ["kitty", "kitten", "ssh", *args])
+
+
+if __name__ == "__main__":
+    sys.exit(main())

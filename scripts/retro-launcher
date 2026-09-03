@@ -1,21 +1,8 @@
 #!/usr/bin/env bash
-# retro-launcher: `rofi -dmenu` for the quickshell retro shell.
-#
-# Lines on stdin, the chosen line on stdout, exit 1 when nothing was
-# chosen. The menu itself is the shell's launcher module
-# (.config/quickshell/retro/launcher/); this only ferries the lines in
-# and the answer out, since a running shell cannot read a caller's stdin.
+# retro-launcher: `rofi -dmenu` for the quickshell retro shell. Lines on
+# stdin, the chosen line on stdout, exit 1 when nothing was chosen.
 #
 #   -p, --prompt TEXT   label on the module's header
-#
-# Other rofi flags (-dmenu, -i, ...) are accepted and ignored so an old
-# pipeline keeps working.
-#
-# The handshake: stdin goes to a file, a FIFO is made beside it, the shell
-# is told where, and this blocks reading the FIFO until the shell writes
-# the chosen line (or an empty one for a cancel). The FIFO is opened
-# read-write so the open itself never blocks; a shell that dies mid-menu
-# then trips the read timeout instead of hanging a keybind forever.
 set -u
 
 prompt=""
@@ -26,7 +13,7 @@ while [ $# -gt 0 ]; do
       shift
       ;;
     -h | --help)
-      sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//'
+      sed -n '2,5p' "$0" | sed 's/^# \{0,1\}//'
       exit 0
       ;;
   esac
@@ -41,6 +28,7 @@ mkfifo "$dir/out" || exit 1
 
 qs -c retro ipc call launcher dmenu "$dir" "$prompt" >/dev/null || exit 1
 
+# Read-write, so the open never blocks and a dead shell hits the timeout.
 exec 3<>"$dir/out"
 IFS= read -r -t 600 -u 3 sel || exit 1
 [ -n "$sel" ] || exit 1
