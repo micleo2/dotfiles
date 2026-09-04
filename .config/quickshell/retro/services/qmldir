@@ -1,5 +1,6 @@
 module Services
 singleton Volume 1.0 Volume.qml
+singleton Players 1.0 Players.qml
 singleton Brightness 1.0 Brightness.qml
 singleton Time 1.0 Time.qml
 singleton Weather 1.0 Weather.qml

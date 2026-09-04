@@ -85,12 +85,23 @@ Singleton {
     }
 
     onWatchingChanged: {
+        Players.watching = root.watching;
         if (root.watching) {
             snapshotDebounce.restart();
         } else {
             root.displaySinks = [];
             root.displayStreams = [];
         }
+    }
+
+    onDisplayAppsChanged: {
+        var pids = [];
+        for (var i = 0; i < root.displayApps.length; i++) {
+            var pid = root.displayApps[i].pid;
+            if (pid !== undefined && pid !== null && pids.indexOf(pid) === -1)
+                pids.push(pid);
+        }
+        Players.match(pids);
     }
 
     Timer {
@@ -172,12 +183,58 @@ Singleton {
         return "Unknown";
     }
 
-    function streamVolume(node) {
-        return node && node.audio ? node.audio.volume : 0;
+    // One row per application rather than per stream. Chromium opens a second,
+    // mono stream for about 15 s when a YouTube video starts, and two tabs
+    // playing at once are two streams too; every one of them is labelled
+    // "Chromium", so as separate rows they are indistinguishable duplicates.
+    // Streams are folded together by owning process, falling back to the
+    // label for the (rare) stream that does not report one.
+    readonly property var displayApps: {
+        var out = [];
+        var byKey = {};
+        var list = root.displayStreams;
+        for (var i = 0; i < list.length; i++) {
+            var node = list[i];
+            var pid = root.nodeProps(node)["application.process.id"];
+            var label = root.streamLabel(node);
+            var key = pid !== undefined && pid !== null ? "pid:" + pid : "label:" + label;
+            var app = byKey[key];
+            if (!app) {
+                app = { key: key, label: label, pid: pid, nodes: [] };
+                byKey[key] = app;
+                out.push(app);
+            }
+            app.nodes.push(node);
+        }
+        return out;
     }
 
-    function streamMuted(node) {
-        return node && node.audio ? node.audio.muted : false;
+    // The loudest stream stands for the group; setting the level brings the
+    // rest in line with it.
+    function appVolume(app) {
+        var level = 0;
+        var nodes = app ? app.nodes : [];
+        for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].audio)
+                level = Math.max(level, nodes[i].audio.volume);
+        }
+        return level;
+    }
+
+    function appTitle(app) {
+        var player = app ? Players.playerFor(app.pid) : null;
+        return player ? String(player.trackTitle || "").trim() : "";
+    }
+
+    function appMuted(app) {
+        var nodes = app ? app.nodes : [];
+        if (nodes.length === 0)
+            return false;
+        for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].audio && !nodes[i].audio.muted)
+                return false;
+        }
+        return true;
     }
 
     function glyphFor(node) {
@@ -206,17 +263,22 @@ Singleton {
         root.sink.audio.volume = Math.max(0, Math.min(1, value));
     }
 
-    // Per-stream moves stay off the OSD: `changed` is for the output level.
-    function setStreamVolume(node, value) {
-        if (!node || !node.audio)
-            return;
-        node.audio.volume = Math.max(0, Math.min(1, value));
+    // Per-app moves stay off the OSD: `changed` is for the output level.
+    function setAppVolume(app, value) {
+        var nodes = app ? app.nodes : [];
+        for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].audio)
+                nodes[i].audio.volume = Math.max(0, Math.min(1, value));
+        }
     }
 
-    function toggleStreamMute(node) {
-        if (!node || !node.audio)
-            return;
-        node.audio.muted = !node.audio.muted;
+    function toggleAppMute(app) {
+        var muted = !root.appMuted(app);
+        var nodes = app ? app.nodes : [];
+        for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].audio)
+                nodes[i].audio.muted = muted;
+        }
     }
 
     function adjust(delta) {
