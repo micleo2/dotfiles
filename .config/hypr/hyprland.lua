@@ -50,25 +50,23 @@ hl.env("HYPRCURSOR_SIZE", "24")
 hl.config({
 	general = {
 		gaps_in = 0,
-		gaps_out = 0,
-		border_size = 2,
+		gaps_out = 6,
+		border_size = 1,
 		col = {
 			active_border = { colors = { "rgba(33ccffee)", "rgba(00ff99ee)" }, angle = 45 },
 			inactive_border = "rgba(595959aa)",
 		},
 		resize_on_border = false, -- enable resizing windows by dragging on borders
 		allow_tearing = false,
-		layout = "master",
+		layout = "scrolling",
 	},
 
 	decoration = {
 		inactive_opacity = 0.9,
 		blur = {
-			enabled = false,
+			enabled = true,
 		},
-		rounding = 10,
-		rounding_power = 2,
-
+		rounding = 0,
 		shadow = {
 			enabled = true,
 			range = 4,
@@ -87,22 +85,6 @@ hl.curve("quick", { type = "bezier", points = { { 0.15, 0 }, { 0.1, 1 } } })
 hl.animation({ leaf = "fade", enabled = true, speed = 4, bezier = "quick" })
 hl.animation({ leaf = "windows", enabled = true, speed = 2, bezier = "easeOutQuint", style = "slide" })
 hl.animation({ leaf = "workspaces", enabled = false })
-
--- "Smart gaps"
-hl.workspace_rule({ workspace = "w[tv1]", gaps_out = 0, gaps_in = 0 })
-hl.workspace_rule({ workspace = "f[1]", gaps_out = 0, gaps_in = 0 })
-hl.window_rule({
-	name = "no-gaps-wtv1",
-	match = { float = false, workspace = "w[tv1]" },
-	border_size = 0,
-	rounding = 0,
-})
-hl.window_rule({
-	name = "no-gaps-f1",
-	match = { float = false, workspace = "f[1]" },
-	border_size = 0,
-	rounding = 0,
-})
 
 -- Skip the fade-out snapshot for the QS submap overlay so it vanishes
 -- instantly when the submap resets (no_anim -> no snapshot in onUnmap).
@@ -201,7 +183,6 @@ local function C(key)
 	return "CTRL + " .. key
 end
 
--- One-key app launcher submap (SUPER + A) + web app window rules
 require("submap-apps")
 require("submap-power")
 require("submap-screenshots")
