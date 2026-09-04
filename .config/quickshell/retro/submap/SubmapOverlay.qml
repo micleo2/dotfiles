@@ -4,8 +4,10 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Hyprland
 import Quickshell.Wayland
-import ".."
 
+// The Wayland side of the submap cheat sheet: one overlay per screen at the
+// bottom centre, shown while Hyprland is in the submap the last `display`
+// call named. The module itself is LcdSubmapView.
 Scope {
     id: root
 
@@ -15,60 +17,20 @@ Scope {
 
     readonly property bool shown: active && entries.length > 0
 
-    readonly property var sortedEntries: entries.slice().sort((a, b) => String(a.label).localeCompare(String(b.label)))
-
-    // Each column holds up to 4 entries, sliced sequentially out of the
-    // sorted list, so the alphabet runs top-to-bottom down one column and
-    // then continues in the next — like `ls` output.
-    readonly property int perColumn: 4
-    readonly property var entryGroups: {
-        const out = [];
-        for (let i = 0; i < root.sortedEntries.length; i += root.perColumn)
-            out.push(root.sortedEntries.slice(i, i + root.perColumn));
-        return out;
-    }
-
     readonly property var default_entries: [
         {
             key: "t",
-            label: "testing",
-            icon: "blender"
+            label: "testing"
+        },
+        {
+            key: "SHIFT+S",
+            label: "shutdown"
+        },
+        {
+            key: "SUPER+A",
+            label: "apps"
         },
     ]
-
-    function escapeHtml(text) {
-        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    }
-
-    // Highlight the trigger key inside the label: a single-character key is
-    // matched case-sensitively anywhere in the label (k -> ma[k]era), a longer
-    // key still only matches as a case-insensitive prefix. Anything else falls
-    // back to the explicit "key->label" form.
-    function styledLabel(key, label) {
-        const red = k => "<font color=\"red\">" + escapeHtml(k) + "</font>";
-
-        if (key.length === 1) {
-            const at = label.indexOf(key);
-            if (at >= 0)
-                return escapeHtml(label.substring(0, at)) + red(key) + escapeHtml(label.substring(at + 1));
-        } else if (label.toLowerCase().startsWith(key.toLowerCase())) {
-            return red(label.substring(0, key.length)) + escapeHtml(label.substring(key.length));
-        }
-
-        return red(key) + "-&gt;" + escapeHtml(label);
-    }
-
-    // Same lookup chain as services/FocusedWindow.qml: try the name as-is, then the
-    // last dot segment (reverse-DNS ids ship their icon under the short name).
-    function iconPath(name) {
-        if (name === undefined || name === null || name === "")
-            return "";
-        const direct = Quickshell.iconPath(name, true);
-        if (direct !== "")
-            return direct;
-        const segments = name.split(".");
-        return Quickshell.iconPath(segments[segments.length - 1].toLocaleLowerCase(), true);
-    }
 
     IpcHandler {
         target: "submap"
@@ -87,8 +49,10 @@ Scope {
         }
 
         function preview(): void {
-            if (root.entries.length === 0)
+            if (root.entries.length === 0) {
                 root.entries = root.default_entries;
+                root.submapName = "preview";
+            }
             root.active = !root.active;
         }
     }
@@ -105,8 +69,8 @@ Scope {
     Variants {
         model: Quickshell.screens
 
-PanelWindow { // qmllint disable uncreatable-type
-                id: overlayWindow
+        PanelWindow { // qmllint disable uncreatable-type
+            id: overlayWindow
 
             required property var modelData
 
@@ -118,119 +82,26 @@ PanelWindow { // qmllint disable uncreatable-type
             exclusiveZone: 0
             color: "transparent"
 
-            anchors {
-                bottom: true
-                left: true
-                right: true
-            }
-            implicitHeight: card.implicitHeight + 40
+            // Anchored to the bottom only, so the compositor centres it and
+            // the surface is no wider than the module: the pointer reaches
+            // whatever is beside it.
+            anchors.bottom: true
+            // PanelWindow's margins group is not described in Quickshell's
+            // type information, so qmllint cannot see it; it works at
+            // runtime.
+            // qmllint disable unqualified unresolved-type
+            margins.bottom: 20
+            // qmllint enable unqualified unresolved-type
 
-            Item {
-                id: card
+            implicitWidth: view.implicitWidth
+            implicitHeight: view.implicitHeight
 
-                x: Math.max(0, (parent.width - width) / 2)
-                y: parent.height - height - 20
+            LcdSubmapView {
+                id: view
 
-                implicitWidth: grid.implicitWidth + 60
-                implicitHeight: grid.implicitHeight + 48
-
-                Rectangle {
-                    anchors.fill: parent
-                    radius: 2
-                    color: "#99000000"
-                }
-
-                Row {
-                    id: grid
-
-                    x: 30
-                    y: 24
-                    // Half of the 36px column gap; a divider occupies the
-                    // other half, so the rule lands centered between columns.
-                    spacing: 18
-
-                    Repeater {
-                        id: columnRepeater
-
-                        model: root.entryGroups
-
-                        Row {
-                            id: entryColumn
-                            required property var modelData
-                            required property int index
-
-                            readonly property var groupEntries: modelData
-
-                            spacing: 18
-
-                            Column {
-                                id: column
-
-                                spacing: 6
-
-                                Repeater {
-                                    model: entryColumn.groupEntries
-
-                                    Row {
-                                        id: entry
-                                        required property var modelData
-
-                                        readonly property string key: String(modelData.key)
-                                        readonly property string label: String(modelData.label)
-
-                                        readonly property string icon: root.iconPath(modelData.icon)
-
-                                        Text {
-                                            text: root.styledLabel(entry.key, entry.label)
-                                            textFormat: Text.StyledText
-                                            color: "white"
-                                            font.pointSize: 18
-                                            font.family: Config.mainFont
-                                        }
-
-                                        // Text {
-                                        //     text: "<font color='red'>" + modelData.key + "</font>->"
-                                        //     color: "white"
-                                        //     font.pointSize: 18
-                                        //     font.family: mainFont.name
-                                        // }
-                                        // IconImage {
-                                        //     implicitSize: 24
-                                        //     source: icon
-                                        //     visible: icon !== ""
-                                        //     anchors.verticalCenter: parent.verticalCenter
-                                        //     layer.effect: MultiEffect {
-                                        //         saturation: -1
-                                        //         contrast: 0.7
-                                        //     }
-                                        // }
-                                        // Text {
-                                        //     text: modelData.label
-                                        //     visible: icon === ""
-                                        //     color: "white"
-                                        //     anchors.verticalCenter: parent.verticalCenter
-                                        //     font.pointSize: 24
-                                        //     font.family: mainFont.name
-                                        // }
-
-                                    }
-                                }
-                            }
-
-                            // A column is only ever short when it is the last
-                            // one, and the last one draws no rule, so the
-                            // sibling Column always spans a full stack here.
-                            // Binding to the enclosing Row's height instead
-                            // would be circular.
-                            Rectangle {
-                                width: 1
-                                height: column.implicitHeight
-                                color: "#33ffffff"
-                                visible: entryColumn.index < columnRepeater.count - 1
-                            }
-                        }
-                    }
-                }
+                anchors.fill: parent
+                entries: root.entries
+                submapName: root.submapName
             }
         }
     }

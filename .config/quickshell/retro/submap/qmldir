@@ -1,2 +1,3 @@
 module Submap
 SubmapOverlay 1.0 SubmapOverlay.qml
+LcdSubmapView 1.0 LcdSubmapView.qml
