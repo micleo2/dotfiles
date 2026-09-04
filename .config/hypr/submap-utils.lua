@@ -7,6 +7,8 @@
 local submap_builder = require("submap-builder")
 
 local submap_options_per_key = {
+	b = { label = "btop", exec_cmd = "kitty --class kitty-float-btop btop" },
+	n = { label = "nvtop", exec_cmd = "kitty --class kitty-float-btop nvtop" },
 	p = {
 		label = "copy-path",
 		-- `>/dev/null 2>&1`: wl-copy 2.3.0 daemonizes but only detaches
