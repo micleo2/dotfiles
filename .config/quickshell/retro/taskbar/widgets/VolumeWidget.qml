@@ -125,42 +125,42 @@ Item {
         }
 
         Ui.SectionLabel {
-            visible: Volume.displayStreams.length > 0
+            visible: Volume.displayApps.length > 0
             text: "Apps"
         }
 
         Repeater {
-            model: Volume.displayStreams
+            model: Volume.displayApps
 
             // Two cursor stops per app: the row (Enter or a click mutes it)
             // and the slider under it (h/l or a drag sets its level).
             Column {
-                id: stream
+                id: app
 
                 required property var modelData
 
                 width: parent ? parent.width : 0
 
                 Ui.PopupRow {
-                    rowKey: "app:" + stream.modelData.id
+                    rowKey: "app:" + app.modelData.key
                     cursorKey: popup.cursorKey
-                    onCursorEntered: popup.cursorKey = "app:" + stream.modelData.id
+                    onCursorEntered: popup.cursorKey = "app:" + app.modelData.key
 
                     glyph: "graphic_eq"
-                    text: Volume.streamLabel(stream.modelData)
-                    detail: Volume.streamMuted(stream.modelData) ? "Muted" : Math.round(Volume.streamVolume(stream.modelData) * 100) + "%"
-                    onClicked: Volume.toggleStreamMute(stream.modelData)
+                    text: Volume.appTitle(app.modelData) !== "" ? app.modelData.label + " - " + Volume.appTitle(app.modelData) : app.modelData.label
+                    detail: Volume.appMuted(app.modelData) ? "Muted" : Math.round(Volume.appVolume(app.modelData) * 100) + "%"
+                    onClicked: Volume.toggleAppMute(app.modelData)
                 }
 
                 Ui.PopupSlider {
-                    rowKey: "appvol:" + stream.modelData.id
+                    rowKey: "appvol:" + app.modelData.key
                     cursorKey: popup.cursorKey
-                    onCursorEntered: popup.cursorKey = "appvol:" + stream.modelData.id
+                    onCursorEntered: popup.cursorKey = "appvol:" + app.modelData.key
 
                     implicitHeight: 16
                     stops: root.steps
-                    index: Math.round(Volume.streamVolume(stream.modelData) / (root.stepPercent / 100)) - 1
-                    onMoved: (index) => Volume.setStreamVolume(stream.modelData, root.steps[index] / 100)
+                    index: Math.round(Volume.appVolume(app.modelData) / (root.stepPercent / 100)) - 1
+                    onMoved: (index) => Volume.setAppVolume(app.modelData, root.steps[index] / 100)
                 }
             }
         }
