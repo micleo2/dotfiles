@@ -4,41 +4,11 @@
     "websearch": true
   },
   "provider": {
-    "llama-local": {
-      "name": "llama.cpp (local)",
-      "npm": "@ai-sdk/openai-compatible",
-      "options": {
-        "baseURL": "http://127.0.0.1:8080/v1"
-      },
-      "models": {
-        "muse-glimmer-30B-kquant-dynamic": {
-          "name": "glimmer-30B"
-        },
-        "qwen-3.6-Q5": {
-          "name": "Qwen3.6 27B-Q5"
-        },
-        "qwen-3.6-Q5": {
-          "name": "Qwen3.6 27B-Q5"
-        },
-        "qwen-3.8-Q5-xhigh": {
-          "name": "Qwen3.8 27B-Q5-High"
-        },
-        "qwen-3.8-Q5-medium": {
-          "name": "Qwen3.8 27B-Q5-Medium"
-        },
-        "qwen-3.8-IQ3_XXS-medium": {
-          "name": "Qwen3.8 27B-IQ3-Medium"
-        },
-        "qwen-3.8-Q5-low": {
-          "name": "Qwen3.8 27B-Q5-Low"
-        }
-      }
-    },
     "ninfer": {
       "npm": "@ai-sdk/openai-compatible",
       "name": "NInfer (local)",
       "options": {
-        "baseURL": "http://127.0.0.1:8090/v1"
+        "baseURL": "http://10.0.20.2:8090/v1"
       },
       "models": {
         "qwen3.8-27b": {
