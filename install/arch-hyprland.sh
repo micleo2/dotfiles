@@ -64,3 +64,5 @@ echo 'kitty.desktop' >~/.config/xdg-terminals.list
 # Install and setup yazi as the system file picker.
 sudo pacman -S --needed yazi
 paru -S xdg-desktop-portal-termfilechooser-hunkyburrito-git
+ln -s ~/dotfiles/.config/xdg-desktop-portal/ ~/.config/
+ln -s ~/dotfiles/.config/xdg-desktop-portal-termfilechooser/ ~/.config/
