@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # setup software from pacman
-sudo pacman -S --needed hyprpaper fzf unixodbc f3d yazi gum
+sudo pacman -S --needed hyprpaper fzf unixodbc f3d gum
 # needed by hyprpm
 sudo pacman -S --needed cmake cpio
 
@@ -46,6 +46,9 @@ done
 ln -sf ~/dotfiles/scripts/retro-launcher ~/.local/bin/
 ln -sf ~/dotfiles/scripts/retro-ssh ~/.local/bin/
 
+sudo pacman -S --needed hypridle
+systemctl --user enable --now hypridle.service
+
 # uwsm session environment
 mkdir -p ~/.config/uwsm
 ln -s ~/dotfiles/.config/uwsm/env ~/.config/uwsm/
@@ -54,13 +57,10 @@ ln -s ~/dotfiles/.config/uwsm/env ~/.config/uwsm/
 hyprpm add https://github.com/virtcode/hypr-dynamic-cursors &&
   hyprpm enable dynamic-cursors
 
-# ---------------------------------------------------------------------------
-# lock screen (quickshell/retro: lock/)
-#
-# The locker is part of `qs -c retro` itself (WlSessionLock + PamContext), so
-# there is no hyprlock. hypridle (hypr/hypridle.conf) asks the shell to lock on
-# idle, on `loginctl lock-session`, and before suspend, where it holds a logind
-# delay inhibitor until Hyprland reports the session locked. Lock manually
-# with SUPER+P, k; the idle timeout is the listener in hypridle.conf.
-sudo pacman -S --needed hypridle
-systemctl --user enable --now hypridle.service
+# Allow kitty to handle Terminal=true .desktop apps.
+paru -S --needed xdg-terminal-exec
+echo 'kitty.desktop' >~/.config/xdg-terminals.list
+
+# Install and setup yazi as the system file picker.
+sudo pacman -S --needed yazi
+paru -S xdg-desktop-portal-termfilechooser-hunkyburrito-git
