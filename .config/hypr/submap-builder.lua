@@ -4,6 +4,8 @@ local M = {}
 local QS_CONFIG = "retro"
 -- Name of the meta submap built by generate_helper_submap.
 local HELPER_SUBMAP_NAME = "helper"
+-- Name under which generate_keybind_index claims its activation key.
+local INDEX_NAME = "keybinds"
 
 -- Every submap defined through this module, in definition order, so
 -- generate_helper_submap can list them; the two sets guard against a submap
@@ -168,6 +170,95 @@ function M.generate_helper_submap(activation_key)
 		end
 		bind_submap_exits()
 	end)
+end
+
+-- Fire the entry bound to `key` inside the submap opened by `activation_key`,
+-- exactly as pressing that key in the submap would. Reached from the shell
+-- through `hyprctl eval`, which runs in this same Lua state -- so entries
+-- with a Lua `action` work too, not only exec_cmd ones.
+function M.run(activation_key, key)
+	for _, submap in ipairs(defined_submaps) do
+		if submap.activation_key == activation_key then
+			local submap_opt = submap.options[key]
+			assert(submap_opt, "submap '" .. submap.name .. "' has no key '" .. key .. "'")
+			hl.dispatch(submap_opt.action or hl.dsp.exec_cmd(submap_opt.exec_cmd))
+			return
+		end
+	end
+	error("no submap is bound to '" .. activation_key .. "'")
+end
+
+-- Single-quote a string for sh.
+local function sh_quote(s)
+	return "'" .. s:gsub("'", "'\\''") .. "'"
+end
+
+local function pad(s, width)
+	return s .. string.rep(" ", width - #s)
+end
+
+-- One line per entry across every submap, "<activation key> <key>  <label>"
+-- in aligned columns. Entries are sorted per submap, single keys before
+-- chords like SHIFT+S, since `pairs` order is arbitrary.
+local function index_lines()
+	local activation_width, key_width = 0, 0
+	for _, submap in ipairs(defined_submaps) do
+		activation_width = math.max(activation_width, #submap.activation_key)
+		for key in pairs(submap.options) do
+			key_width = math.max(key_width, #key)
+		end
+	end
+
+	local lines = {}
+	for _, submap in ipairs(defined_submaps) do
+		local keys = {}
+		for key in pairs(submap.options) do
+			table.insert(keys, key)
+		end
+		table.sort(keys, function(a, b)
+			if #a ~= #b then
+				return #a < #b
+			end
+			return a < b
+		end)
+		for _, key in ipairs(keys) do
+			table.insert(
+				lines,
+				pad(submap.activation_key, activation_width)
+					.. " "
+					.. pad(key, key_width)
+					.. "  "
+					.. submap.options[key].label
+			)
+		end
+	end
+	return lines
+end
+
+-- Searchable index of every submap entry in the shell's launcher
+-- (launcher/Launcher.qml in dmenu mode, via scripts/retro-launcher).
+-- Choosing a line runs that entry through M.run.
+--
+-- Call this AFTER all define_submap calls, so the registry is complete.
+--
+-- Default key is SUPER + /.
+function M.generate_keybind_index(activation_key)
+	activation_key = activation_key or "SUPER+slash"
+	claim(INDEX_NAME, activation_key)
+
+	local quoted = {}
+	for _, line in ipairs(index_lines()) do
+		table.insert(quoted, sh_quote(line))
+	end
+
+	-- `read` splits the chosen line back into its first two columns; the
+	-- rest (the label) is discarded. Hyprland runs exec_cmd through sh.
+	local cmd = "printf '%s\\n' "
+		.. table.concat(quoted, " ")
+		.. " | retro-launcher -p "
+		.. INDEX_NAME
+		.. " | { read -r act key _ && hyprctl eval \"require('submap-builder').run('$act', '$key')\"; }"
+	hl.bind(activation_key, hl.dsp.exec_cmd(cmd))
 end
 
 return M

@@ -209,9 +209,11 @@ require("submap-utils")
 require("submap-layout")
 require("submap-edit")
 require("submap-topbar")
--- SUPER + ? lists the submaps above with their activation keys. Must come
--- after the requires so every submap is registered.
+-- SUPER + ? lists the submaps above with their activation keys; SUPER + /
+-- opens a searchable index of every entry in them. Both must come after the
+-- requires so every submap is registered.
 require("submap-builder").generate_helper_submap()
+require("submap-builder").generate_keybind_index()
 
 -- Window binds
 hl.bind(M("Q"), hl.dsp.window.close())
