@@ -1,4 +1,5 @@
 #!/bin/sh
+set -euo pipefail
 
 # setup software from pacman
 sudo pacman -S --needed hyprpaper fzf unixodbc f3d gum
@@ -62,7 +63,7 @@ paru -S --needed xdg-terminal-exec
 echo 'kitty.desktop' >~/.config/xdg-terminals.list
 
 # Install and setup yazi as the system file picker.
-sudo pacman -S --needed yazi
+sudo pacman -S --needed yazi ffmpeg 7zip jq poppler fd ripgrep fzf zoxide resvg imagemagick
 paru -S xdg-desktop-portal-termfilechooser-hunkyburrito-git
 ln -s ~/dotfiles/.config/xdg-desktop-portal/ ~/.config/
 ln -s ~/dotfiles/.config/xdg-desktop-portal-termfilechooser/ ~/.config/
