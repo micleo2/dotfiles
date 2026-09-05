@@ -114,8 +114,10 @@ hl.window_rule({
 	workspace = 8,
 })
 hl.window_rule({
+	-- Only the real game window; dialogs float and stay readable
 	match = {
 		class = "steam_app_(.*)",
+		float = false,
 	},
 	workspace = 8,
 	fullscreen = true,
