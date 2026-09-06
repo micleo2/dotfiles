@@ -2,7 +2,7 @@
 """Bridge between the shell and the raw HID link of one or more QMK boards.
 
 Run with no arguments it is a daemon for services/Qmk.qml. It knows the
-boards by USB id (BOARDS below, matching ~/oss/keyboards/desktop/boards/*.json), opens each
+boards by USB id (BOARDS below, matching ~/oss/keyboards/host/boards/*.json), opens each
 one's raw HID interface (usage page 0xFF60, usage 0x61) as it appears,
 says HELLO, repeats it every two seconds as a keep-alive, and turns every
 packet a board pushes into one JSON line on stdout, tagged with the board's
@@ -35,7 +35,7 @@ One-shot use from a terminal:
 
 The protocol is documented in ~/oss/keyboards/users/micleo2/host_link.c. Needs
 python-hid (the `hid` module, hidapi) and read/write access to the hidraw
-nodes: a udev rule tagging each board's VID/PID with uaccess (keyboards/desktop/udev).
+nodes: a udev rule tagging each board's VID/PID with uaccess (keyboards/host/udev).
 """
 
 import json
