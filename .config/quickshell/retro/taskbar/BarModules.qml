@@ -27,7 +27,7 @@ RowLayout {
     // nothing in it can show. Bound to the widgets' `available` flags rather
     // than their `visible` props, because a child's effective visibility goes
     // false the moment this row hides, which would latch the row hidden.
-    visible: system.available || network.available || bluetooth.available || display.available || idle.available || battery.available
+    visible: system.available || network.available || bluetooth.available || display.available || keyboard.available || idle.available || battery.available
 
     Widgets.SystemWidget {
         id: system
@@ -52,6 +52,13 @@ RowLayout {
 
     Widgets.DisplayWidget {
         id: display
+        Layout.fillHeight: true
+        barScreen: root.barScreen
+        primary: root.primary
+    }
+
+    Widgets.KeyboardWidget {
+        id: keyboard
         Layout.fillHeight: true
         barScreen: root.barScreen
         primary: root.primary

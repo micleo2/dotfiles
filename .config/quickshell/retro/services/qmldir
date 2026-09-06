@@ -12,3 +12,4 @@ singleton DisplayScale 1.0 DisplayScale.qml
 singleton Idle 1.0 Idle.qml
 singleton Host 1.0 Host.qml
 singleton Modules 1.0 Modules.qml
+singleton Qmk 1.0 Qmk.qml

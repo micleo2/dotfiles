@@ -14,6 +14,7 @@ import "notifications" as Notifications_
 import "lock" as Lock_
 import "calc" as Calc
 import "launcher" as Launcher_
+import "keymap" as Keymap_
 
 Scope {
     id: root
@@ -31,4 +32,6 @@ Scope {
     Calc.CalcOverlay {}
 
     Launcher_.LauncherOverlay {}
+
+    Keymap_.KeymapOverlay {}
 }

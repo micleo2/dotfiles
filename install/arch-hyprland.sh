@@ -22,13 +22,29 @@ systemctl --user enable --now hyprpolkitagent.service
 #   gtk3                  `gtk-launch`, how every SUPER+A entry starts its app
 #   playerctl, wireplumber  media and volume keys
 #   grim                  screen capture for scripts/ocr-region-select.sh
+#   wtype                 types Rocket League quick chats behind SUPER+N
 sudo pacman -S --needed quickshell cliphist libqalculate hyprpicker gpu-screen-recorder-ui \
-  wl-clipboard gtk3 playerctl wireplumber grim
+  wl-clipboard gtk3 playerctl wireplumber grim wtype
 
 # from the AUR (paru is bootstrapped in arch-setup.sh):
 #   snappy-switcher  ALT+Tab switcher daemon
 #   voxtype          push-to-talk dictation on SUPER+R
 # paru -S --needed snappy-switcher voxtype
+
+# quickshell configs: `qs -c retro` (bar, submaps, notifications, keyboard
+# layout viewer) lives in dotfiles, `qs -c gw-idle` in creative-synced.
+mkdir -p ~/.config/quickshell
+ln -sfn ~/dotfiles/.config/quickshell/retro ~/.config/quickshell/retro
+ln -sfn ~/creative-synced/programming/qs/gw-idle ~/.config/quickshell/gw-idle
+
+# QMK keyboards <-> quickshell: the bar chip, layout viewer (SUPER+U k) and
+# live layer follow.  Firmware, keymaps, the exporter that writes the viewer's
+# data to $XDG_STATE_HOME/quickshell/retro/keymap, and the udev rule all live
+# in the keyboards repo; its setup.sh installs the toolchain and the rule.
+#   python-hid   retro/services/qmk/qmk-bridge.py talks raw HID to the boards
+sudo pacman -S --needed python-hid
+gh repo clone micleo2/keyboards ~/oss/keyboards
+~/oss/keyboards/setup.sh
 
 # make xdg-open detect real MIME types (mimetype reads shared-mime-info DB,
 # not libmagic which misclassifies 3D/font files)

@@ -24,6 +24,12 @@ local submap_options_per_key = {
 		label = "ssh",
 		exec_cmd = "retro-ssh",
 	},
+	-- keymap: the shell's LCD view of the unicorne's layers
+	-- (quickshell/retro/keymap), data from `make export` in ~/oss/keyboards.
+	k = {
+		label = "keymap",
+		exec_cmd = "qs -c retro ipc call keymap toggle",
+	},
 }
 
 submap_builder.define_submap("utils", "SUPER+U", submap_options_per_key)
