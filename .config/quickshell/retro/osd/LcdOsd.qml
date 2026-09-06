@@ -7,8 +7,8 @@ import Quickshell.Wayland
 import "../lcd" as Lcd
 import "../services"
 
-// The on-screen display: one Game & Watch style LCD panel with two modes,
-// volume and brightness. Every segment is always drawn as a faint ghost and
+// The on-screen display: one Game & Watch style LCD panel with three modes,
+// volume, display brightness and the keyboard's backlight. Every segment is always drawn as a faint ghost and
 // the live ones are solid, which is what makes it read as an LCD. One window
 // and one timer, so a volume change while brightness is up simply swaps the
 // panel's contents. Colours come from the palette, so the dark themes get a
@@ -16,18 +16,21 @@ import "../services"
 Scope {
     id: osdRoot
 
-    // "volume" or "brightness".
+    // "volume", "brightness" or "keyboard".
     property string mode: ""
     property bool shown: false
 
     readonly property bool volume: osdRoot.mode === "volume"
-    readonly property int segments: osdRoot.volume ? Volume.segments : Brightness.segments
-    readonly property int percent: osdRoot.volume ? Volume.percent : Brightness.percent
+    readonly property bool keyboard: osdRoot.mode === "keyboard"
+    readonly property int segments: osdRoot.volume ? Volume.segments : (osdRoot.keyboard ? Qmk.segments : Brightness.segments)
+    readonly property int percent: osdRoot.volume ? Volume.percent : (osdRoot.keyboard ? Qmk.percent : Brightness.percent)
     readonly property int filled: Math.round(osdRoot.percent / 100 * osdRoot.segments)
     readonly property bool muted: osdRoot.volume && Volume.muted
     readonly property real ghost: 0.12
 
     readonly property var sun: ["....#....", ".#.....#.", "...###...", "..#####..", "#.#####.#", "..#####..", "...###...", ".#.....#.", "....#...."]
+    // A keyboard: outline, two rows of keys, a space bar.
+    readonly property var keys: ["#########", "#.......#", "#.#.#.#.#", "#.......#", "#.#.#.#.#", "#.......#", "#..###..#", "#.......#", "#########"]
 
     function flash(which) {
         osdRoot.mode = which;
@@ -52,6 +55,14 @@ Scope {
             if (!Brightness.available)
                 return;
             osdRoot.flash("brightness");
+        }
+    }
+
+    Connections {
+        target: Qmk
+
+        function onBrightnessChanged() {
+            osdRoot.flash("keyboard");
         }
     }
 
@@ -122,7 +133,8 @@ Scope {
                     anchors.centerIn: parent
                     spacing: 20
 
-                    // Icon: the hand-drawn speaker at 4x, or a pixel-map sun.
+                    // Icon: the hand-drawn speaker at 4x, or a pixel-map sun
+                    // or keyboard.
                     Item {
                         width: 64
                         height: 64
@@ -156,7 +168,7 @@ Scope {
                         Lcd.PixelGlyph {
                             anchors.centerIn: parent
                             visible: !osdRoot.volume
-                            rows: osdRoot.sun
+                            rows: osdRoot.keyboard ? osdRoot.keys : osdRoot.sun
                             cell: 7
                             ghost: osdRoot.ghost
                         }

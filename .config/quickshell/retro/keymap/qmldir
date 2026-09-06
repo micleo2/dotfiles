@@ -1,0 +1,4 @@
+module Keymap
+singleton Keymap 1.0 Keymap.qml
+KeymapOverlay 1.0 KeymapOverlay.qml
+LcdKeymapView 1.0 LcdKeymapView.qml
