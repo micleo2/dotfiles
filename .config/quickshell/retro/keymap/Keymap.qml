@@ -11,7 +11,7 @@ import "../services"
 // The keyboard layout viewer's state: which board and which of its layers
 // is on show, and whether the window is up. The layouts come from
 // <board>.json under Settings.stateDir/keymap, written by keymap-export.py
-// (~/oss/keyboards/desktop, `make export` there) from each QMK keymap and
+// (~/oss/keyboards/host, `make export` there) from each QMK keymap and
 // listed in index.json; every file is watched, so re-running the exporter
 // after a flash updates the viewer in place. Rendered by KeymapOverlay.
 //
