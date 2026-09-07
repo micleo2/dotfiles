@@ -3,7 +3,7 @@
 # setup software from pacman
 sudo pacman -S --needed base-devel git
 # (xorg-xhost needed by gparted and rpi-imager)
-sudo pacman -S --needed git github-cli os-prober man-db nvim nfs-utils fish unzip bat fd fzf rustup less bitwarden nodejs npm zoxide gparted xorg-xhost btop
+sudo pacman -S --needed git github-cli os-prober man-db nvim nfs-utils fish unzip bat fd fzf rustup less bitwarden nodejs npm zoxide gparted xorg-xhost btop bubblewrap
 sudo pacman -S --needed noto-fonts noto-fonts-cjk noto-fonts-extra noto-fonts-emoji otf-firamono-nerd ttf-jetbrains-mono-nerd
 sudo pacman -S --needed pavucontrol syncthing discord gwenview
 sudo pacman -S --needed pavucontrol ethtool ddcutil
@@ -40,6 +40,10 @@ gh auth login
 # install fisher
 sudo pacman -S --needed fisher &&
   fisher install PatrickF1/fzf.fish && fisher install kidonng/zoxide.fish
+
+# arena: head-to-head agent comparisons (creative-synced/programming/arena)
+mkdir -p ~/.local/bin
+ln -sf ~/creative-synced/programming/arena/arena ~/.local/bin/
 
 # Setup dotfiles
 gh repo clone micleo2/dotfiles
