@@ -35,7 +35,8 @@ One-shot use from a terminal:
 
 The protocol is documented in ~/oss/keyboards/users/micleo2/host_link.c. Needs
 python-hid (the `hid` module, hidapi) and read/write access to the hidraw
-nodes: a udev rule tagging each board's VID/PID with uaccess (keyboards/host/udev).
+nodes: udev rules in keyboards/host/udev tag each board's raw interface with uaccess
+and name it /dev/<board>-bridge (the bridge itself finds it by usage page).
 """
 
 import json
