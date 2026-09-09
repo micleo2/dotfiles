@@ -14,8 +14,9 @@ import ".."
 // `= result` for the draft appears as it is typed. A draft is never shown
 // as an error: most of them are, until they are finished.
 //
-// Enter commits the line; Ctrl+V commits it, copies its result and closes;
-// Escape closes. Ctrl+C clears the line, Ctrl+L the console. Up and Down
+// Enter commits the line; Ctrl+Enter commits it, copies its result and
+// closes; Escape closes. Ctrl+C clears the line, Ctrl+L the console. Ctrl+V
+// and Shift+Insert are left to the TextInput, which pastes. Up and Down
 // walk the committed lines, PageUp and PageDown scroll the console. The
 // rest of the line editing is readline's (Ui.Readline).
 Item {
@@ -37,7 +38,7 @@ Item {
     property int historyAt: -1
     property string stash: ""
 
-    readonly property string hint: "^C CLR LINE  ^L CLR ALL  ^V COPY  ESC CLOSE"
+    readonly property string hint: "^C CLEAR  ^L CLEAR ALL  ^RET COPY  ESC CLOSE"
 
     // Every console row, oldest first: {text, alarm}.
     readonly property var consoleLines: {
@@ -176,7 +177,7 @@ Item {
             var ctrl = (event.modifiers & Qt.ControlModifier) !== 0;
             if (event.key === Qt.Key_Escape) {
                 Calculator.dismiss();
-            } else if (ctrl && event.key === Qt.Key_V) {
+            } else if (ctrl && (event.key === Qt.Key_Return || event.key === Qt.Key_Enter)) {
                 Calculator.commit(true);
             } else if (ctrl && event.key === Qt.Key_C) {
                 Calculator.draft = "";

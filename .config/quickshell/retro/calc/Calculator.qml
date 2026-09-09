@@ -98,7 +98,7 @@ Singleton {
     }
 
     // Enter: hand the line to qalc and move it into the console. With
-    // `copy` (Ctrl+V), also put its result on the clipboard and close;
+    // `copy` (Ctrl+Enter), also put its result on the clipboard and close;
     // the result lands once qalc answers, whether or not the window is
     // still up. `exit`, `quit` and `clear` are the CLI's own commands and
     // are handled here rather than replayed: the first two would end the

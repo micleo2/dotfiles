@@ -34,8 +34,18 @@ Singleton {
     // expired unseen, and ones silenced by do-not-disturb. Anything dismissed
     // by hand counts as read and never lands here. Mirrored to history.json beside settings.json so a
     // config reload, which recreates this singleton, does not wipe it.
+    // Nothing is recorded while keepHistory is off; toasts render as usual.
     readonly property var history: historyStore.entries
     readonly property int historyLimit: 30
+    readonly property bool keepHistory: Settings.notificationHistory
+
+    function setKeepHistory(value) {
+        Settings.notificationHistory = value;
+    }
+
+    function toggleKeepHistory() {
+        root.setKeepHistory(!root.keepHistory);
+    }
 
     // The history popup of the primary bar, registered by NotificationWidget
     // so the IPC handler can open it.
@@ -237,6 +247,8 @@ Singleton {
     }
 
     function record(entry) {
+        if (!root.keepHistory)
+            return;
         historyStore.entries = [entry].concat(root.history).slice(0, root.historyLimit);
     }
 
@@ -498,8 +510,18 @@ Singleton {
             return root.doNotDisturb ? "on" : "off";
         }
 
+        function toggleHistory(): string {
+            root.toggleKeepHistory();
+            return root.keepHistory ? "on" : "off";
+        }
+
+        function history(value: string): string {
+            root.setKeepHistory(value === "on" || value === "true" || value === "1");
+            return root.keepHistory ? "on" : "off";
+        }
+
         function status(): string {
-            return "dnd=" + (root.doNotDisturb ? "on" : "off") + " live=" + root.popups.length + " history=" + root.history.length;
+            return "dnd=" + (root.doNotDisturb ? "on" : "off") + " history=" + (root.keepHistory ? "on" : "off") + " live=" + root.popups.length + " logged=" + root.history.length;
         }
 
         function clearHistory(): void {
