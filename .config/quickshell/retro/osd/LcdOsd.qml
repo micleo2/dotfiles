@@ -103,7 +103,7 @@ Scope {
                 y: bezel.y + 4
                 width: bezel.width
                 height: bezel.height
-                color: Config.colors.outline
+                color: Config.colors.dropShadow
             }
 
             Rectangle {

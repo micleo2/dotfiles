@@ -1,45 +1,55 @@
 import "../.."
+import "../../ui" as Ui
 import QtQuick
 import QtQuick.Effects
 import "../../services"
 
+// Condition glyph and temperature. Hidden, frame and all, until the first
+// forecast arrives.
 Item {
-    implicitWidth: row.implicitWidth
-    implicitHeight: row.implicitHeight
+    id: root
 
-    Row {
-        id: row
+    implicitWidth: chip.implicitWidth
+    implicitHeight: parent ? parent.height : 0
+    visible: Weather.temp !== ""
 
-        anchors.centerIn: parent
+    Ui.Chip {
+        id: chip
 
-        Text {
-            id: iconText
+        width: root.width
+        height: root.height
+        padding: 4
 
-            text: Weather.icon
-            color: Config.colors.text
-            font.pixelSize: Math.round(Config.settings.bar.fontSize * 0.9)
-            font.family: Config.mainFont
+        Row {
             anchors.verticalCenter: parent.verticalCenter
-            visible: false
-        }
 
-        MultiEffect {
-            source: iconText
-            width: iconText.implicitWidth
-            height: iconText.implicitHeight
-            anchors.verticalCenter: parent.verticalCenter
-            saturation: -1
-            contrast: 0.7
-        }
+            Text {
+                id: iconText
 
-        Text {
-            text: Weather.temp
-            color: Config.colors.text
-            font.pixelSize: Config.settings.bar.fontSize
-            font.family: Config.mainFont
-            anchors.verticalCenter: parent.verticalCenter
-        }
+                text: Weather.icon
+                color: Config.colors.text
+                font.pixelSize: Math.round(Config.settings.bar.fontSize * 0.9)
+                font.family: Config.mainFont
+                anchors.verticalCenter: parent.verticalCenter
+                visible: false
+            }
 
+            MultiEffect {
+                source: iconText
+                width: iconText.implicitWidth
+                height: iconText.implicitHeight
+                anchors.verticalCenter: parent.verticalCenter
+                saturation: -1
+                contrast: 0.7
+            }
+
+            Text {
+                text: Weather.temp
+                color: Config.colors.text
+                font.pixelSize: Config.settings.bar.fontSize
+                font.family: Config.mainFont
+                anchors.verticalCenter: parent.verticalCenter
+            }
+        }
     }
-
 }

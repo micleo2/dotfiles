@@ -24,6 +24,10 @@ Singleton {
 
     // The palette in use, chosen by name in the display popup and persisted
     // in Settings. Any entry added to `themes` below shows up there.
+    // Every palette carries a "dropShadow": the hard offset shadow behind
+    // chips, popups and LCD frames. It sits between "outline" and "base"
+    // (about a 55/45 mix) so a shadow reads as a second shape behind the
+    // frame instead of a thicker stretch of its outline.
     readonly property var colors: root.themes[Settings.theme] !== undefined ? root.themes[Settings.theme] : root.themes.default
     readonly property var themeNames: Object.keys(root.themes)
 
@@ -37,6 +41,7 @@ Singleton {
             "text": "#000000",
             "outline": "#000000",
             "outlineGradientFade": "#161616",
+            "dropShadow": "#6a6a6a",
             "defaultWallpaperPath": ""
         },
         "yorha": {
@@ -48,6 +53,7 @@ Singleton {
             "text": "#3e3d38",
             "outline": "#3d3d39",
             "outlineGradientFade": "#5b5b45",
+            "dropShadow": "#837c73",
             "defaultWallpaperPath": ""
         },
         "cherry": {
@@ -59,6 +65,7 @@ Singleton {
             "text": "#321d32",
             "outline": "#20091d",
             "outlineGradientFade": "#3e233e",
+            "dropShadow": "#7f5f7c",
             "defaultWallpaperPath": ""
         },
         "indigo": {
@@ -70,6 +77,7 @@ Singleton {
             "text": "#0d0d19",
             "outline": "#1a2135",
             "outlineGradientFade": "#223143",
+            "dropShadow": "#626a85",
             "defaultWallpaperPath": ""
         },
         "gleep": {
@@ -81,10 +89,12 @@ Singleton {
             "text": "#0d1913",
             "outline": "#21351a",
             "outlineGradientFade": "#284223",
+            "dropShadow": "#668567",
             "defaultWallpaperPath": ""
         },
         // Phosphor on black. Text and outlines share the one green, so every
-        // frame, edge and drop shadow reads as a lit trace on a dark tube.
+        // frame and edge reads as a lit trace on a dark tube; drop shadows
+        // are the same trace at half brightness.
         "matrix": {
             "base": "#000000",
             "shadow": "#0a3d16",
@@ -94,6 +104,7 @@ Singleton {
             "text": "#00ff41",
             "outline": "#00ff41",
             "outlineGradientFade": "#00b32d",
+            "dropShadow": "#008c24",
             "defaultWallpaperPath": ""
         }
     }
