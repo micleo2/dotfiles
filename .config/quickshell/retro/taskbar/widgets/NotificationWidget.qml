@@ -97,18 +97,21 @@ Ui.Chip {
             onClicked: Notifications.dismissAll()
         }
 
+        // The whole section is gone while nothing is being recorded; the
+        // toggle above is the only trace of it.
         Ui.SectionLabel {
+            visible: Notifications.keepHistory
             text: "History"
         }
 
         Ui.PopupRow {
             interactive: false
-            visible: root.count === 0
-            text: Notifications.keepHistory ? "Nothing yet" : "Not recording"
+            visible: Notifications.keepHistory && root.count === 0
+            text: "Nothing yet"
         }
 
         Repeater {
-            model: Notifications.history
+            model: Notifications.keepHistory ? Notifications.history : []
 
             // Click or Enter drops the entry; right click too.
             Ui.PopupRow {
@@ -128,7 +131,7 @@ Ui.Chip {
         Ui.PopupRow {
             rowKey: "clear"
 
-            visible: root.count > 0
+            visible: Notifications.keepHistory && root.count > 0
             glyph: "delete"
             text: "Clear history"
             onClicked: Notifications.clearHistory()
