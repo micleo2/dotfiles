@@ -14,4 +14,5 @@ singleton Host 1.0 Host.qml
 singleton Modules 1.0 Modules.qml
 singleton Qmk 1.0 Qmk.qml
 singleton Screens 1.0 Screens.qml
+singleton BatteryHistory 1.0 BatteryHistory.qml
 Command 1.0 Command.qml
