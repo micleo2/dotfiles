@@ -37,14 +37,16 @@ Item {
         root.moved(Math.max(0, Math.min(root.stops.length - 1, root.index + delta)));
     }
 
-    // The blocks carry their own borders, so the cursor is a frame around the
-    // whole track rather than a recolour of the level.
+    // The cursor is the same filled block PopupRow and PopupToggle paint, bled
+    // a few pixels past the track so it reads as a band behind the blocks.
+    // `highlight` is only a shade off `base` on every palette, so a 2px frame
+    // in it is invisible; only a solid fill carries enough area to register.
+    // The lit blocks keep their text fill and the unlit ones show the band
+    // through, so the level stays readable on top of it.
     Rectangle {
         anchors.fill: parent
-        anchors.margins: -3
-        color: "transparent"
-        border.width: 2
-        border.color: root.hasCursor ? Config.colors.highlight : "transparent"
+        anchors.margins: -4
+        color: root.hasCursor ? Config.colors.highlight : "transparent"
     }
 
     Row {
