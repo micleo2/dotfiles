@@ -71,7 +71,7 @@ Ui.Chip {
 
         anchorItem: root
         barScreen: root.barScreen
-        cardWidth: 300
+        cardWidth: 340
 
         Ui.SectionLabel {
             text: "Battery"
@@ -109,6 +109,34 @@ Ui.Chip {
         }
 
         Ui.SectionLabel {
+            text: "History"
+        }
+
+        Ui.PopupRow {
+            interactive: false
+            visible: BatteryHistory.error !== ""
+            text: BatteryHistory.error
+        }
+
+        Ui.HistoryBars {
+            rowKey: "history"
+
+            visible: BatteryHistory.error === ""
+            series: BatteryHistory.series
+            divisions: ticks.divisions
+            // One bucket per 2px column, so the columns tile the card exactly.
+            onWidthChanged: BatteryHistory.buckets = Math.max(1, Math.floor(width / 2))
+            onStepped: (direction) => BatteryHistory.cycle(direction)
+        }
+
+        Ui.HistoryTicks {
+            id: ticks
+
+            visible: BatteryHistory.error === ""
+            span: BatteryHistory.span
+        }
+
+        Ui.SectionLabel {
             text: "Power profile"
         }
 
@@ -126,6 +154,16 @@ Ui.Chip {
                 selected: PowerProfiles.profile === modelData
                 onClicked: PowerProfiles.profile = modelData
             }
+        }
+    }
+
+    // The history is only as fresh as the popup: fetched on open, never polled.
+    Connections {
+        target: popup
+
+        function onOpenedChanged() {
+            if (popup.opened)
+                BatteryHistory.refresh();
         }
     }
 
