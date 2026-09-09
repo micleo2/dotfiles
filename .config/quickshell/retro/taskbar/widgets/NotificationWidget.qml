@@ -97,29 +97,9 @@ Ui.Chip {
             onClicked: Notifications.dismissAll()
         }
 
-        // What middle-clicking a toast has silenced, so a block that was too
-        // broad can be found and taken off again; click or Enter removes.
-        Ui.SectionLabel {
-            visible: Notifications.blocks.length > 0
-            text: "Blocked"
-        }
-
-        Repeater {
-            model: Notifications.blocks
-
-            Ui.PopupRow {
-                required property var modelData
-                required property int index
-
-                rowKey: "b:" + index
-
-                glyph: "block"
-                text: modelData.text !== "" ? modelData.text : modelData.app
-                detail: modelData.text !== "" ? modelData.app : "all"
-                onClicked: Notifications.unblock(index)
-                onRightClicked: Notifications.unblock(index)
-            }
-        }
+        // The blocklist has no rows here on purpose: it is edited by hand in
+        // notifications/blocks.json (or over IPC), and the store picks up
+        // the edit live.
 
         // The whole section is gone while nothing is being recorded; the
         // toggle above is the only trace of it.
