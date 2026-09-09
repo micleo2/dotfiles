@@ -156,7 +156,7 @@ hl.window_rule({
 hl.window_rule({
 	name = "kitty-float-utils",
 	-- class matching is RE2::FullMatch, so the pattern must consume the
-	-- whole class string ("kitty-float-z").
+	-- whole class string ("kitty-float-btop").
 	match = { class = "^kitty-float.*" },
 	float = true,
 	center = true,

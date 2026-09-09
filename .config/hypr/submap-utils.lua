@@ -1,6 +1,6 @@
 -- Utils map: tap SUPER+U to enter a submap for small utility floats.
 --
--- copy-path launches kitty with a `kitty-float-*` class; a window rule
+-- btop and nvtop launch kitty with a `kitty-float-*` class; a window rule
 -- (see window-workspace-rules.lua) floats + centers any window whose class
 -- matches the `^kitty-float` prefix. The calculator is the shell's own
 -- (quickshell/retro/calc/Calculator.qml), driven by qalc underneath.
@@ -9,11 +9,11 @@ local submap_builder = require("submap-builder")
 local submap_options_per_key = {
 	b = { label = "btop", exec_cmd = "kitty --class kitty-float-btop btop" },
 	n = { label = "nvtop", exec_cmd = "kitty --class kitty-float-btop nvtop" },
+	-- copy-path: pick a zoxide directory in the shell's launcher (the SUPER+Z
+	-- list) and put it on the clipboard without a trailing newline.
 	p = {
 		label = "copy-path",
-		-- `>/dev/null 2>&1`: wl-copy 2.3.0 daemonizes but only detaches
-		-- stdin/stdout; stderr would keep the kitty pty open forever
-		exec_cmd = "kitty --class kitty-float-z bash -c 'zoxide query -l | fzf | wl-copy -n >/dev/null 2>&1'",
+		exec_cmd = "bash -c 'target=$(zoxide query -l | retro-launcher -p copy) && wl-copy -n -- \"$target\"'",
 	},
 	-- qalc: the shell's LCD calculator, on the focused monitor.
 	c = {
