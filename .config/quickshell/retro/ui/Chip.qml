@@ -82,12 +82,22 @@ Item {
         }
     }
 
+    // The cursor lives on a hover handler rather than on the MouseArea below:
+    // a disabled MouseArea still owns the cursor under it, so a passive chip
+    // (clock, focused window) would advertise a click it cannot take. A
+    // disabled handler sets nothing, which also leaves inner controls such as
+    // workspace cells and tray icons free to set their own.
+    HoverHandler {
+        enabled: root.interactive
+        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+        cursorShape: Qt.PointingHandCursor
+    }
+
     MouseArea {
         id: press
 
         anchors.fill: parent
         enabled: root.interactive
-        cursorShape: Qt.PointingHandCursor
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         onClicked: (mouse) => {
             // taskbar/Bar.qml's full-width click area toggles bar transparency on any
