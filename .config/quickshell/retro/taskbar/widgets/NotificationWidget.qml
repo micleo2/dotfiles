@@ -89,6 +89,16 @@ Item {
             onToggled: (value) => Notifications.setDoNotDisturb(value)
         }
 
+        Ui.PopupToggle {
+            rowKey: "history"
+            cursorKey: popup.cursorKey
+            onCursorEntered: popup.cursorKey = "history"
+
+            text: "Keep history"
+            checked: Notifications.keepHistory
+            onToggled: (value) => Notifications.setKeepHistory(value)
+        }
+
         Ui.PopupRow {
             rowKey: "dismiss"
             cursorKey: popup.cursorKey
@@ -108,7 +118,7 @@ Item {
         Ui.PopupRow {
             interactive: false
             visible: root.count === 0
-            text: "Nothing yet"
+            text: Notifications.keepHistory ? "Nothing yet" : "Not recording"
         }
 
         Repeater {

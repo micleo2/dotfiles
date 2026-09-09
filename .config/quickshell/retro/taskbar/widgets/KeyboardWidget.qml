@@ -11,10 +11,9 @@ import "../../keymap" as Keymap_
 // backlight.
 //
 // The chip shows the active board's layer name from its exported keymap
-// (keymap/<board>.json), in the urgent colour when it is not the base
-// layer, and scrolls the backlight. The popup has the backlight slider and
-// toggle, the RGB effect, one row per layer to toggle it from the mouse,
-// and a row that opens the layout viewer.
+// (keymap/<board>.json) and scrolls the backlight. The popup has the backlight slider and
+// toggle, one row per layer to toggle it from the mouse, and a row that
+// opens the layout viewer.
 //
 // Shown wherever the board is plugged in, subject to the modules map like
 // every other chip (Modules.allow).
@@ -38,7 +37,6 @@ Item {
     readonly property var layers: root.boardData ? root.boardData.layers : []
     readonly property var layerEntry: Keymap_.Keymap.layerFor(Qmk.active, Qmk.layer)
     readonly property string layerName: root.layerEntry ? String(root.layerEntry.name) : "L" + Qmk.layer
-    readonly property bool offBase: Qmk.layer !== 0
 
     property real wheelAccumulator: 0
 
@@ -79,7 +77,6 @@ Item {
         Ui.Label {
             anchors.verticalCenter: parent.verticalCenter
             text: root.layerName
-            color: root.offBase ? Config.colors.urgent : Config.colors.text
         }
     }
 
@@ -128,19 +125,6 @@ Item {
             text: Qmk.rgbOn ? "RGB  " + Qmk.percent + "%" : "RGB  off"
             checked: Qmk.rgbOn
             onToggled: (value) => Qmk.setEnabled(value)
-        }
-
-        // Click steps forward through the effects, right-click back.
-        Ui.PopupRow {
-            rowKey: "effect"
-            cursorKey: popup.cursorKey
-            onCursorEntered: popup.cursorKey = "effect"
-
-            glyph: "auto_awesome"
-            text: "Effect"
-            detail: Qmk.mode + " / " + Qmk.modeCount
-            onClicked: Qmk.nextMode()
-            onRightClicked: Qmk.prevMode()
         }
 
         Ui.SectionLabel {
