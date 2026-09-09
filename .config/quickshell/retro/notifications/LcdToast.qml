@@ -64,17 +64,12 @@ Item {
 
     implicitWidth: bezel.width + 4
     implicitHeight: bezel.height + 4
-
-    Rectangle {
-        x: bezel.x + 4
-        y: bezel.y + 4
-        width: bezel.width
-        height: bezel.height
-        color: Config.colors.dropShadow
-    }
-
     Rectangle {
         id: bezel
+
+        Ui.Shadow {
+            offset: 4
+        }
 
         width: panel.implicitWidth + 2 * root.pad
         height: panel.implicitHeight + 2 * root.pad

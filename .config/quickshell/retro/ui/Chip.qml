@@ -32,15 +32,13 @@ Item {
     implicitWidth: inner.implicitWidth + root.padding * 2
     implicitHeight: parent ? parent.height : 0
 
-    // The drop shadow: the frame's silhouette two pixels down and right, in
-    // its own mid tone so it reads as a shape behind the frame rather than a
-    // thicker outline. Drawn first so the face covers all but a two-pixel L.
-    Rectangle {
+    // The frame's silhouette two pixels down and right; the border bleeds 2px
+    // past the face, so the shadow covers that too. Hidden while pressed, when
+    // the face has sunk onto it.
+    Shadow {
         visible: !root.pressed
-        x: 0
-        y: 0
-        width: root.width + 4
-        height: root.height + 4
+        offset: 2
+        bleed: 2
         color: root.shadowColor
     }
 

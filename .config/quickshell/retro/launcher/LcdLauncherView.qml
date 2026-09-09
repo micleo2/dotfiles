@@ -236,17 +236,12 @@ Item {
             Launcher.move(wheel.angleDelta.y > 0 ? -1 : 1);
         }
     }
-
-    Rectangle {
-        x: bezel.x + 4
-        y: bezel.y + 4
-        width: bezel.width
-        height: bezel.height
-        color: Config.colors.dropShadow
-    }
-
     Rectangle {
         id: bezel
+
+        Ui.Shadow {
+            offset: 4
+        }
 
         width: panel.implicitWidth + 2 * root.pad
         height: panel.implicitHeight + 2 * root.pad
