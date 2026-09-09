@@ -225,17 +225,6 @@ Scope {
             onCleared: root.close()
         }
 
-        Rectangle {
-            id: shadow
-
-            visible: root.shadowOffset > 0
-            x: card.x - 2 + root.shadowOffset
-            y: card.y - 2 + root.shadowOffset
-            width: card.width + 4
-            height: card.height + 4
-            color: Config.colors.dropShadow
-        }
-
         Item {
             id: card
 
@@ -243,6 +232,13 @@ Scope {
             y: 2
             width: root.cardWidth
             height: Math.min(cardContent.implicitHeight + 20, root.maxCardHeight)
+
+            // The border below bleeds 2px past the card, so the shadow does too.
+            Shadow {
+                visible: root.shadowOffset > 0
+                offset: root.shadowOffset
+                bleed: 2
+            }
 
             Rectangle {
                 anchors.fill: parent

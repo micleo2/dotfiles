@@ -5,6 +5,7 @@ import QtQuick.Effects
 import Quickshell
 import Quickshell.Wayland
 import "../lcd" as Lcd
+import "../ui" as Ui
 import "../services"
 
 // The on-screen display: one Game & Watch style LCD panel with three modes,
@@ -99,15 +100,11 @@ Scope {
 
             // The popup's frame language: hard offset shadow, outlined bezel.
             Rectangle {
-                x: bezel.x + 4
-                y: bezel.y + 4
-                width: bezel.width
-                height: bezel.height
-                color: Config.colors.dropShadow
-            }
-
-            Rectangle {
                 id: bezel
+
+                Ui.Shadow {
+                    offset: 4
+                }
 
                 width: panel.implicitWidth + 2 * 18
                 height: panel.implicitHeight + 2 * 18

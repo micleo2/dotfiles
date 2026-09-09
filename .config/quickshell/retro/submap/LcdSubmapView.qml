@@ -96,15 +96,11 @@ Item {
 
     // The frame language: hard offset shadow, outlined bezel, dark face.
     Rectangle {
-        x: bezel.x + 4
-        y: bezel.y + 4
-        width: bezel.width
-        height: bezel.height
-        color: Config.colors.dropShadow
-    }
-
-    Rectangle {
         id: bezel
+
+        Ui.Shadow {
+            offset: 4
+        }
 
         width: panel.implicitWidth + 2 * root.pad
         height: panel.implicitHeight + 2 * root.pad
