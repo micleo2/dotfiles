@@ -30,6 +30,15 @@
 // compared case-insensitively, anything else with ===. `apply` is a
 // function of the view, or an object of fields to set. Every matching rule
 // runs, in order, until one sets `drop` or carries `stop: true`.
+//
+// After the rules comes the user's blocklist, which is data rather than
+// code: entries live in settings.json and are handed to process() by
+// Notifications. An entry is { app, text }, either side optional; `app` is
+// matched against the app name and the desktop entry, `text` against the
+// summary and body together. A plain string matches anywhere in the field,
+// case-insensitively; text between slashes, /like this/, is a regular
+// expression. A match drops the notification. Blocks run last so a pattern
+// matches what the toast would have said, not the sender's raw fields.
 
 var LOW = 0;
 var NORMAL = 1;
@@ -148,7 +157,41 @@ function matches(rule, view) {
     return true;
 }
 
-function process(view) {
+// A blocklist pattern: a regular expression if it is written between
+// slashes, a case-insensitive substring otherwise.
+function hits(value, pattern) {
+    var expression = /^\/(.+)\/$/.exec(pattern);
+    if (expression) {
+        try {
+            return new RegExp(expression[1], "i").test(value);
+        } catch (error) {
+            // A hand-edited pattern that will not compile blocks nothing,
+            // rather than throwing inside the notification handler.
+            return false;
+        }
+    }
+    return String(value).toLowerCase().indexOf(pattern.toLowerCase()) >= 0;
+}
+
+function blockedBy(view, blocks) {
+    for (var i = 0; i < blocks.length; i++) {
+        var entry = blocks[i];
+        if (!entry)
+            continue;
+        var app = String(entry.app || "");
+        var text = String(entry.text || "");
+        if (app === "" && text === "")
+            continue;
+        if (app !== "" && !hits(view.appName || "", app) && !hits(view.desktopEntry || "", app))
+            continue;
+        if (text !== "" && !hits((view.summary || "") + "\n" + (view.body || ""), text))
+            continue;
+        return entry;
+    }
+    return null;
+}
+
+function process(view, blocks) {
     for (var i = 0; i < RULES.length; i++) {
         var rule = RULES[i];
         if (!matches(rule, view))
@@ -161,6 +204,13 @@ function process(view) {
         }
         if (view.drop === true || rule.stop === true)
             break;
+    }
+    if (view.drop !== true && blocks) {
+        var entry = blockedBy(view, blocks);
+        if (entry) {
+            view.drop = true;
+            view.blockedBy = entry;
+        }
     }
     return view;
 }

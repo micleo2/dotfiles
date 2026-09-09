@@ -61,6 +61,58 @@ Singleton {
         root.setDoNotDisturb(!root.doNotDisturb);
     }
 
+    // ------------------------------------------------------------ blocklist
+
+    // The line a block taken from a toast should match: the summary if there
+    // is one, else the first line of the body, cut back to a word so a
+    // pattern lifted from one message still matches the next copy of it.
+    function blockPattern(view) {
+        var text = String(view.summary !== "" ? view.summary : String(view.body || "").split("\n")[0]).trim();
+        if (text.length <= 48)
+            return text;
+        var cut = text.slice(0, 48);
+        var space = cut.lastIndexOf(" ");
+        return (space > 16 ? cut.slice(0, space) : cut).trim();
+    }
+
+    function addBlock(app, text) {
+        var entry = {
+            app: String(app || ""),
+            text: String(text || "")
+        };
+        if (entry.app === "" && entry.text === "")
+            return null;
+        var next = root.blocks;
+        for (var i = 0; i < next.length; i++) {
+            if (next[i].app === entry.app && next[i].text === entry.text)
+                return entry;
+        }
+        Settings.notificationBlocks = next.concat([entry]);
+        return entry;
+    }
+
+    // Block what this toast is saying, and take it off the screen.
+    function block(notification) {
+        var view = root.viewOf(notification);
+        var entry = root.addBlock(view.appName, root.blockPattern(view));
+        notification.dismiss();
+        return entry;
+    }
+
+    function unblock(index) {
+        var next = root.blocks;
+        next.splice(index, 1);
+        Settings.notificationBlocks = next;
+    }
+
+    function clearBlocks() {
+        Settings.notificationBlocks = [];
+    }
+
+    function describeBlock(entry) {
+        return (entry.app !== "" ? entry.app : "any app") + " | " + (entry.text !== "" ? entry.text : "anything");
+    }
+
     // Lifetimes. A toast lives at least this long by urgency, stretched up to
     // the cap if the sender asked for more; critical never expires on its own.
     readonly property int lowDuration: 5000
@@ -76,6 +128,11 @@ Singleton {
     // Ticks while anything is on screen; the countdown bars bind to it.
     property double now: Date.now()
 
+    // Patterns the user never wants to see, as { app, text }; matched by
+    // rules.js. A list out of a JsonAdapter is a QVariantList, which is not a
+    // JS array, so it is copied through JSON before anything treats it as one.
+    readonly property var blocks: JSON.parse(JSON.stringify(Settings.notificationBlocks || []))
+
     // The processed view of a notification: what the rules made of it.
     function buildView(notification) {
         return Rules.process({
@@ -86,7 +143,7 @@ Singleton {
             urgency: notification.urgency,
             expireTimeout: notification.expireTimeout,
             transient: notification.transient === true
-        });
+        }, root.blocks);
     }
 
     readonly property var blankView: ({
@@ -289,8 +346,11 @@ Singleton {
 
         var view = root.arm(notification);
 
-        // Dropped by a rule: gone as if it never arrived.
+        // Dropped by a rule or a block: gone as if it never arrived. Logged
+        // because there is otherwise no trace of a block that turned out to
+        // be broader than it looked.
         if (view.drop === true) {
+            console.info("notification dropped: app=" + notification.appName + " by=" + (view.blockedBy ? "block " + root.describeBlock(view.blockedBy) : "rule"));
             root.drop(notification);
             notification.dismiss();
             return;
@@ -311,12 +371,19 @@ Singleton {
             root.forget(notification, reason);
         });
         notification.summaryChanged.connect(function () {
-            root.arm(notification);
+            root.refresh(notification);
         });
         notification.bodyChanged.connect(function () {
-            root.arm(notification);
+            root.refresh(notification);
         });
         root.popups = [notification].concat(root.popups);
+    }
+
+    // A sender rewriting a live toast can turn it into something blocked;
+    // dismissing is enough, since a dismissed toast is not recorded either.
+    function refresh(notification) {
+        if (root.arm(notification).drop === true)
+            notification.dismiss();
     }
 
     function drop(notification) {
@@ -504,11 +571,39 @@ Singleton {
         }
 
         function status(): string {
-            return "dnd=" + (root.doNotDisturb ? "on" : "off") + " history=" + (root.keepHistory ? "on" : "off") + " live=" + root.popups.length + " logged=" + root.history.length;
+            return "dnd=" + (root.doNotDisturb ? "on" : "off") + " history=" + (root.keepHistory ? "on" : "off") + " live=" + root.popups.length + " logged=" + root.history.length + " blocked=" + root.blocks.length;
         }
 
         function clearHistory(): void {
             root.clearHistory();
+        }
+
+        function block(app: string, text: string): string {
+            var entry = root.addBlock(app, text);
+            return entry ? "blocked " + root.describeBlock(entry) : "nothing to match on";
+        }
+
+        function blockLast(): string {
+            if (root.popups.length === 0)
+                return "nothing on screen";
+            var entry = root.block(root.popups[0]);
+            return entry ? "blocked " + root.describeBlock(entry) : "nothing to match on";
+        }
+
+        function blocked(): string {
+            var lines = [];
+            for (var i = 0; i < root.blocks.length; i++)
+                lines.push(i + ": " + root.describeBlock(root.blocks[i]));
+            return lines.length > 0 ? lines.join("\n") : "none";
+        }
+
+        function unblock(index: string): string {
+            var at = parseInt(index, 10);
+            if (isNaN(at) || at < 0 || at >= root.blocks.length)
+                return "no such block";
+            var entry = root.blocks[at];
+            root.unblock(at);
+            return "unblocked " + root.describeBlock(entry);
         }
 
         function reset(): void {
