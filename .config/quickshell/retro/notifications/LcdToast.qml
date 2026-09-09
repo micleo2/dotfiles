@@ -163,6 +163,8 @@ Item {
         onClicked: (mouse) => {
             if (mouse.button === Qt.LeftButton)
                 Notifications.invoke(root.notification);
+            else if (mouse.button === Qt.MiddleButton)
+                Notifications.block(root.notification);
             else
                 root.notification.dismiss();
         }
