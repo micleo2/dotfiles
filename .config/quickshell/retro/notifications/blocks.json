@@ -1,0 +1,12 @@
+{
+    "entries": [
+        {
+            "app": "",
+            "text": "keep the app open"
+        },
+        {
+            "app": "chromium",
+            "text": "/^\\s*www\\.messenger\\.com\\s*$/"
+        }
+    ]
+}

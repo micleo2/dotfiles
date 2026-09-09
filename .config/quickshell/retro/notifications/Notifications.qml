@@ -87,7 +87,7 @@ Singleton {
             if (next[i].app === entry.app && next[i].text === entry.text)
                 return entry;
         }
-        Settings.notificationBlocks = next.concat([entry]);
+        blockStore.entries = next.concat([entry]);
         return entry;
     }
 
@@ -102,11 +102,11 @@ Singleton {
     function unblock(index) {
         var next = root.blocks;
         next.splice(index, 1);
-        Settings.notificationBlocks = next;
+        blockStore.entries = next;
     }
 
     function clearBlocks() {
-        Settings.notificationBlocks = [];
+        blockStore.entries = [];
     }
 
     function describeBlock(entry) {
@@ -131,7 +131,7 @@ Singleton {
     // Patterns the user never wants to see, as { app, text }; matched by
     // rules.js. A list out of a JsonAdapter is a QVariantList, which is not a
     // JS array, so it is copied through JSON before anything treats it as one.
-    readonly property var blocks: JSON.parse(JSON.stringify(Settings.notificationBlocks || []))
+    readonly property var blocks: JSON.parse(JSON.stringify(blockStore.entries || []))
 
     // The processed view of a notification: what the rules made of it.
     function buildView(notification) {
@@ -332,6 +332,20 @@ Singleton {
 
         JsonAdapter { // qmllint disable unresolved-type
             id: historyStore
+
+            property var entries: []
+        }
+    }
+
+    // Blocks live in the checkout, not under XDG_STATE_HOME with the rest of
+    // the shell's state: a notification worth never seeing is a fact about
+    // the config, not about the machine, so both machines want the same list.
+    JsonStore {
+        dir: Quickshell.shellPath("notifications")
+        name: "blocks.json"
+
+        JsonAdapter { // qmllint disable unresolved-type
+            id: blockStore
 
             property var entries: []
         }
