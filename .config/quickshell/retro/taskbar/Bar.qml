@@ -19,7 +19,7 @@ Scope {
     // border when Hyprland gaps are 0, and the window's own shadow darkens
     // the last few px of the bar on top of that. This pads the bottom and
     // the chips are nudged up by half of it to keep the silhouette centered.
-    property int bottomPad: 3
+    property int bottomPad: 4
     property double sideMargin: 8
 
     IpcHandler {
