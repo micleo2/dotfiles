@@ -169,6 +169,14 @@ hl.gesture({
 	direction = "horizontal",
 	action = "workspace",
 })
+-- Same as SUPER + D: back to the previous workspace.
+hl.gesture({
+	fingers = 3,
+	direction = "down",
+	action = function()
+		hl.dispatch(hl.dsp.focus({ workspace = "previous" }))
+	end,
+})
 
 ---------------------
 ---- KEYBINDINGS ----
