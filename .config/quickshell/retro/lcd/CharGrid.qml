@@ -21,7 +21,7 @@ Item {
     property int rows: 2
     property int size: Config.settings.bar.fontSize
     property color color: Config.colors.text
-    property real ghost: 0.12
+    property real ghost: Config.lcdGhost
 
     default property alias content: overlay.data
     property alias marks: marksLayer.data

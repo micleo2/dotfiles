@@ -4,7 +4,6 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import Quickshell.Hyprland
 import ".."
 import "../services"
 
@@ -48,8 +47,7 @@ Singleton {
     readonly property string layerName: root.current ? root.current.name : ""
 
     function open() {
-        var monitor = Hyprland.focusedMonitor;
-        root.screenName = monitor && monitor.name ? monitor.name : (Quickshell.screens.length > 0 ? Quickshell.screens[0].name : "");
+        root.screenName = Screens.focusedName;
         root.followBoard();
         root.shown = true;
     }

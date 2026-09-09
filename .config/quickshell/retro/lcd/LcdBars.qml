@@ -13,7 +13,7 @@ Row {
     // is the same size whether it shows 10 brightness steps or 20 volume ones.
     property int totalWidth: 216
     property int segmentHeight: 44
-    property real ghost: 0.12
+    property real ghost: Config.lcdGhost
     property color color: Config.colors.text
 
     readonly property int segmentWidth: Math.max(2, Math.floor((root.totalWidth - root.spacing * (root.segments - 1)) / root.segments))

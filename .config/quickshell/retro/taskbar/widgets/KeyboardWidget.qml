@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import Quickshell.Io
 import "../../ui" as Ui
 import "../.."
 import "../../services"
@@ -17,7 +16,7 @@ import "../../keymap" as Keymap_
 //
 // Shown wherever the board is plugged in, subject to the modules map like
 // every other chip (Modules.allow).
-Item {
+Ui.Chip {
     id: root
 
     required property var barScreen
@@ -26,72 +25,44 @@ Item {
     readonly property bool available: Modules.allow("keyboard", Qmk.anyPresent)
 
     readonly property int stepPercent: Qmk.step
-    readonly property var steps: {
-        var out = [];
-        for (var v = root.stepPercent; v <= 100; v += root.stepPercent)
-            out.push(v);
-        return out;
-    }
 
     readonly property var boardData: Keymap_.Keymap.cache[Qmk.active] || null
     readonly property var layers: root.boardData ? root.boardData.layers : []
     readonly property var layerEntry: Keymap_.Keymap.layerFor(Qmk.active, Qmk.layer)
     readonly property string layerName: root.layerEntry ? String(root.layerEntry.name) : "L" + Qmk.layer
 
-    property real wheelAccumulator: 0
-
-    implicitWidth: chip.implicitWidth
-    implicitHeight: parent ? parent.height : 0
     visible: root.available
 
-    function handleWheel(event) {
-        var delta = event.angleDelta.y !== 0 ? event.angleDelta.y : event.angleDelta.x;
-        root.wheelAccumulator += Math.max(-120, Math.min(120, delta));
-        while (Math.abs(root.wheelAccumulator) >= 120) {
-            var direction = root.wheelAccumulator > 0 ? 1 : -1;
-            root.wheelAccumulator -= direction * 120;
-            Qmk.adjust(direction * root.stepPercent);
-        }
+    interactive: true
+
+    onClicked: (mouse) => {
+        if (mouse.button === Qt.RightButton)
+            Keymap_.Keymap.toggle();
+        else
+            popup.toggle();
+    }
+    onStepped: (direction) => Qmk.adjust(direction * root.stepPercent)
+
+    Ui.Glyph {
+        anchors.verticalCenter: parent.verticalCenter
+        text: Qmk.capsWord ? "keyboard_capslock" : "keyboard"
     }
 
-    Ui.Chip {
-        id: chip
-
-        width: root.width
-        height: root.height
-        interactive: true
-
-        onClicked: (mouse) => {
-            if (mouse.button === Qt.RightButton)
-                Keymap_.Keymap.toggle();
-            else
-                popup.toggle();
-        }
-        onScrolled: (event) => root.handleWheel(event)
-
-        Ui.Glyph {
-            anchors.verticalCenter: parent.verticalCenter
-            text: Qmk.capsWord ? "keyboard_capslock" : "keyboard"
-        }
-
-        Ui.Label {
-            anchors.verticalCenter: parent.verticalCenter
-            text: root.layerName
-        }
+    Ui.Label {
+        anchors.verticalCenter: parent.verticalCenter
+        text: root.layerName
     }
 
     Ui.Popup {
         id: popup
 
-        anchorItem: chip
+        anchorItem: root
         barScreen: root.barScreen
         cardWidth: 320
 
         // Which board the popup is about; click to switch when two are in.
         Ui.PopupRow {
             rowKey: "board"
-            cursorKey: popup.cursorKey
-            onCursorEntered: popup.cursorKey = "board"
 
             glyph: "keyboard"
             text: root.boardData ? String(root.boardData.title) : Qmk.active
@@ -109,18 +80,14 @@ Item {
 
         Ui.PopupSlider {
             rowKey: "level"
-            cursorKey: popup.cursorKey
-            onCursorEntered: popup.cursorKey = "level"
 
-            stops: root.steps
-            index: Math.round(Qmk.percent / root.stepPercent) - 1
-            onMoved: (index) => Qmk.set(root.steps[index])
+            stops: percentStops(root.stepPercent)
+            index: percentIndex(Qmk.percent, root.stepPercent)
+            onMoved: (index) => Qmk.set(stops[index])
         }
 
         Ui.PopupToggle {
             rowKey: "rgb"
-            cursorKey: popup.cursorKey
-            onCursorEntered: popup.cursorKey = "rgb"
 
             text: Qmk.rgbOn ? "RGB  " + Qmk.percent + "%" : "RGB  off"
             checked: Qmk.rgbOn
@@ -146,8 +113,6 @@ Item {
                 readonly property int boardLayer: Number(modelData.index)
 
                 rowKey: "layer:" + index
-                cursorKey: popup.cursorKey
-                onCursorEntered: popup.cursorKey = "layer:" + layerRow.index
 
                 glyph: layerRow.boardLayer === Qmk.layer ? "layers" : "layers_clear"
                 text: String(modelData.name) + "  " + String(modelData.title)
@@ -164,8 +129,6 @@ Item {
 
         Ui.PopupRow {
             rowKey: "keymap"
-            cursorKey: popup.cursorKey
-            onCursorEntered: popup.cursorKey = "keymap"
 
             glyph: "grid_on"
             text: "Show layout"
@@ -177,31 +140,8 @@ Item {
         }
     }
 
-    IpcHandler {
-        // Bars are instantiated per screen; only the primary one claims the
-        // target, or a second monitor collides with it.
+    Ui.PopupIpc {
         target: "keyboard"
         enabled: root.primary
-
-        // `show`, `call`, `wait`, `listen` and `prop` are swallowed by the
-        // `qs ipc` CLI parser (see submap/SubmapOverlay.qml).
-        function toggle(): void {
-            popup.toggle();
-        }
-
-        function open(): void {
-            popup.open();
-        }
-
-        function close(): void {
-            popup.close();
-        }
-
-        // Open with the keyboard cursor placed, for the SUPER+T submap
-        // (hypr/submap-topbar.lua).
-        function focus(): void {
-            if (root.available)
-                popup.openWithCursor();
-        }
     }
 }

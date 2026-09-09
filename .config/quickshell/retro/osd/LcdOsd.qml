@@ -5,7 +5,6 @@ import QtQuick.Effects
 import Quickshell
 import Quickshell.Wayland
 import "../lcd" as Lcd
-import "../ui" as Ui
 import "../services"
 
 // The on-screen display: one Game & Watch style LCD panel with three modes,
@@ -27,7 +26,6 @@ Scope {
     readonly property int percent: osdRoot.volume ? Volume.percent : (osdRoot.keyboard ? Qmk.percent : Brightness.percent)
     readonly property int filled: Math.round(osdRoot.percent / 100 * osdRoot.segments)
     readonly property bool muted: osdRoot.volume && Volume.muted
-    readonly property real ghost: 0.12
 
     readonly property var sun: ["....#....", ".#.....#.", "...###...", "..#####..", "#.#####.#", "..#####..", "...###...", ".#.....#.", "....#...."]
     // A keyboard: outline, two rows of keys, a space bar.
@@ -88,9 +86,9 @@ Scope {
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
             exclusiveZone: 0
             color: "transparent"
-            // Sized from the panel, plus its bottom margin, the shadow and the
-            // outline bleed; a fixed height clipped the top of the bezel.
-            implicitHeight: bezel.height + bezel.anchors.bottomMargin + 8
+            // Sized from the bezel, its bottom margin and its shadow, with a
+            // little air; a fixed height clipped the top of the bezel.
+            implicitHeight: bezel.height + bezel.anchors.bottomMargin + bezel.shadowOffset + 4
 
             anchors {
                 bottom: true
@@ -98,36 +96,14 @@ Scope {
                 right: true
             }
 
-            // The popup's frame language: hard offset shadow, outlined bezel.
-            Rectangle {
+            Lcd.Bezel {
                 id: bezel
 
-                Ui.Shadow {
-                    offset: 4
-                }
-
-                width: panel.implicitWidth + 2 * 18
-                height: panel.implicitHeight + 2 * 18
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.bottom: parent.bottom
                 anchors.bottomMargin: 80
-                color: Config.colors.base
-                border.width: 2
-                border.color: Config.colors.outline
-
-                // The LCD face.
-                Rectangle {
-                    anchors.fill: parent
-                    anchors.margins: 8
-                    color: Config.colors.shadow
-                    border.width: 2
-                    border.color: Config.colors.outline
-                }
 
                 Row {
-                    id: panel
-
-                    anchors.centerIn: parent
                     spacing: 20
 
                     // Icon: the hand-drawn speaker at 4x, or a pixel-map sun
@@ -167,7 +143,6 @@ Scope {
                             visible: !osdRoot.volume
                             rows: osdRoot.keyboard ? osdRoot.keys : osdRoot.sun
                             cell: 7
-                            ghost: osdRoot.ghost
                         }
                     }
 
@@ -175,7 +150,6 @@ Scope {
                         anchors.verticalCenter: parent.verticalCenter
                         segments: osdRoot.segments
                         filled: osdRoot.muted ? 0 : osdRoot.filled
-                        ghost: osdRoot.ghost
                     }
 
                     // Readout: three seven-segment digits, or MUTE in the
@@ -207,8 +181,7 @@ Scope {
                                             return p >= 10 ? Math.floor(p / 10) % 10 : -1;
                                         return p % 10;
                                     }
-                                    ghost: osdRoot.ghost
-                                }
+                                        }
                             }
                         }
 

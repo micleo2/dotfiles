@@ -2,7 +2,6 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
-import Quickshell.Io
 import Quickshell.Services.Mpris
 
 // Pairs a playback stream with the MPRIS player of the same application, so
@@ -21,7 +20,6 @@ Singleton {
     property var owners: ({})
     property var pids: []
     property bool watching: false
-    property bool stale: false
 
     function match(pids) {
         root.pids = pids;
@@ -31,12 +29,8 @@ Singleton {
     function refresh() {
         if (!root.watching || root.pids.length === 0)
             return;
-        if (matcher.running) {
-            root.stale = true;
-            return;
-        }
         matcher.command = ["sh", "-c", root.script, "match"].concat(root.pids.map(String));
-        matcher.running = true;
+        matcher.run();
     }
 
     function playerFor(pid) {
@@ -82,27 +76,18 @@ for pid in \"$@\"; do
 done
 "
 
-    Process {
+    Command {
         id: matcher
 
-        stdout: StdioCollector {
-            onStreamFinished: {
-                var out = {};
-                var lines = text.split("\n");
-                for (var i = 0; i < lines.length; i++) {
-                    var parts = lines[i].trim().split(" ");
-                    if (parts.length === 2)
-                        out[parts[0]] = parts[1];
-                }
-                root.owners = out;
+        onCollected: (text) => {
+            var out = {};
+            var lines = text.split("\n");
+            for (var i = 0; i < lines.length; i++) {
+                var parts = lines[i].trim().split(" ");
+                if (parts.length === 2)
+                    out[parts[0]] = parts[1];
             }
-        }
-
-        onExited: (exitCode) => { // qmllint disable signal-handler-parameters
-            if (root.stale) {
-                root.stale = false;
-                root.refresh();
-            }
+            root.owners = out;
         }
     }
 }

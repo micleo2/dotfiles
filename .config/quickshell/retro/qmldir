@@ -1,3 +1,4 @@
 module qs
 singleton Config 1.0 Config.qml
 singleton Settings 1.0 Settings.qml
+JsonStore 1.0 JsonStore.qml

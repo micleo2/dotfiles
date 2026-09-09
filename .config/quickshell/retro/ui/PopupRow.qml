@@ -2,7 +2,11 @@ import QtQuick
 import ".."
 
 // One selectable line in a popup: leading glyph, label, trailing status.
-Item {
+//
+// With a `rowKey` the row paints from the popup's cursor (see PopupControl);
+// without one it keeps its own hover, which is fine for lists that never
+// move.
+PopupControl {
     id: root
 
     property string glyph: ""
@@ -14,27 +18,15 @@ Item {
     // Rows that are pure readouts take no hover, no cursor and no clicks.
     property bool interactive: true
 
-    // Managed-cursor mode, for lists that churn while they are open.
-    //
-    // A Repeater fed a fresh JS array destroys and recreates every delegate, so
-    // a row that paints its own hover blinks each time the model is rebuilt —
-    // which, during a bluetooth scan, is many times a second. Omarchy's answer
-    // is that the highlight must not live in the delegate at all: rows paint
-    // from a cursor the panel owns, and hover only *writes* it. Give a row a
-    // `rowKey` and bind `cursorKey` to opt in; leave `rowKey` empty and the row
-    // keeps its own hover, which is fine for lists that never move.
-    property string rowKey: ""
-    property string cursorKey: ""
     readonly property bool managed: root.rowKey !== ""
-    readonly property bool hasCursor: root.managed && root.rowKey === root.cursorKey
-    // Readouts are skipped by the popup's keyboard cursor even if keyed.
-    readonly property bool navigable: root.interactive
 
     signal clicked
     signal rightClicked
-    signal cursorEntered
 
-    implicitWidth: parent ? parent.width : 0
+    // Readouts are skipped by the popup's keyboard cursor even if keyed.
+    navigable: root.interactive
+    hoverEnabled: root.interactive
+
     implicitHeight: Math.max(28, label.implicitHeight + 10)
 
     // Keyboard entry points, dispatched by Popup on the row under its cursor.
@@ -46,17 +38,12 @@ Item {
         root.rightClicked();
     }
 
-    function enter() {
-        if (hover.hovered && root.managed && Popups.pointerMoved(hover.point.scenePosition))
-            root.cursorEntered();
-    }
-
     Rectangle {
         anchors.fill: parent
         color: {
             if (!root.interactive)
                 return "transparent";
-            var lit = root.managed ? root.hasCursor : hover.hovered;
+            var lit = root.managed ? root.hasCursor : root.hovered;
             return lit ? Config.colors.highlight : "transparent";
         }
     }
@@ -107,34 +94,14 @@ Item {
             opacity: 0.75
         }
 
-        // Selection marker, constructed exactly like PopupToggle's checked box
-        // and aligned to the same right edge, so "this one is on" looks the same
-        // whether it is a toggle or a row. Filling the row background instead
-        // would collide with hover, which is what that background means.
-        Rectangle {
+        // Selection marker, aligned to the same right edge as PopupToggle's
+        // box. Filling the row background instead would collide with hover,
+        // which is what that background means.
+        CheckBox {
             anchors.verticalCenter: parent.verticalCenter
             visible: root.selected
-            width: 18
-            height: 18
-            color: Config.colors.text
-            border.width: 2
-            border.color: Config.colors.outline
+            checked: true
         }
-    }
-
-    HoverHandler {
-        id: hover
-
-        enabled: root.interactive
-        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
-        cursorShape: Qt.PointingHandCursor
-
-        // Enter only, and only on real motion (see Popups.pointerMoved).
-        // Leaving deliberately does not clear the cursor, so the highlight
-        // stays put when a row slides out from under a still pointer instead
-        // of vanishing.
-        onHoveredChanged: root.enter()
-        onPointChanged: root.enter()
     }
 
     MouseArea {

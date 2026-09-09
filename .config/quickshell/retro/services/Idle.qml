@@ -84,55 +84,44 @@ Singleton {
     }
 
     function refresh() {
-        clientsProc.running = true;
-        inhibitsProc.running = true;
+        clientsProc.run();
+        inhibitsProc.run();
     }
 
     // While stay-awake is forced here the chip is urgent whatever else
     // holds the screen, so the background poll has nothing to show and
     // stops; it starts again, with a fresh read, the moment it is released.
     readonly property bool pollingNow: root.watching || (root.polling && !root.stayAwake)
+    readonly property int pollInterval: root.watching ? 2000 : 5000
 
-    onPollingNowChanged: {
-        if (root.pollingNow)
-            root.refresh();
-    }
-
-    Timer {
-        running: root.pollingNow
-        interval: root.watching ? 2000 : 5000
-        repeat: true
-        onTriggered: root.refresh()
-    }
-
-    Process {
+    Command {
         id: clientsProc
 
         command: ["hyprctl", "clients", "-j"]
+        polling: root.pollingNow
+        interval: root.pollInterval
 
-        stdout: StdioCollector {
-            onStreamFinished: {
-                try {
-                    root.clients = JSON.parse(text);
-                } catch (e) {
-                    root.clients = [];
-                }
+        onCollected: (text) => {
+            try {
+                root.clients = JSON.parse(text);
+            } catch (e) {
+                root.clients = [];
             }
         }
     }
 
-    Process {
+    Command {
         id: inhibitsProc
 
         command: ["systemd-inhibit", "--list", "--json=short"]
+        polling: root.pollingNow
+        interval: root.pollInterval
 
-        stdout: StdioCollector {
-            onStreamFinished: {
-                try {
-                    root.inhibits = JSON.parse(text);
-                } catch (e) {
-                    root.inhibits = [];
-                }
+        onCollected: (text) => {
+            try {
+                root.inhibits = JSON.parse(text);
+            } catch (e) {
+                root.inhibits = [];
             }
         }
     }

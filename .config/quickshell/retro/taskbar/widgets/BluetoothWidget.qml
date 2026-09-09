@@ -2,13 +2,12 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
-import Quickshell.Io
 import Quickshell.Bluetooth
 import "../../ui" as Ui
 import "../.."
 import "../../services"
 
-Item {
+Ui.Chip {
     id: root
 
     required property var barScreen
@@ -29,8 +28,6 @@ Item {
         return n;
     }
 
-    implicitWidth: chip.implicitWidth
-    implicitHeight: parent ? parent.height : 0
     visible: root.available
 
     // Connected, then paired, then everything else by name.
@@ -142,43 +139,37 @@ Item {
         }
     }
 
-    Ui.Chip {
-        id: chip
+    interactive: true
 
-        width: root.width
-        height: root.height
-        interactive: true
+    onClicked: (mouse) => {
+        if (mouse.button === Qt.RightButton)
+            root.setPower(!(root.adapter && root.adapter.enabled));
+        else
+            popup.toggle();
+    }
 
-        onClicked: (mouse) => {
-            if (mouse.button === Qt.RightButton)
-                root.setPower(!(root.adapter && root.adapter.enabled));
-            else
-                popup.toggle();
+    Ui.Glyph {
+        anchors.verticalCenter: parent.verticalCenter
+        opacity: root.adapter && root.adapter.enabled ? 1 : 0.5
+        text: {
+            if (!root.adapter || !root.adapter.enabled)
+                return "bluetooth_disabled";
+            if (root.adapter.discovering)
+                return "bluetooth_searching";
+            return root.connectedCount > 0 ? "bluetooth_connected" : "bluetooth";
         }
+    }
 
-        Ui.Glyph {
-            anchors.verticalCenter: parent.verticalCenter
-            opacity: root.adapter && root.adapter.enabled ? 1 : 0.5
-            text: {
-                if (!root.adapter || !root.adapter.enabled)
-                    return "bluetooth_disabled";
-                if (root.adapter.discovering)
-                    return "bluetooth_searching";
-                return root.connectedCount > 0 ? "bluetooth_connected" : "bluetooth";
-            }
-        }
-
-        Ui.Label {
-            anchors.verticalCenter: parent.verticalCenter
-            visible: root.connectedCount > 1
-            text: root.connectedCount
-        }
+    Ui.Label {
+        anchors.verticalCenter: parent.verticalCenter
+        visible: root.connectedCount > 1
+        text: root.connectedCount
     }
 
     Ui.Popup {
         id: popup
 
-        anchorItem: chip
+        anchorItem: root
         barScreen: root.barScreen
 
         // Discovery burns power and floods the list; only scan while visible.
@@ -189,8 +180,6 @@ Item {
 
         Ui.PopupToggle {
             rowKey: "power"
-            cursorKey: popup.cursorKey
-            onCursorEntered: popup.cursorKey = "power"
 
             text: "Bluetooth"
             checked: root.adapter ? root.adapter.enabled : false
@@ -199,8 +188,6 @@ Item {
 
         Ui.PopupToggle {
             rowKey: "scan"
-            cursorKey: popup.cursorKey
-            onCursorEntered: popup.cursorKey = "scan"
 
             text: "Scanning"
             enabled: root.adapter ? root.adapter.enabled : false
@@ -222,8 +209,6 @@ Item {
                 required property var modelData
 
                 rowKey: modelData.address
-                cursorKey: popup.cursorKey
-                onCursorEntered: popup.cursorKey = modelData.address
 
                 glyph: modelData.connected ? "bluetooth_connected" : "bluetooth"
                 text: root.label(modelData)
@@ -249,31 +234,8 @@ Item {
         }
     }
 
-    IpcHandler {
-        // Bars are instantiated per screen; only the primary one
-        // claims the target, or a second monitor collides with it.
+    Ui.PopupIpc {
         target: "bluetooth"
         enabled: root.primary
-
-        // `show`, `call`, `wait`, `listen` and `prop` are swallowed by
-        // the `qs ipc` CLI parser (see submap/SubmapOverlay.qml).
-        function toggle(): void {
-            popup.toggle();
-        }
-
-        function open(): void {
-            popup.open();
-        }
-
-        function close(): void {
-            popup.close();
-        }
-
-        // Open with the keyboard cursor placed, for the SUPER+T submap
-        // (hypr/submap-topbar.lua).
-        function focus(): void {
-            if (root.available)
-                popup.openWithCursor();
-        }
     }
 }

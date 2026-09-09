@@ -4,3 +4,7 @@ PixelGlyph 1.0 PixelGlyph.qml
 SevenSegment 1.0 SevenSegment.qml
 LcdBars 1.0 LcdBars.qml
 PromptRow 1.0 PromptRow.qml
+Bezel 1.0 Bezel.qml
+CellText 1.0 CellText.qml
+Cell 1.0 Cell.qml
+HiddenInput 1.0 HiddenInput.qml

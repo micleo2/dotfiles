@@ -1,6 +1,5 @@
 import QtQuick
 import Quickshell
-import Quickshell.Io
 pragma Singleton
 
 Singleton {
@@ -10,7 +9,6 @@ Singleton {
     readonly property string temp: weatherTemp
     property string weatherIcon: ""
     property string weatherTemp: ""
-    property string _buf: ""
 
     function weatherCodeToEmoji(code) {
         if (code === 113)
@@ -40,39 +38,21 @@ Singleton {
         return "☁️";
     }
 
-    Process {
-        id: weatherProc
-
+    // Every half minute until the first forecast lands, then every ten.
+    Command {
         command: ["curl", "-s", "wttr.in/?format=j1"]
-        onRunningChanged: {
-            if (running) {
-                root._buf = "";
-            } else {
-                try {
-                    const j = JSON.parse(root._buf);
-                    const cc = j.current_condition[0];
-                    root.weatherTemp = cc.temp_F + "°F";
-                    const code = parseInt(cc.weatherCode, 10);
-                    root.weatherIcon = root.weatherCodeToEmoji(code);
-                } catch (e) {
-                }
-            }
-        }
-
-        stdout: SplitParser {
-            onRead: (data) => {
-                root._buf += data;
-            }
-        }
-
-    }
-
-    Timer {
+        polling: true
         interval: root.weatherTemp === "" ? 30000 : 600000
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: weatherProc.running = true
-    }
 
+        onCollected: (text) => {
+            try {
+                const j = JSON.parse(text);
+                const cc = j.current_condition[0];
+                root.weatherTemp = cc.temp_F + "°F";
+                const code = parseInt(cc.weatherCode, 10);
+                root.weatherIcon = root.weatherCodeToEmoji(code);
+            } catch (e) {
+            }
+        }
+    }
 }

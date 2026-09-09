@@ -10,7 +10,7 @@ Item {
 
     property var rows: []
     property int cell: 6
-    property real ghost: 0.12
+    property real ghost: Config.lcdGhost
     property color color: Config.colors.text
 
     readonly property int columns: root.rows.length > 0 ? root.rows[0].length : 0

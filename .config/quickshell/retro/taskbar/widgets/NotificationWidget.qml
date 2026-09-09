@@ -10,7 +10,7 @@ import "../../notifications"
 // The bell: do-not-disturb state and the count of what has come and gone,
 // with a popup holding the switch and the history. Right-clicking the chip
 // toggles silencing without opening anything.
-Item {
+Ui.Chip {
     id: root
 
     required property var barScreen
@@ -21,8 +21,6 @@ Item {
     readonly property bool available: Modules.setting("notifications") !== false
     readonly property int count: Notifications.history.length
 
-    implicitWidth: chip.implicitWidth
-    implicitHeight: parent ? parent.height : 0
     visible: root.available
 
     function glyph() {
@@ -42,36 +40,30 @@ Item {
             Notifications.panel = popup;
     }
 
-    Ui.Chip {
-        id: chip
+    interactive: true
+    fillColor: Notifications.doNotDisturb ? Config.colors.urgent : Config.colors.shadow
+    onClicked: (mouse) => {
+        if (mouse.button === Qt.RightButton)
+            Notifications.toggleDoNotDisturb();
+        else
+            popup.toggle();
+    }
 
-        width: root.width
-        height: root.height
-        interactive: true
-        fillColor: Notifications.doNotDisturb ? Config.colors.urgent : Config.colors.shadow
-        onClicked: (mouse) => {
-            if (mouse.button === Qt.RightButton)
-                Notifications.toggleDoNotDisturb();
-            else
-                popup.toggle();
-        }
+    Ui.Glyph {
+        anchors.verticalCenter: parent.verticalCenter
+        text: root.glyph()
+    }
 
-        Ui.Glyph {
-            anchors.verticalCenter: parent.verticalCenter
-            text: root.glyph()
-        }
-
-        Ui.Label {
-            anchors.verticalCenter: parent.verticalCenter
-            visible: root.count > 0
-            text: root.count
-        }
+    Ui.Label {
+        anchors.verticalCenter: parent.verticalCenter
+        visible: root.count > 0
+        text: root.count
     }
 
     Ui.Popup {
         id: popup
 
-        anchorItem: chip
+        anchorItem: root
         barScreen: root.barScreen
         cardWidth: 360
 
@@ -81,8 +73,6 @@ Item {
 
         Ui.PopupToggle {
             rowKey: "dnd"
-            cursorKey: popup.cursorKey
-            onCursorEntered: popup.cursorKey = "dnd"
 
             text: "Do not disturb"
             checked: Notifications.doNotDisturb
@@ -91,8 +81,6 @@ Item {
 
         Ui.PopupToggle {
             rowKey: "history"
-            cursorKey: popup.cursorKey
-            onCursorEntered: popup.cursorKey = "history"
 
             text: "Keep history"
             checked: Notifications.keepHistory
@@ -101,8 +89,6 @@ Item {
 
         Ui.PopupRow {
             rowKey: "dismiss"
-            cursorKey: popup.cursorKey
-            onCursorEntered: popup.cursorKey = "dismiss"
 
             visible: Notifications.popups.length > 0
             glyph: "close"
@@ -130,8 +116,6 @@ Item {
                 required property int index
 
                 rowKey: "h:" + modelData.key
-                cursorKey: popup.cursorKey
-                onCursorEntered: popup.cursorKey = "h:" + modelData.key
 
                 glyph: root.urgencyGlyph(modelData.urgency)
                 text: modelData.summary !== "" ? modelData.summary : modelData.body
@@ -143,8 +127,6 @@ Item {
 
         Ui.PopupRow {
             rowKey: "clear"
-            cursorKey: popup.cursorKey
-            onCursorEntered: popup.cursorKey = "clear"
 
             visible: root.count > 0
             glyph: "delete"

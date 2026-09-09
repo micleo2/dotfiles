@@ -269,26 +269,9 @@ Singleton {
         root.clearHistory();
     }
 
-    Process {
-        // FileView will not create intermediate directories.
-        running: true
-        command: ["mkdir", "-p", Settings.stateDir]
-        onExited: historyFile.reload() // qmllint disable signal-handler-parameters
-    }
-
-    FileView {
-        id: historyFile
-
-        path: Settings.stateDir + "/history.json"
-        watchChanges: true
-        printErrors: false
-
-        onFileChanged: reload()
-        onAdapterUpdated: writeAdapter()
-        onLoadFailed: (error) => {
-            if (error === FileViewError.FileNotFound)
-                writeAdapter();
-        }
+    JsonStore {
+        dir: Settings.stateDir
+        name: "history.json"
 
         JsonAdapter { // qmllint disable unresolved-type
             id: historyStore

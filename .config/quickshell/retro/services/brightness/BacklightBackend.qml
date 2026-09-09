@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import ".."
 
 // Internal panel backlight, via /sys/class/backlight.
 //
@@ -43,7 +44,7 @@ Item {
         reader.reload();
     }
 
-    Process {
+    Command {
         // Run through bash so a missing brightnessctl cannot produce a
         // "process failed to start" warning, and so the device heuristic stays
         // in one place. The ordering mirrors omarchy-hw-display: apple-gmux
@@ -52,15 +53,13 @@ Item {
         running: true
         command: ["bash", "-c", 'd=""; for c in /sys/class/backlight/gmux_backlight /sys/class/backlight/amdgpu_bl* /sys/class/backlight/intel_backlight /sys/class/backlight/acpi_video*; do [ -e "$c" ] && { d="$c"; break; }; done; [ -n "$d" ] || d="$(ls -d /sys/class/backlight/* 2>/dev/null | grep -v appletb_backlight | head -n1)"; [ -n "$d" ] && printf "%s\\n%s\\n" "${d##*/}" "$(cat "$d/max_brightness" 2>/dev/null)"; exit 0']
 
-        stdout: StdioCollector {
-            onStreamFinished: {
-                var lines = text.trim().split("\n");
-                if (lines.length >= 2 && lines[0] !== "") {
-                    root.device = lines[0].trim();
-                    root.maxValue = parseInt(lines[1].trim(), 10) || 0;
-                }
-                root.probed = true;
+        onCollected: (text) => {
+            var lines = text.trim().split("\n");
+            if (lines.length >= 2 && lines[0] !== "") {
+                root.device = lines[0].trim();
+                root.maxValue = parseInt(lines[1].trim(), 10) || 0;
             }
+            root.probed = true;
         }
     }
 

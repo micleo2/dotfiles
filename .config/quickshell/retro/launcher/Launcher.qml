@@ -4,8 +4,8 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import Quickshell.Hyprland
 import ".."
+import "../services"
 
 // rofi's `-show drun` and `-dmenu` as one LCD module. Dmenu mode is driven
 // by scripts/retro-launcher over a file and a FIFO; matching is `fzf
@@ -39,8 +39,7 @@ Singleton {
     signal opened
 
     function open() {
-        var monitor = Hyprland.focusedMonitor;
-        root.screenName = monitor && monitor.name ? monitor.name : (Quickshell.screens.length > 0 ? Quickshell.screens[0].name : "");
+        root.screenName = Screens.focusedName;
         matchTimer.stop();
         root.query = "";
         root.matchFor = "";
@@ -328,25 +327,14 @@ Singleton {
         root.counts = out;
     }
 
-    Process {
-        // FileView will not create intermediate directories.
-        running: true
-        command: ["mkdir", "-p", Settings.stateDir]
-        onExited: storeFile.reload() // qmllint disable signal-handler-parameters
-    }
-
-    FileView {
+    JsonStore {
         id: storeFile
 
-        path: Settings.stateDir + "/launcher.json"
-        watchChanges: false
-        printErrors: false
-
-        onLoaded: root.restore()
-        onLoadFailed: (error) => {
-            if (error === FileViewError.FileNotFound)
-                root.restore();
-        }
+        dir: Settings.stateDir
+        name: "launcher.json"
+        // Written through writeStore() only, once restored.
+        live: false
+        onReady: root.restore()
 
         JsonAdapter { // qmllint disable unresolved-type
             id: store

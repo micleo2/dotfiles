@@ -3,7 +3,6 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import "../lcd" as Lcd
 import "../lcd/text.js" as TextUtil
-import "../ui" as Ui
 import ".."
 
 // The submap cheat sheet as a Game & Watch LCD module in the OSD's frame:
@@ -23,8 +22,6 @@ Item {
     // Blank cells between columns.
     property int gap: 2
 
-    readonly property real ghost: 0.12
-    readonly property int pad: 18
     readonly property color ink: Config.colors.text
     // The trigger key, the palette's alert colour.
     readonly property color key: Config.colors.urgent
@@ -91,36 +88,13 @@ Item {
     readonly property int rows: Math.max(1, Math.min(root.perColumn, root.sortedEntries.length))
     readonly property string label: TextUtil.fit(root.submapName.toUpperCase(), root.columns)
 
-    implicitWidth: bezel.width + 4
-    implicitHeight: bezel.height + 4
+    implicitWidth: bezel.width + bezel.shadowOffset
+    implicitHeight: bezel.height + bezel.shadowOffset
 
-    // The frame language: hard offset shadow, outlined bezel, dark face.
-    Rectangle {
+    Lcd.Bezel {
         id: bezel
 
-        Ui.Shadow {
-            offset: 4
-        }
-
-        width: panel.implicitWidth + 2 * root.pad
-        height: panel.implicitHeight + 2 * root.pad
-        color: Config.colors.base
-        border.width: 2
-        border.color: Config.colors.outline
-
-        // The LCD face.
-        Rectangle {
-            anchors.fill: parent
-            anchors.margins: 8
-            color: Config.colors.shadow
-            border.width: 2
-            border.color: Config.colors.outline
-        }
-
         Column {
-            id: panel
-
-            anchors.centerIn: parent
             spacing: 6
 
             // Row: which submap this is.
@@ -129,17 +103,11 @@ Item {
 
                 columns: root.columns
                 rows: 1
-                ghost: root.ghost
 
-                Ui.Label {
-                    x: 0
-                    y: headerGrid.rowY(0)
-                    height: headerGrid.cellHeight
+                Lcd.CellText {
+                    grid: headerGrid
                     text: root.label
                     color: root.ink
-                    size: headerGrid.size
-                    font.letterSpacing: headerGrid.letterSpacing
-                    textFormat: Text.PlainText
                 }
             }
 
@@ -149,7 +117,6 @@ Item {
 
                 columns: root.columns
                 rows: root.rows
-                ghost: root.ghost
 
                 Repeater {
                     model: root.layout.cells
@@ -166,34 +133,25 @@ Item {
                         width: keyGrid.width
                         height: keyGrid.cellHeight
 
-                        Ui.Label {
-                            x: entry.start * keyGrid.cellWidth
-                            height: keyGrid.cellHeight
+                        Lcd.CellText {
+                            grid: keyGrid
+                            col: entry.start
                             text: entry.modelData.pre
                             color: root.ink
-                            size: keyGrid.size
-                            font.letterSpacing: keyGrid.letterSpacing
-                            textFormat: Text.PlainText
                         }
 
-                        Ui.Label {
-                            x: (entry.start + entry.modelData.pre.length) * keyGrid.cellWidth
-                            height: keyGrid.cellHeight
+                        Lcd.CellText {
+                            grid: keyGrid
+                            col: entry.start + entry.modelData.pre.length
                             text: entry.modelData.key
                             color: root.key
-                            size: keyGrid.size
-                            font.letterSpacing: keyGrid.letterSpacing
-                            textFormat: Text.PlainText
                         }
 
-                        Ui.Label {
-                            x: (entry.start + entry.modelData.pre.length + entry.modelData.key.length) * keyGrid.cellWidth
-                            height: keyGrid.cellHeight
+                        Lcd.CellText {
+                            grid: keyGrid
+                            col: entry.start + entry.modelData.pre.length + entry.modelData.key.length
                             text: entry.modelData.post
                             color: root.ink
-                            size: keyGrid.size
-                            font.letterSpacing: keyGrid.letterSpacing
-                            textFormat: Text.PlainText
                         }
                     }
                 }

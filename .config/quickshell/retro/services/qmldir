@@ -13,3 +13,5 @@ singleton Idle 1.0 Idle.qml
 singleton Host 1.0 Host.qml
 singleton Modules 1.0 Modules.qml
 singleton Qmk 1.0 Qmk.qml
+singleton Screens 1.0 Screens.qml
+Command 1.0 Command.qml

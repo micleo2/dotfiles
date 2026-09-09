@@ -24,8 +24,6 @@ Item {
 
     readonly property bool denied: Lock.denied
     readonly property color ink: root.denied ? Config.colors.urgent : Config.colors.text
-    readonly property real ghost: 0.12
-    readonly property int pad: 18
     readonly property int columns: 28
 
     readonly property date now: Time.now
@@ -47,26 +45,13 @@ Item {
         width: 44
         height: 80
         thickness: 10
-        ghost: root.ghost
         color: root.ink
-    }
-
-    function focusInput() {
-        if (root.inputEnabled)
-            input.forceActiveFocus();
-    }
-
-    onInputEnabledChanged: {
-        if (root.inputEnabled)
-            Qt.callLater(root.focusInput);
     }
 
     onDeniedChanged: {
         if (!root.denied)
             root.blinkOn = true;
     }
-
-    Component.onCompleted: Qt.callLater(root.focusInput)
 
     Timer {
         running: root.denied
@@ -87,13 +72,10 @@ Item {
         color: Config.colors.outline
     }
 
-    // Keys land here. Nothing of it is drawn; the cells below are the echo.
-    TextInput {
+    Lcd.HiddenInput {
         id: input
 
-        width: 1
-        height: 1
-        opacity: 0
+        active: root.inputEnabled
         enabled: root.inputEnabled && !Lock.checking
         echoMode: TextInput.Password
         passwordMaskDelay: 0
@@ -141,38 +123,16 @@ Item {
                 Lock.previewVisible = false;
                 return;
             }
-            root.focusInput();
+            input.grab();
         }
     }
 
-    // The frame language: hard offset shadow, outlined bezel, dark face.
-    Rectangle {
+    Lcd.Bezel {
         id: bezel
 
-        Ui.Shadow {
-            offset: 4
-        }
-
-        width: panel.implicitWidth + 2 * root.pad
-        height: panel.implicitHeight + 2 * root.pad
         anchors.centerIn: parent
-        color: Config.colors.base
-        border.width: 2
-        border.color: Config.colors.outline
-
-        // The LCD face.
-        Rectangle {
-            anchors.fill: parent
-            anchors.margins: 8
-            color: Config.colors.shadow
-            border.width: 2
-            border.color: Config.colors.outline
-        }
 
         Column {
-            id: panel
-
-            anchors.centerIn: parent
             spacing: 16
             opacity: root.denied && !root.blinkOn ? 0.35 : 1
 
@@ -208,7 +168,7 @@ Item {
                             width: 10
                             height: 10
                             color: root.ink
-                            opacity: root.colonOn ? 1 : root.ghost
+                            opacity: root.colonOn ? 1 : Config.lcdGhost
                         }
 
                         Rectangle {
@@ -217,7 +177,7 @@ Item {
                             width: 10
                             height: 10
                             color: root.ink
-                            opacity: root.colonOn ? 1 : root.ghost
+                            opacity: root.colonOn ? 1 : Config.lcdGhost
                         }
                     }
 
@@ -247,28 +207,18 @@ Item {
 
                 columns: root.columns
                 rows: 1
-                ghost: root.ghost
 
-                Ui.Label {
-                    x: 0
-                    y: infoGrid.rowY(0)
-                    height: infoGrid.cellHeight
+                Lcd.CellText {
+                    grid: infoGrid
                     text: root.dateLabel
                     color: root.ink
-                    size: infoGrid.size
-                    font.letterSpacing: infoGrid.letterSpacing
-                    textFormat: Text.PlainText
                 }
 
-                Ui.Label {
-                    x: (infoGrid.columns - root.whoLabel.length) * infoGrid.cellWidth
-                    y: infoGrid.rowY(0)
-                    height: infoGrid.cellHeight
+                Lcd.CellText {
+                    grid: infoGrid
+                    align: Text.AlignRight
                     text: root.whoLabel
                     color: root.ink
-                    size: infoGrid.size
-                    font.letterSpacing: infoGrid.letterSpacing
-                    textFormat: Text.PlainText
                 }
             }
 
@@ -278,39 +228,30 @@ Item {
 
                 columns: root.columns
                 rows: 1
-                ghost: root.ghost
 
                 // Lit cells, not text, so they go on the cell layer.
                 marks: Repeater {
                     model: passwordGrid.columns
 
-                    Rectangle {
+                    Lcd.Cell {
                         required property int index
 
                         readonly property bool typed: !root.denied && !Lock.checking && index < root.litCells
                         readonly property bool sweeping: Lock.checking && index === root.sweep
 
-                        x: index * passwordGrid.cellWidth
-                        y: 0
-                        width: passwordGrid.cellWidth - 1
-                        height: passwordGrid.cellHeight - 1
+                        grid: passwordGrid
+                        col: index
                         color: root.ink
                         visible: typed || sweeping
                     }
                 }
 
-                Ui.Label {
-                    readonly property string label: "DENIED"
-
+                Lcd.CellText {
+                    grid: passwordGrid
+                    align: Text.AlignHCenter
                     visible: root.denied
-                    x: Math.floor((passwordGrid.columns - label.length) / 2) * passwordGrid.cellWidth
-                    y: passwordGrid.rowY(0)
-                    height: passwordGrid.cellHeight
-                    text: label
+                    text: "DENIED"
                     color: root.ink
-                    size: passwordGrid.size
-                    font.letterSpacing: passwordGrid.letterSpacing
-                    textFormat: Text.PlainText
                 }
             }
         }

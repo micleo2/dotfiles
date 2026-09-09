@@ -2,10 +2,9 @@ import QtQuick
 import ".."
 
 // The bar-slot frame: grey fill with a 2px outline bled 2px outward, and a
-// 1px button edge below and to the right of that, System 7 style.
-//
-// taskbar/Bar.qml repeated this block verbatim for each of its five widgets. It is one
-// component now so the module chips do not add five more copies of it.
+// hard 2px drop shadow below and to the right of that, System 7 style. Every
+// bar widget is one of these; a widget's popup and IPC handler sit inside
+// it too, being non-visual, and only its glyphs and labels are drawn.
 //
 // Content goes into an inner Row, which derives its own implicit size from its
 // children — sizing the frame off childrenRect instead would risk a binding loop.
@@ -27,7 +26,11 @@ Item {
     readonly property bool pressed: press.pressed
 
     signal clicked(var mouse)
-    signal scrolled(var event)
+    // One per wheel detent, direction +1 or -1. Touchpads send a stream of
+    // sub-notch deltas rather than one event per detent, so the remainder is
+    // carried between events or a slow drag does nothing and a fast one jumps.
+    signal stepped(int direction)
+    property real wheelAccumulator: 0
 
     implicitWidth: inner.implicitWidth + root.padding * 2
     implicitHeight: parent ? parent.height : 0
@@ -76,7 +79,15 @@ Item {
         acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
         onWheel: (event) => {
             event.accepted = true;
-            root.scrolled(event);
+            var delta = event.angleDelta.y !== 0 ? event.angleDelta.y : event.angleDelta.x;
+            // One detent is 120 units. Clamp so a flung touchpad cannot
+            // deliver a single enormous event.
+            root.wheelAccumulator += Math.max(-120, Math.min(120, delta));
+            while (Math.abs(root.wheelAccumulator) >= 120) {
+                var direction = root.wheelAccumulator > 0 ? 1 : -1;
+                root.wheelAccumulator -= direction * 120;
+                root.stepped(direction);
+            }
         }
     }
 

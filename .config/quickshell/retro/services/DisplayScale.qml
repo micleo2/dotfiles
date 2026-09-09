@@ -189,17 +189,14 @@ Singleton {
         printErrors: false
     }
 
-    Process {
+    Command {
         // Read the GTK interface font once so the factor can be quantised.
         running: true
         command: ["gsettings", "get", "org.gnome.desktop.interface", "font-name"]
-
-        stdout: StdioCollector {
-            onStreamFinished: {
-                var match = text.match(/([0-9]+(?:\.[0-9]+)?)'?\s*$/);
-                if (match)
-                    root.gtkFontPt = parseFloat(match[1]);
-            }
+        onCollected: (text) => {
+            var match = text.match(/([0-9]+(?:\.[0-9]+)?)'?\s*$/);
+            if (match)
+                root.gtkFontPt = parseFloat(match[1]);
         }
     }
 }

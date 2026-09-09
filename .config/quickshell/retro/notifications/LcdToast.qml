@@ -30,9 +30,8 @@ Item {
     readonly property var view: Notifications.viewOf(root.notification)
 
     readonly property bool critical: root.view.urgency === NotificationUrgency.Critical
+    // The unlit grid stays neutral; only the ink goes urgent.
     readonly property color ink: root.critical ? Config.colors.urgent : Config.colors.text
-    readonly property real ghost: 0.12
-    readonly property int pad: 18
 
     readonly property string time: Qt.formatTime(new Date(Notifications.arrivedAt(root.notification)), "HH:mm")
     readonly property string appLabel: TextUtil.fit(TextUtil.appLabel(root.view.appName, root.view.desktopEntry), root.columns - root.time.length - 1)
@@ -62,41 +61,19 @@ Item {
         onTriggered: root.blinkOn = !root.blinkOn
     }
 
-    implicitWidth: bezel.width + 4
-    implicitHeight: bezel.height + 4
-    Rectangle {
+    implicitWidth: bezel.width + bezel.shadowOffset
+    implicitHeight: bezel.height + bezel.shadowOffset
+
+    Lcd.Bezel {
         id: bezel
 
-        Ui.Shadow {
-            offset: 4
-        }
-
-        width: panel.implicitWidth + 2 * root.pad
-        height: panel.implicitHeight + 2 * root.pad
-        color: Config.colors.base
-        border.width: 2
-        border.color: Config.colors.outline
-
-        // The LCD face.
-        Rectangle {
-            anchors.fill: parent
-            anchors.margins: 8
-            color: Config.colors.shadow
-            border.width: 2
-            border.color: Config.colors.outline
-        }
-
         Row {
-            id: panel
-
-            anchors.centerIn: parent
             spacing: 16
 
             Lcd.PixelGlyph {
                 anchors.verticalCenter: parent.verticalCenter
                 rows: root.pictogram
                 cell: 5
-                ghost: root.ghost
                 color: root.ink
                 opacity: root.critical && !root.blinkOn ? 0.35 : 1
             }
@@ -109,30 +86,19 @@ Item {
 
                     columns: root.columns
                     rows: root.bodyRow + root.body.length
-                    // The unlit grid stays neutral; only the ink goes urgent.
-                    ghost: root.ghost
 
                     // Row 0: who, and when.
-                    Ui.Label {
-                        x: 0
-                        y: grid.rowY(0)
-                        height: grid.cellHeight
+                    Lcd.CellText {
+                        grid: grid
                         text: root.appLabel
                         color: root.ink
-                        size: grid.size
-                        font.letterSpacing: grid.letterSpacing
-                        textFormat: Text.PlainText
                     }
 
-                    Ui.Label {
-                        x: (grid.columns - root.time.length) * grid.cellWidth
-                        y: grid.rowY(0)
-                        height: grid.cellHeight
+                    Lcd.CellText {
+                        grid: grid
+                        align: Text.AlignRight
                         text: root.time
                         color: root.ink
-                        size: grid.size
-                        font.letterSpacing: grid.letterSpacing
-                        textFormat: Text.PlainText
                     }
 
                     // Row 1: the summary, crawling if it overflows.
@@ -157,18 +123,14 @@ Item {
                     Repeater {
                         model: root.body
 
-                        Ui.Label {
+                        Lcd.CellText {
                             required property string modelData
                             required property int index
 
-                            x: 0
-                            y: grid.rowY(root.bodyRow + index)
-                            height: grid.cellHeight
+                            grid: grid
+                            row: root.bodyRow + index
                             text: modelData
                             color: root.ink
-                            size: grid.size
-                            font.letterSpacing: grid.letterSpacing
-                            textFormat: Text.PlainText
                         }
                     }
                 }
@@ -180,28 +142,29 @@ Item {
                     segmentHeight: 6
                     spacing: 3
                     filled: Math.ceil(root.remaining * segments)
-                    ghost: root.ghost
                     color: root.ink
                 }
             }
         }
+    }
 
-        HoverHandler {
-            id: hover
+    HoverHandler {
+        id: hover
 
-            acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
-        }
+        parent: bezel
+        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+    }
 
-        MouseArea {
-            anchors.fill: parent
-            acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
-            cursorShape: Qt.PointingHandCursor
-            onClicked: (mouse) => {
-                if (mouse.button === Qt.LeftButton)
-                    Notifications.invoke(root.notification);
-                else
-                    root.notification.dismiss();
-            }
+    MouseArea {
+        parent: bezel
+        anchors.fill: parent
+        acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+        cursorShape: Qt.PointingHandCursor
+        onClicked: (mouse) => {
+            if (mouse.button === Qt.LeftButton)
+                Notifications.invoke(root.notification);
+            else
+                root.notification.dismiss();
         }
     }
 }
