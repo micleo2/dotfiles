@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell.Io
+import ".."
 
 // External monitors over DDC/CI, via ddcutil.
 //
@@ -77,11 +78,10 @@ Item {
     }
 
     function probe() {
-        if (!prober.running)
-            prober.running = true;
+        prober.run();
     }
 
-    Process {
+    Command {
         id: prober
 
         // `command -v` first so a machine without ddcutil never tries to launch
@@ -91,19 +91,17 @@ Item {
         running: true
         command: ["bash", "-c", "command -v ddcutil >/dev/null 2>&1 && ddcutil detect --brief 2>/dev/null | awk '/I2C bus:/ { b = $3; sub(\"/dev/i2c-\", \"\", b) } /DRM connector:/ { c = $3; sub(/^card[0-9]+-/, \"\", c); if (c != \"\" && b != \"\") print c, b }' || true"]
 
-        stdout: StdioCollector {
-            onStreamFinished: {
-                var found = {};
-                var lines = text.trim().split("\n");
-                for (var i = 0; i < lines.length; i++) {
-                    var parts = lines[i].trim().split(/\s+/);
-                    if (parts.length === 2 && !isNaN(parseInt(parts[1], 10)))
-                        found[parts[0]] = parseInt(parts[1], 10);
-                }
-                root.buses = found;
-                root.probed = true;
-                root.refresh();
+        onCollected: (text) => {
+            var found = {};
+            var lines = text.trim().split("\n");
+            for (var i = 0; i < lines.length; i++) {
+                var parts = lines[i].trim().split(/\s+/);
+                if (parts.length === 2 && !isNaN(parseInt(parts[1], 10)))
+                    found[parts[0]] = parseInt(parts[1], 10);
             }
+            root.buses = found;
+            root.probed = true;
+            root.refresh();
         }
     }
 

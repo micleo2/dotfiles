@@ -39,8 +39,7 @@ Singleton {
     property string pendingUuid: ""
 
     function refresh() {
-        if (!lister.running)
-            lister.running = true;
+        lister.run();
     }
 
     function toggle(connection) {
@@ -52,19 +51,7 @@ Singleton {
         toggler.running = true;
     }
 
-    onWatchingChanged: {
-        if (root.watching)
-            root.refresh();
-    }
-
-    Timer {
-        running: root.watching
-        interval: 2000
-        repeat: true
-        onTriggered: root.refresh()
-    }
-
-    Process {
+    Command {
         id: lister
 
         // UUID, TYPE and STATE can never contain a colon, but a connection name
@@ -72,31 +59,31 @@ Singleton {
         // three splits are unambiguous and the remainder is the name, so no
         // unescaping is needed for the fields that matter.
         command: ["nmcli", "-t", "-f", "UUID,TYPE,STATE,NAME", "connection", "show"]
+        polling: root.watching
+        interval: 2000
 
-        stdout: StdioCollector {
-            onStreamFinished: {
-                var out = [];
-                var lines = text.split("\n");
-                for (var i = 0; i < lines.length; i++) {
-                    var line = lines[i];
-                    if (line.trim() === "")
-                        continue;
-                    var parts = line.split(":");
-                    if (parts.length < 4)
-                        continue;
-                    // NM calls OpenVPN and friends type "vpn"; a kernel
-                    // WireGuard profile is its own type. Only the latter here.
-                    if (parts[1] !== "wireguard")
-                        continue;
-                    out.push({
-                        uuid: parts[0],
-                        active: parts[2] === "activated",
-                        name: parts.slice(3).join(":").replace(/\\:/g, ":")
-                    });
-                }
-                root.connections = out;
-                root.pendingUuid = "";
+        onCollected: (text) => {
+            var out = [];
+            var lines = text.split("\n");
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i];
+                if (line.trim() === "")
+                    continue;
+                var parts = line.split(":");
+                if (parts.length < 4)
+                    continue;
+                // NM calls OpenVPN and friends type "vpn"; a kernel
+                // WireGuard profile is its own type. Only the latter here.
+                if (parts[1] !== "wireguard")
+                    continue;
+                out.push({
+                    uuid: parts[0],
+                    active: parts[2] === "activated",
+                    name: parts.slice(3).join(":").replace(/\\:/g, ":")
+                });
             }
+            root.connections = out;
+            root.pendingUuid = "";
         }
     }
 

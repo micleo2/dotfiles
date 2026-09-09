@@ -36,9 +36,8 @@ Scope {
 
     readonly property bool opened: Popups.active === root
 
-    // One highlight per popup, owned here rather than by any row. Controls opt
-    // in by setting `rowKey` and binding `cursorKey` to this — see PopupRow.
-    // The keyboard moves the same cursor, so hover and keys never disagree.
+    // One highlight per popup, owned here rather than by any control. Hover
+    // and the keyboard both move it; controls paint from it (PopupControl).
     property string cursorKey: ""
 
     onOpenedChanged: {
@@ -98,9 +97,10 @@ Scope {
 
     // Keyboard cursor.
     //
-    // A control is navigable when it carries a non-empty `rowKey`, is visible
-    // and enabled, and does not set `navigable: false`. It may offer
-    // `activate()`, `adjust(delta)` and `secondary()`. Nothing registers: the
+    // A control (PopupControl) is navigable when it carries a non-empty
+    // `rowKey`, is visible and enabled, and does not set `navigable: false`.
+    // It may offer `activate()`, `adjust(delta)` and `secondary()`. Nothing
+    // registers: the
     // content is walked in tree order, which inside a Column is visual order
     // (Repeater delegates are inserted at the Repeater's own position, nested
     // Columns included), and recursion stops at the first navigable item.
@@ -270,6 +270,9 @@ Scope {
 
                 Column {
                     id: cardContent
+
+                    // Found by every PopupControl inside, up the tree.
+                    readonly property var popup: root
 
                     width: parent.width
                     spacing: 6

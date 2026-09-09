@@ -16,9 +16,10 @@ Scope {
     property double topMargin: 8
     // Room under the chips. Their drop shadow reaches 4px below the box, so
     // centering the box alone leaves the shadow flush against the window
-    // border when Hyprland gaps are 0; this pads the bottom and the chips
-    // are nudged up by half of it to keep the silhouette centered.
-    property int bottomPad: 2
+    // border when Hyprland gaps are 0, and the window's own shadow darkens
+    // the last few px of the bar on top of that. This pads the bottom and
+    // the chips are nudged up by half of it to keep the silhouette centered.
+    property int bottomPad: 3
     property double sideMargin: 8
 
     IpcHandler {
@@ -33,6 +34,9 @@ Scope {
         Item {
             id: root
             required property var modelData
+            // Bars are instantiated per screen; per-screen singletons (IPC
+            // targets, the idle inhibitor) are claimed by this one only.
+            readonly property bool primary: root.modelData === Quickshell.screens[0]
 
             PanelWindow { // qmllint disable uncreatable-type
                 id: taskbar
@@ -149,21 +153,21 @@ Scope {
                         Layout.fillHeight: true
                         taskbarWindow: taskbar
                         barScreen: root.modelData
-                        primary: root.modelData === Quickshell.screens[0]
+                        primary: root.primary
                     }
 
                     // Volume
                     Widgets.VolumeWidget {
                         Layout.fillHeight: true
                         barScreen: root.modelData
-                        primary: root.modelData === Quickshell.screens[0]
+                        primary: root.primary
                     }
 
                     // Notifications: the bell, silencing, and history.
                     Widgets.NotificationWidget {
                         Layout.fillHeight: true
                         barScreen: root.modelData
-                        primary: root.modelData === Quickshell.screens[0]
+                        primary: root.primary
                     }
                 }
             }

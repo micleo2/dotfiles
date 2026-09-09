@@ -5,24 +5,30 @@ import ".."
 
 // A stepped slider drawn as discrete blocks, in the register of the segmented
 // bucket in osd/LcdOsd.qml rather than as a smooth track.
-Item {
+PopupControl {
     id: root
 
     // Discrete stops. Values may be any numbers; the slider snaps between them.
     property var stops: []
     property int index: 0
 
-    // Keyboard/hover cursor, on the same terms as PopupRow: set `rowKey` and
-    // bind `cursorKey` to the popup's to take part.
-    property string rowKey: ""
-    property string cursorKey: ""
-    readonly property bool hasCursor: root.rowKey !== "" && root.rowKey === root.cursorKey
-
     signal moved(int index)
-    signal cursorEntered
 
-    implicitWidth: parent ? parent.width : 0
     implicitHeight: 26
+
+    // Evenly spaced percentages, `step` apart, ending at 100: the stops a
+    // level control (volume, a backlight) snaps between. Pair with
+    // percentIndex() for the stop a level is on.
+    function percentStops(step) {
+        var out = [];
+        for (var v = step; v <= 100; v += step)
+            out.push(v);
+        return out;
+    }
+
+    function percentIndex(percent, step) {
+        return Math.round(percent / step) - 1;
+    }
 
     function indexAt(px) {
         if (root.stops.length === 0)
@@ -68,27 +74,8 @@ Item {
         }
     }
 
-    function enter() {
-        if (hover.hovered && root.rowKey !== "" && Popups.pointerMoved(hover.point.scenePosition))
-            root.cursorEntered();
-    }
-
-    HoverHandler {
-        id: hover
-
-        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
-
-        // Enter only, and only on real motion (see Popups.pointerMoved).
-        // Leaving deliberately does not clear the cursor, so the highlight
-        // stays put when a row slides out from under a still pointer instead
-        // of vanishing.
-        onHoveredChanged: root.enter()
-        onPointChanged: root.enter()
-    }
-
     MouseArea {
         anchors.fill: parent
-        cursorShape: Qt.PointingHandCursor
         onPressed: (mouse) => {
             mouse.accepted = true;
             root.moved(root.indexAt(mouse.x));

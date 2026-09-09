@@ -22,6 +22,11 @@ Singleton {
     }
     readonly property string iconFont: iconFontLoader.name
 
+    // Opacity of an unlit LCD segment or cell. Every segment is always
+    // drawn as this ghost and the live ones solid, which is what makes the
+    // modules read as an LCD.
+    readonly property real lcdGhost: 0.12
+
     // The palette in use, chosen by name in the display popup and persisted
     // in Settings. Any entry added to `themes` below shows up there.
     // Every palette carries a "dropShadow": the hard offset shadow behind

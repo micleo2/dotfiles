@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import Quickshell.Io
 import Quickshell.Networking
 import "../../ui" as Ui
 import "../.."
@@ -14,7 +13,7 @@ import "../../services"
 // singleton. Omarchy's equivalent panel is ~2000 lines because it also does band
 // pinning, DNS switching, QR sharing and speed tests through a pile of omarchy-*
 // scripts, and has no VPN support at all.
-Item {
+Ui.Chip {
     id: root
 
     required property var barScreen
@@ -44,8 +43,6 @@ Item {
     // The network awaiting a passphrase, if any.
     property var pending: null
 
-    implicitWidth: chip.implicitWidth
-    implicitHeight: parent ? parent.height : 0
     visible: root.available
 
     function strengthOf(network) {
@@ -108,30 +105,24 @@ Item {
         root.pending = network;
     }
 
-    Ui.Chip {
-        id: chip
+    interactive: true
 
-        width: root.width
-        height: root.height
-        interactive: true
+    onClicked: (mouse) => {
+        if (mouse.button === Qt.RightButton)
+            Networking.wifiEnabled = !Networking.wifiEnabled;
+        else
+            popup.toggle();
+    }
 
-        onClicked: (mouse) => {
-            if (mouse.button === Qt.RightButton)
-                Networking.wifiEnabled = !Networking.wifiEnabled;
-            else
-                popup.toggle();
-        }
-
-        Ui.Glyph {
-            anchors.verticalCenter: parent.verticalCenter
-            text: root.glyphFor(root.active)
-        }
+    Ui.Glyph {
+        anchors.verticalCenter: parent.verticalCenter
+        text: root.glyphFor(root.active)
     }
 
     Ui.Popup {
         id: popup
 
-        anchorItem: chip
+        anchorItem: root
         barScreen: root.barScreen
         cardWidth: 360
 
@@ -161,8 +152,6 @@ Item {
                 readonly property bool pending: Vpn.pendingUuid === modelData.uuid
 
                 rowKey: "vpn:" + modelData.uuid
-                cursorKey: popup.cursorKey
-                onCursorEntered: popup.cursorKey = "vpn:" + modelData.uuid
 
                 glyph: modelData.active ? "vpn_key" : "vpn_key_off"
                 text: modelData.name
@@ -204,8 +193,6 @@ Item {
                 readonly property string key: "ip:" + modelData.name + ":" + modelData.address
 
                 rowKey: key
-                cursorKey: popup.cursorKey
-                onCursorEntered: popup.cursorKey = key
 
                 glyph: {
                     if (modelData.isTunnel)
@@ -230,8 +217,6 @@ Item {
             readonly property var info: Addresses.publicInfo
 
             rowKey: "ip:public"
-            cursorKey: popup.cursorKey
-            onCursorEntered: popup.cursorKey = "ip:public"
 
             glyph: "public"
             text: "public"
@@ -253,8 +238,6 @@ Item {
 
         Ui.PopupToggle {
             rowKey: "wifi-enabled"
-            cursorKey: popup.cursorKey
-            onCursorEntered: popup.cursorKey = "wifi-enabled"
 
             text: "Enabled"
             checked: Networking.wifiEnabled
@@ -274,8 +257,6 @@ Item {
 
                 Ui.PopupRow {
                     rowKey: "wifi:" + entry.modelData.name
-                    cursorKey: popup.cursorKey
-                    onCursorEntered: popup.cursorKey = "wifi:" + entry.modelData.name
 
                     glyph: root.glyphFor(entry.modelData)
                     text: entry.modelData.name !== "" ? entry.modelData.name : "(hidden)"
@@ -320,32 +301,9 @@ Item {
         }
     }
 
-    IpcHandler {
-        // Bars are instantiated per screen; only the primary one
-        // claims the target, or a second monitor collides with it.
+    Ui.PopupIpc {
         target: "network"
         enabled: root.primary
-
-        // `show`, `call`, `wait`, `listen` and `prop` are swallowed by
-        // the `qs ipc` CLI parser (see submap/SubmapOverlay.qml).
-        function toggle(): void {
-            popup.toggle();
-        }
-
-        function open(): void {
-            popup.open();
-        }
-
-        function close(): void {
-            popup.close();
-        }
-
-        // Open with the keyboard cursor placed, for the SUPER+T submap
-        // (hypr/submap-topbar.lua).
-        function focus(): void {
-            if (root.available)
-                popup.openWithCursor();
-        }
 
         // Toggle a WireGuard profile by a case-insensitive substring of its
         // name, so it can take a keybind without opening the popup.

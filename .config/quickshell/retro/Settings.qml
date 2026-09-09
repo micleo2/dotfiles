@@ -36,29 +36,9 @@ Singleton {
         root.monitorScales = next;
     }
 
-    Process {
-        // FileView will not create intermediate directories.
-        running: true
-        command: ["mkdir", "-p", root.stateDir]
-        // Process.exited carries a QProcess::ExitStatus that Quickshell does
-        // not expose to QML, so qmllint cannot type the handler.
-        onExited: view.reload() // qmllint disable signal-handler-parameters
-    }
-
-    FileView {
-        id: view
-
-        path: root.stateDir + "/settings.json"
-        watchChanges: true
-        printErrors: false
-
-        onFileChanged: reload()
-        onAdapterUpdated: writeAdapter()
-        onLoadFailed: (error) => {
-            // First run: materialise the defaults so the file is discoverable.
-            if (error === FileViewError.FileNotFound)
-                writeAdapter();
-        }
+    JsonStore {
+        dir: root.stateDir
+        name: "settings.json"
 
         JsonAdapter { // qmllint disable unresolved-type
             id: adapter

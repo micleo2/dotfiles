@@ -9,106 +9,87 @@ import Quickshell.I3
 
 // One cell per workspace on this bar's monitor. The cells butt against the
 // chip frame with no padding, so the row reads as a segmented button.
-Item {
+Ui.Chip {
     id: root
 
     required property var taskbarWindow
 
-    implicitWidth: chip.implicitWidth
-    implicitHeight: parent ? parent.height : 0
+    padding: 0
 
-    Ui.Chip {
-        id: chip
+    RowLayout {
+        id: workspaces
 
-        width: root.width
+        property bool usingHyprland: Hyprland.workspaces.values.length == 0 ? false : true
+        property var currentWorkspaces: Hyprland.workspaces.values.filter((w) => {
+            return w.monitor.name == root.taskbarWindow.screen.name && w.id >= 0;
+        })
+
+        // Fill the face so the cell backgrounds meet the frame whatever
+        // the bar's text size.
         height: root.height
-        padding: 0
+        spacing: 0
 
-        RowLayout {
-            id: workspaces
+        Repeater {
+            model: workspaces.currentWorkspaces
 
-            property bool usingHyprland: Hyprland.workspaces.values.length == 0 ? false : true
-            property var currentWorkspaces: Hyprland.workspaces.values.filter((w) => {
-                return w.monitor.name == root.taskbarWindow.screen.name && w.id >= 0;
-            })
+            Button {
+                id: control
 
-            // Fill the face so the cell backgrounds meet the frame whatever
-            // the bar's text size.
-            height: chip.height
-            spacing: 0
+                required property var modelData
+                required property int index
 
-            Repeater {
-                model: workspaces.currentWorkspaces
+                readonly property int focusedWindowId: workspaces.usingHyprland ? Hyprland.focusedWorkspace.id : I3.focusedWorkspace.number
 
-                Button {
-                    id: control
-
-                    required property var modelData
-                    required property int index
-
-                    property int focusedWindowId: 0
-
-                    function getColor() {
-                        if (workspaces.usingHyprland == true)
-                            focusedWindowId = Hyprland.focusedWorkspace.id;
-                        else
-                            focusedWindowId = I3.focusedWorkspace.number;
-                        if (modelData.urgent) {
-                            return Config.colors.urgent;
-                        } else {
-                            if ((workspaces.usingHyprland && modelData.id == focusedWindowId) || mouse.hovered)
-                                return Config.colors.shadow;
-                            else if ((workspaces.usingHyprland == false && modelData.number == focusedWindowId) || mouse.hovered)
-                                return Config.colors.shadow;
-                        }
-                        return Config.colors.base;
+                function getColor() {
+                    if (modelData.urgent) {
+                        return Config.colors.urgent;
+                    } else {
+                        if ((workspaces.usingHyprland && modelData.id == focusedWindowId) || mouse.hovered)
+                            return Config.colors.shadow;
+                        else if ((workspaces.usingHyprland == false && modelData.number == focusedWindowId) || mouse.hovered)
+                            return Config.colors.shadow;
                     }
+                    return Config.colors.base;
+                }
 
-                    implicitWidth: 28
-                    Layout.fillHeight: true
-                    padding: 0
-                    onClicked: {
-                        Hyprland.dispatch(`hl.dsp.focus({ workspace = ${modelData.id}, on_current_monitor = true })`);
-                    }
+                implicitWidth: 28
+                Layout.fillHeight: true
+                padding: 0
+                onClicked: {
+                    Hyprland.dispatch(`hl.dsp.focus({ workspace = ${modelData.id}, on_current_monitor = true })`);
+                }
 
-                    HoverHandler {
-                        id: mouse
+                HoverHandler {
+                    id: mouse
 
-                        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
-                        cursorShape: Qt.PointingHandCursor
-                    }
+                    acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+                    cursorShape: Qt.PointingHandCursor
+                }
 
-                    contentItem: Text {
-                        text: control.modelData.id
-                        color: Config.colors.text
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
+                contentItem: Ui.Label {
+                    text: control.modelData.id
+                    horizontalAlignment: Text.AlignHCenter
+                }
 
-                        font {
-                            family: Config.mainFont
-                            pixelSize: Config.settings.bar.fontSize
-                        }
-                    }
+                background: Rectangle {
+                    id: bgRect
 
-                    background: Rectangle {
-                        id: bgRect
+                    color: control.getColor()
 
-                        color: control.getColor()
+                    Rectangle {
+                        visible: control.index > 0
+                        width: 2
+                        color: Config.colors.outline
 
-                        Rectangle {
-                            visible: control.index > 0
-                            width: 2
-                            color: Config.colors.outline
-
-                            anchors {
-                                top: parent.top
-                                bottom: parent.bottom
-                                left: parent.left
-                            }
+                        anchors {
+                            top: parent.top
+                            bottom: parent.bottom
+                            left: parent.left
                         }
                     }
                 }
             }
         }
     }
+
 }

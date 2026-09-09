@@ -21,8 +21,6 @@ Item {
 
     property bool inputEnabled: true
 
-    readonly property real ghost: 0.12
-    readonly property int pad: 18
     readonly property int columns: 48
     readonly property int listRows: 10
     readonly property color ink: Config.colors.text
@@ -33,7 +31,6 @@ Item {
     readonly property int iconCells: root.apps ? 2 : 0
     readonly property int textStart: root.apps ? 3 : 0
 
-    property bool cursorOn: true
     property int sweep: 0
     // First visible match. Not `top`: that is a FINAL Item property.
     property int first: 0
@@ -77,16 +74,6 @@ Item {
         return TextUtil.fit(detail, room);
     }
 
-    function focusInput() {
-        if (root.inputEnabled)
-            input.forceActiveFocus();
-    }
-
-    function blink() {
-        root.cursorOn = true;
-        blinkTimer.restart();
-    }
-
     function follow() {
         var s = Launcher.selected;
         if (s < root.first)
@@ -96,13 +83,6 @@ Item {
         var maxTop = Math.max(0, Launcher.matches.length - root.listRows);
         root.first = Math.max(0, Math.min(maxTop, root.first));
     }
-
-    onInputEnabledChanged: {
-        if (root.inputEnabled)
-            Qt.callLater(root.focusInput);
-    }
-
-    Component.onCompleted: Qt.callLater(root.focusInput)
 
     Connections {
         target: Launcher
@@ -125,15 +105,6 @@ Item {
             root.first = 0;
             input.cursorPosition = 0;
         }
-    }
-
-    Timer {
-        id: blinkTimer
-
-        running: root.inputEnabled
-        interval: 530
-        repeat: true
-        onTriggered: root.cursorOn = !root.cursorOn
     }
 
     // The sweep waits a beat: a keystroke's fzf is back within a tick, and
@@ -175,30 +146,23 @@ Item {
         }
     }
 
-    implicitWidth: bezel.width + 4
-    implicitHeight: bezel.height + 4
+    implicitWidth: bezel.width + bezel.shadowOffset
+    implicitHeight: bezel.height + bezel.shadowOffset
 
-    TextInput {
+    Lcd.HiddenInput {
         id: input
 
-        width: 1
-        height: 1
-        opacity: 0
-        enabled: root.inputEnabled
+        active: root.inputEnabled
         text: Launcher.query
-        inputMethodHints: Qt.ImhNoPredictiveText | Qt.ImhNoAutoUppercase
 
         onTextChanged: {
             if (text !== Launcher.query)
                 Launcher.query = text;
         }
 
-        onCursorPositionChanged: root.blink()
-
         onAccepted: Launcher.accept()
 
         Keys.onPressed: (event) => {
-            root.blink();
             var ctrl = (event.modifiers & Qt.ControlModifier) !== 0;
             var shift = (event.modifiers & Qt.ShiftModifier) !== 0;
             var alt = (event.modifiers & Qt.AltModifier) !== 0;
@@ -231,36 +195,16 @@ Item {
 
     MouseArea {
         anchors.fill: parent
-        onClicked: root.focusInput()
+        onClicked: input.grab()
         onWheel: (wheel) => {
             Launcher.move(wheel.angleDelta.y > 0 ? -1 : 1);
         }
     }
-    Rectangle {
+
+    Lcd.Bezel {
         id: bezel
 
-        Ui.Shadow {
-            offset: 4
-        }
-
-        width: panel.implicitWidth + 2 * root.pad
-        height: panel.implicitHeight + 2 * root.pad
-        color: Config.colors.base
-        border.width: 2
-        border.color: Config.colors.outline
-
-        Rectangle {
-            anchors.fill: parent
-            anchors.margins: 8
-            color: Config.colors.shadow
-            border.width: 2
-            border.color: Config.colors.outline
-        }
-
         Column {
-            id: panel
-
-            anchors.centerIn: parent
             spacing: 6
 
             Lcd.CharGrid {
@@ -268,37 +212,25 @@ Item {
 
                 columns: root.columns
                 rows: 1
-                ghost: root.ghost
 
-                marks: Rectangle {
-                    x: root.sweep * headerGrid.cellWidth
-                    y: 0
-                    width: headerGrid.cellWidth - 1
-                    height: headerGrid.cellHeight - 1
+                marks: Lcd.Cell {
+                    grid: headerGrid
+                    col: root.sweep
                     color: root.ink
                     visible: root.sweeping && root.inputEnabled
                 }
 
-                Ui.Label {
-                    x: 0
-                    y: headerGrid.rowY(0)
-                    height: headerGrid.cellHeight
+                Lcd.CellText {
+                    grid: headerGrid
                     text: root.label
                     color: root.ink
-                    size: headerGrid.size
-                    font.letterSpacing: headerGrid.letterSpacing
-                    textFormat: Text.PlainText
                 }
 
-                Ui.Label {
-                    x: (headerGrid.columns - root.counter.length) * headerGrid.cellWidth
-                    y: headerGrid.rowY(0)
-                    height: headerGrid.cellHeight
+                Lcd.CellText {
+                    grid: headerGrid
+                    align: Text.AlignRight
                     text: root.counter
                     color: root.ink
-                    size: headerGrid.size
-                    font.letterSpacing: headerGrid.letterSpacing
-                    textFormat: Text.PlainText
                 }
             }
 
@@ -306,11 +238,10 @@ Item {
                 id: queryGrid
 
                 columns: root.columns
-                ghost: root.ghost
                 ink: root.ink
                 text: Launcher.query
                 cursorPosition: input.cursorPosition
-                cursorOn: root.inputEnabled && root.cursorOn
+                active: root.inputEnabled
             }
 
             Lcd.CharGrid {
@@ -318,7 +249,6 @@ Item {
 
                 columns: root.columns
                 rows: root.listRows
-                ghost: root.ghost
 
                 // One solid bar, not lit cells: the gutters cut through the glyphs.
                 marks: Item {
@@ -383,7 +313,7 @@ Item {
                             Launcher.select(root.first + row);
                             Launcher.accept();
                         }
-                        root.focusInput();
+                        input.grab();
                     }
                     onWheel: (wheel) => {
                         Launcher.move(wheel.angleDelta.y > 0 ? -1 : 1);
@@ -408,42 +338,30 @@ Item {
                         width: listGrid.width
                         height: listGrid.cellHeight
 
-                        Ui.Label {
-                            x: root.textStart * listGrid.cellWidth
-                            y: 0
-                            height: listGrid.cellHeight
+                        Lcd.CellText {
+                            grid: listGrid
+                            col: root.textStart
                             text: row.name
                             color: row.selectedRow ? root.face : root.ink
-                            size: listGrid.size
-                            font.letterSpacing: listGrid.letterSpacing
-                            textFormat: Text.PlainText
                         }
 
-                        Ui.Label {
-                            x: (listGrid.columns - row.detail.length) * listGrid.cellWidth
-                            y: 0
-                            height: listGrid.cellHeight
+                        Lcd.CellText {
+                            grid: listGrid
+                            align: Text.AlignRight
                             text: row.detail
                             color: row.selectedRow ? root.face : root.ink
                             opacity: row.selectedRow ? 1 : 0.55
-                            size: listGrid.size
-                            font.letterSpacing: listGrid.letterSpacing
-                            textFormat: Text.PlainText
                             visible: row.detail !== ""
                         }
                     }
                 }
 
-                Ui.Label {
+                Lcd.CellText {
+                    grid: listGrid
+                    align: Text.AlignHCenter
                     visible: root.status !== ""
-                    x: Math.floor((listGrid.columns - root.status.length) / 2) * listGrid.cellWidth
-                    y: listGrid.rowY(0)
-                    height: listGrid.cellHeight
                     text: root.status
                     color: Config.colors.urgent
-                    size: listGrid.size
-                    font.letterSpacing: listGrid.letterSpacing
-                    textFormat: Text.PlainText
                 }
             }
         }

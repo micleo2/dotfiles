@@ -4,8 +4,8 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import Quickshell.Hyprland
 import ".."
+import "../services"
 
 // The calculator. Nothing here does arithmetic: every evaluation is the
 // real `qalc` binary, so whatever the CLI accepts (units, variables, `to`,
@@ -62,8 +62,7 @@ Singleton {
     signal committed
 
     function open() {
-        var monitor = Hyprland.focusedMonitor;
-        root.screenName = monitor && monitor.name ? monitor.name : (Quickshell.screens.length > 0 ? Quickshell.screens[0].name : "");
+        root.screenName = Screens.focusedName;
         root.shown = true;
     }
 
@@ -365,31 +364,19 @@ Singleton {
         }
     }
 
-    Process {
-        // FileView will not create intermediate directories.
-        running: true
-        command: ["mkdir", "-p", Settings.stateDir]
-        onExited: storeFile.reload() // qmllint disable signal-handler-parameters
-    }
-
-    FileView {
+    JsonStore {
         id: storeFile
 
-        path: Settings.stateDir + "/calc.json"
-        // Not watched: a commit writes twice in quick succession (the line,
+        dir: Settings.stateDir
+        name: "calc.json"
+        // Not live: a commit writes twice in quick succession (the line,
         // then its result) and a reload racing the second write would put
-        // the first back. The file is only ever read at startup.
-        watchChanges: false
-        printErrors: false
-
-        // Writes go through writeStore() only. The adapter reports an update
-        // while it is being built, before the file has loaded, and writing
-        // its empty defaults then would race the load and wipe the session.
-        onLoaded: root.restore()
-        onLoadFailed: (error) => {
-            if (error === FileViewError.FileNotFound)
-                root.restore();
-        }
+        // the first back, and the adapter reports an update while it is
+        // being built, before the file has loaded, when writing its empty
+        // defaults would race the load and wipe the session. The file is
+        // read once at startup and written through writeStore() only.
+        live: false
+        onReady: root.restore()
 
         JsonAdapter { // qmllint disable unresolved-type
             id: store

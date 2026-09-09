@@ -36,9 +36,7 @@ Item {
     readonly property var shownLayer: Keymap.current
     readonly property var layerKeys: root.shownLayer ? root.shownLayer.keys : []
 
-    readonly property real ghost: 0.12
     readonly property real dim: 0.35
-    readonly property int pad: 18
     // The text size the board would take at the bar's size, shrunk until it
     // fits: 5 cells per key unit, so the natural width is roughly
     // units * 5 * advance, plus the frame. Cozette's advance at a pixel size
@@ -47,7 +45,7 @@ Item {
         var full = Config.settings.bar.fontSize;
         if (root.maxWidth <= 0 || Keymap.width <= 0)
             return full;
-        var frame = 2 * root.pad + 24;
+        var frame = 2 * bezel.pad + 24;
         var natural = Keymap.width * 5 * natural_advance.advanceWidth + frame;
         if (natural <= root.maxWidth)
             return full;
@@ -108,48 +106,13 @@ Item {
     }
     readonly property string title: (Keymap.title + (Keymap.boards.length > 1 ? " [B]" : "") + "  " + (root.shownLayer ? String(root.shownLayer.title) : "NO KEYMAP")).toUpperCase()
 
-    implicitWidth: bezel.width + 4
-    implicitHeight: bezel.height + 4
+    implicitWidth: bezel.width + bezel.shadowOffset
+    implicitHeight: bezel.height + bezel.shadowOffset
 
-    function focusInput() {
-        if (root.inputEnabled)
-            input.forceActiveFocus();
-    }
-
-    onInputEnabledChanged: {
-        if (root.inputEnabled)
-            Qt.callLater(root.focusInput);
-    }
-
-    Component.onCompleted: Qt.callLater(root.focusInput)
-
-    // The frame language: hard offset shadow, outlined bezel, dark face.
-    Rectangle {
+    Lcd.Bezel {
         id: bezel
 
-        Ui.Shadow {
-            offset: 4
-        }
-
-        width: panel.implicitWidth + 2 * root.pad
-        height: panel.implicitHeight + 2 * root.pad
-        color: Config.colors.base
-        border.width: 2
-        border.color: Config.colors.outline
-
-        // The LCD face.
-        Rectangle {
-            anchors.fill: parent
-            anchors.margins: 8
-            color: Config.colors.shadow
-            border.width: 2
-            border.color: Config.colors.outline
-        }
-
         Column {
-            id: panel
-
-            anchors.centerIn: parent
             spacing: 8
 
             // Header: every layer's name as a ghost, the shown one lit, and
@@ -160,12 +123,11 @@ Item {
                 columns: root.columns
                 rows: 1
                 size: root.size
-                ghost: root.ghost
 
                 Repeater {
                     model: Keymap.layers
 
-                    Ui.Label {
+                    Lcd.CellText {
                         id: nameLabel
 
                         required property var modelData
@@ -173,27 +135,19 @@ Item {
 
                         readonly property bool active: index === Keymap.index
 
-                        x: root.nameCells[index] * header.cellWidth
-                        y: header.rowY(0)
-                        height: header.cellHeight
+                        grid: header
+                        col: index < root.nameCells.length ? root.nameCells[index] : 0
                         text: String(modelData.name)
                         color: nameLabel.active ? root.lit : root.ink
                         opacity: nameLabel.active ? 1 : root.dim
-                        size: header.size
-                        font.letterSpacing: header.letterSpacing
-                        textFormat: Text.PlainText
                     }
                 }
 
-                Ui.Label {
-                    x: (header.columns - root.title.length) * header.cellWidth
-                    y: header.rowY(0)
-                    height: header.cellHeight
+                Lcd.CellText {
+                    grid: header
+                    align: Text.AlignRight
                     text: root.title
                     color: root.ink
-                    size: header.size
-                    font.letterSpacing: header.letterSpacing
-                    textFormat: Text.PlainText
                 }
             }
 
@@ -233,7 +187,7 @@ Item {
                         Rectangle {
                             anchors.fill: parent
                             color: root.ink
-                            opacity: key.down ? 0.5 : (key.entry ? 0.3 : root.ghost)
+                            opacity: key.down ? 0.5 : (key.entry ? 0.3 : Config.lcdGhost)
                         }
 
                         Rectangle {
@@ -241,7 +195,7 @@ Item {
                             color: "transparent"
                             border.width: 1
                             border.color: root.ink
-                            opacity: key.none ? root.ghost : root.dim
+                            opacity: key.none ? Config.lcdGhost : root.dim
                         }
 
                         Ui.Label {
@@ -276,10 +230,12 @@ Item {
         }
     }
 
-    Item {
+    // No line to edit: the sink only reads the keys below.
+    Lcd.HiddenInput {
         id: input
 
-        focus: true
+        active: root.inputEnabled
+        readOnly: true
 
         Keys.onPressed: (event) => {
             var shift = (event.modifiers & Qt.ShiftModifier) !== 0;
@@ -302,7 +258,7 @@ Item {
 
     MouseArea {
         anchors.fill: parent
-        onClicked: root.focusInput()
+        onClicked: input.grab()
         onWheel: (wheel) => {
             if (wheel.angleDelta.y > 0)
                 Keymap.prev();

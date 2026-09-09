@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import Quickshell.Io
 import "../../ui" as Ui
 import "../../services"
 
@@ -9,7 +8,7 @@ import "../../services"
 // a permanent glance; CPU and GPU utilization live in the popup. It all rides
 // on SystemStats.gpuAvailable, so a machine with no GPU (the laptop) shows no
 // chip at all.
-Item {
+Ui.Chip {
     id: root
 
     required property var barScreen
@@ -17,37 +16,29 @@ Item {
 
     readonly property bool available: Modules.allow("system", true)
 
-    implicitWidth: chip.implicitWidth
-    implicitHeight: parent ? parent.height : 0
     visible: root.available && SystemStats.gpuAvailable
 
     function gib(mib) {
         return (mib / 1024).toFixed(1);
     }
 
-    Ui.Chip {
-        id: chip
+    interactive: true
+    onClicked: popup.toggle()
 
-        width: root.width
-        height: root.height
-        interactive: true
-        onClicked: popup.toggle()
+    Ui.Glyph {
+        anchors.verticalCenter: parent.verticalCenter
+        text: "memory_alt"
+    }
 
-        Ui.Glyph {
-            anchors.verticalCenter: parent.verticalCenter
-            text: "memory_alt"
-        }
-
-        Ui.Label {
-            anchors.verticalCenter: parent.verticalCenter
-            text: root.gib(SystemStats.vramUsedMib) + "G"
-        }
+    Ui.Label {
+        anchors.verticalCenter: parent.verticalCenter
+        text: root.gib(SystemStats.vramUsedMib) + "G"
     }
 
     Ui.Popup {
         id: popup
 
-        anchorItem: chip
+        anchorItem: root
         barScreen: root.barScreen
         cardWidth: 300
 
@@ -84,32 +75,8 @@ Item {
         }
     }
 
-    IpcHandler {
-        // Bars are instantiated per screen; only the primary one
-        // claims the target, or a second monitor collides with it.
+    Ui.PopupIpc {
         target: "system"
         enabled: root.primary
-
-        // `show`, `call`, `wait`, `listen` and `prop` are swallowed by
-        // the `qs ipc` CLI parser (see submap/SubmapOverlay.qml).
-        function toggle(): void {
-            popup.toggle();
-        }
-
-        function open(): void {
-            popup.open();
-        }
-
-        function close(): void {
-            popup.close();
-        }
-
-        // Open with the keyboard cursor placed, for the SUPER+T submap
-        // (hypr/submap-topbar.lua). Gated on the same predicate as the
-        // chip: no GPU, no panel.
-        function focus(): void {
-            if (root.visible)
-                popup.openWithCursor();
-        }
     }
 }

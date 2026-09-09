@@ -1,13 +1,12 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import Quickshell.Io
 import Quickshell.Services.UPower
 import "../../ui" as Ui
 import "../.."
 import "../../services"
 
-Item {
+Ui.Chip {
     id: root
 
     required property var barScreen
@@ -22,8 +21,6 @@ Item {
     readonly property bool full: root.battery && root.battery.state === UPowerDeviceState.FullyCharged
     readonly property bool low: !root.charging && !root.full && root.percent <= 15
 
-    implicitWidth: chip.implicitWidth
-    implicitHeight: parent ? parent.height : 0
     visible: root.available
 
     function glyph() {
@@ -54,31 +51,25 @@ Item {
         return hours > 0 ? hours + "h " + minutes + "m" : minutes + "m";
     }
 
-    Ui.Chip {
-        id: chip
+    interactive: true
+    onClicked: popup.toggle()
 
-        width: root.width
-        height: root.height
-        interactive: true
-        onClicked: popup.toggle()
+    Ui.Glyph {
+        anchors.verticalCenter: parent.verticalCenter
+        color: root.low ? Config.colors.urgent : Config.colors.text
+        text: root.glyph()
+    }
 
-        Ui.Glyph {
-            anchors.verticalCenter: parent.verticalCenter
-            color: root.low ? Config.colors.urgent : Config.colors.text
-            text: root.glyph()
-        }
-
-        Ui.Label {
-            anchors.verticalCenter: parent.verticalCenter
-            color: root.low ? Config.colors.urgent : Config.colors.text
-            text: root.percent + "%"
-        }
+    Ui.Label {
+        anchors.verticalCenter: parent.verticalCenter
+        color: root.low ? Config.colors.urgent : Config.colors.text
+        text: root.percent + "%"
     }
 
     Ui.Popup {
         id: popup
 
-        anchorItem: chip
+        anchorItem: root
         barScreen: root.barScreen
         cardWidth: 300
 
@@ -130,8 +121,6 @@ Item {
                 required property var modelData
 
                 rowKey: "profile:" + modelData
-                cursorKey: popup.cursorKey
-                onCursorEntered: popup.cursorKey = "profile:" + modelData
 
                 text: root.profileName(modelData)
                 selected: PowerProfiles.profile === modelData
@@ -140,31 +129,8 @@ Item {
         }
     }
 
-    IpcHandler {
-        // Bars are instantiated per screen; only the primary one
-        // claims the target, or a second monitor collides with it.
+    Ui.PopupIpc {
         target: "battery"
         enabled: root.primary
-
-        // `show`, `call`, `wait`, `listen` and `prop` are swallowed by
-        // the `qs ipc` CLI parser (see submap/SubmapOverlay.qml).
-        function toggle(): void {
-            popup.toggle();
-        }
-
-        function open(): void {
-            popup.open();
-        }
-
-        function close(): void {
-            popup.close();
-        }
-
-        // Open with the keyboard cursor placed, for the SUPER+T submap
-        // (hypr/submap-topbar.lua).
-        function focus(): void {
-            if (root.available)
-                popup.openWithCursor();
-        }
     }
 }

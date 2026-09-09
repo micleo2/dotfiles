@@ -24,8 +24,6 @@ Item {
 
     property bool inputEnabled: true
 
-    readonly property real ghost: 0.12
-    readonly property int pad: 18
     readonly property int columns: 44
     readonly property int consoleRows: 12
     readonly property int previewRows: 2
@@ -33,7 +31,6 @@ Item {
 
     // Rows from the bottom of the console.
     property int scroll: 0
-    property bool cursorOn: true
     // Where Up/Down stand in the history; -1 is the line being written.
     property int historyAt: -1
     property string stash: ""
@@ -80,16 +77,6 @@ Item {
             });
     }
 
-    function focusInput() {
-        if (root.inputEnabled)
-            input.forceActiveFocus();
-    }
-
-    function blink() {
-        root.cursorOn = true;
-        blinkTimer.restart();
-    }
-
     function recall(delta) {
         var lines = Calculator.history;
         if (lines.length === 0)
@@ -114,13 +101,9 @@ Item {
     }
 
     onInputEnabledChanged: {
-        if (root.inputEnabled) {
+        if (root.inputEnabled)
             root.scroll = 0;
-            Qt.callLater(root.focusInput);
-        }
     }
-
-    Component.onCompleted: Qt.callLater(root.focusInput)
 
     Connections {
         target: Calculator
@@ -140,40 +123,23 @@ Item {
         }
     }
 
-    Timer {
-        id: blinkTimer
+    implicitWidth: bezel.width + bezel.shadowOffset
+    implicitHeight: bezel.height + bezel.shadowOffset
 
-        running: root.inputEnabled
-        interval: 530
-        repeat: true
-        onTriggered: root.cursorOn = !root.cursorOn
-    }
-
-    implicitWidth: bezel.width + 4
-    implicitHeight: bezel.height + 4
-
-    // Keys land here. Nothing of it is drawn; the grid below is the echo.
-    TextInput {
+    Lcd.HiddenInput {
         id: input
 
-        width: 1
-        height: 1
-        opacity: 0
-        enabled: root.inputEnabled
+        active: root.inputEnabled
         text: Calculator.draft
-        inputMethodHints: Qt.ImhNoPredictiveText | Qt.ImhNoAutoUppercase
 
         onTextChanged: {
             if (text !== Calculator.draft)
                 Calculator.draft = text;
         }
 
-        onCursorPositionChanged: root.blink()
-
         onAccepted: Calculator.commit(false)
 
         Keys.onPressed: (event) => {
-            root.blink();
             var ctrl = (event.modifiers & Qt.ControlModifier) !== 0;
             if (event.key === Qt.Key_Escape) {
                 Calculator.dismiss();
@@ -200,40 +166,17 @@ Item {
 
     MouseArea {
         anchors.fill: parent
-        onClicked: root.focusInput()
+        onClicked: input.grab()
         onWheel: (wheel) => {
             var step = wheel.angleDelta.y > 0 ? 1 : -1;
             root.scroll = Math.max(0, Math.min(root.maxScroll, root.scroll + step));
         }
     }
 
-    // The frame language: hard offset shadow, outlined bezel, dark face.
-    Rectangle {
+    Lcd.Bezel {
         id: bezel
 
-        Ui.Shadow {
-            offset: 4
-        }
-
-        width: panel.implicitWidth + 2 * root.pad
-        height: panel.implicitHeight + 2 * root.pad
-        color: Config.colors.base
-        border.width: 2
-        border.color: Config.colors.outline
-
-        // The LCD face.
-        Rectangle {
-            anchors.fill: parent
-            anchors.margins: 8
-            color: Config.colors.shadow
-            border.width: 2
-            border.color: Config.colors.outline
-        }
-
         Column {
-            id: panel
-
-            anchors.centerIn: parent
             spacing: 6
 
             // Row: the controls.
@@ -242,17 +185,12 @@ Item {
 
                 columns: root.columns
                 rows: 1
-                ghost: root.ghost
 
-                Ui.Label {
-                    x: (headerGrid.columns - root.hint.length) * headerGrid.cellWidth
-                    y: headerGrid.rowY(0)
-                    height: headerGrid.cellHeight
+                Lcd.CellText {
+                    grid: headerGrid
+                    align: Text.AlignRight
                     text: root.hint
                     color: root.ink
-                    size: headerGrid.size
-                    font.letterSpacing: headerGrid.letterSpacing
-                    textFormat: Text.PlainText
                 }
             }
 
@@ -262,23 +200,18 @@ Item {
 
                 columns: root.columns
                 rows: root.consoleRows
-                ghost: root.ghost
 
                 Repeater {
                     model: root.visibleLines
 
-                    Ui.Label {
+                    Lcd.CellText {
                         required property var modelData
                         required property int index
 
-                        x: 0
-                        y: consoleGrid.rowY(root.consoleRows - root.visibleLines.length + index)
-                        height: consoleGrid.cellHeight
+                        grid: consoleGrid
+                        row: root.consoleRows - root.visibleLines.length + index
                         text: modelData.text
                         color: modelData.alarm ? Config.colors.urgent : root.ink
-                        size: consoleGrid.size
-                        font.letterSpacing: consoleGrid.letterSpacing
-                        textFormat: Text.PlainText
                     }
                 }
             }
@@ -288,11 +221,10 @@ Item {
                 id: inputGrid
 
                 columns: root.columns
-                ghost: root.ghost
                 ink: root.ink
                 text: root.draft
                 cursorPosition: input.cursorPosition
-                cursorOn: root.inputEnabled && root.cursorOn
+                active: root.inputEnabled
             }
 
             // Rows: qalc's answer to the draft, dimmed until it is committed.
@@ -301,24 +233,19 @@ Item {
 
                 columns: root.columns
                 rows: root.previewRows
-                ghost: root.ghost
 
                 Repeater {
                     model: root.previewLines
 
-                    Ui.Label {
+                    Lcd.CellText {
                         required property var modelData
                         required property int index
 
-                        x: 0
-                        y: previewGrid.rowY(root.previewRows - root.previewLines.length + index)
-                        height: previewGrid.cellHeight
+                        grid: previewGrid
+                        row: root.previewRows - root.previewLines.length + index
                         text: modelData.text
                         color: modelData.alarm ? Config.colors.urgent : root.ink
                         opacity: 0.55
-                        size: previewGrid.size
-                        font.letterSpacing: previewGrid.letterSpacing
-                        textFormat: Text.PlainText
                     }
                 }
             }

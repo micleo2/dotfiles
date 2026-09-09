@@ -13,7 +13,7 @@ import "../../services"
 // lit glyph and a count when something else holds the screen (a game, a
 // video); plain fill with a dim glyph when nothing does and the timeout
 // will lock.
-Item {
+Ui.Chip {
     id: root
 
     required property var barScreen
@@ -23,8 +23,6 @@ Item {
 
     readonly property bool available: Modules.allow("idle", true)
 
-    implicitWidth: chip.implicitWidth
-    implicitHeight: parent ? parent.height : 0
     visible: root.available
 
     // `available` settles only after settings.json and UPower have answered,
@@ -41,37 +39,31 @@ Item {
         enabled: root.primary && Idle.stayAwake
     }
 
-    Ui.Chip {
-        id: chip
+    interactive: true
+    fillColor: Idle.stayAwake ? Config.colors.urgent : Config.colors.shadow
+    onClicked: (mouse) => {
+        if (mouse.button === Qt.RightButton)
+            popup.toggle();
+        else
+            Idle.toggle();
+    }
 
-        width: root.width
-        height: root.height
-        interactive: true
-        fillColor: Idle.stayAwake ? Config.colors.urgent : Config.colors.shadow
-        onClicked: (mouse) => {
-            if (mouse.button === Qt.RightButton)
-                popup.toggle();
-            else
-                Idle.toggle();
-        }
+    Ui.Glyph {
+        anchors.verticalCenter: parent.verticalCenter
+        opacity: Idle.stayAwake || Idle.others > 0 ? 1 : 0.5
+        text: "coffee"
+    }
 
-        Ui.Glyph {
-            anchors.verticalCenter: parent.verticalCenter
-            opacity: Idle.stayAwake || Idle.others > 0 ? 1 : 0.5
-            text: "coffee"
-        }
-
-        Ui.Label {
-            anchors.verticalCenter: parent.verticalCenter
-            visible: !Idle.stayAwake && Idle.others > 0
-            text: Idle.others
-        }
+    Ui.Label {
+        anchors.verticalCenter: parent.verticalCenter
+        visible: !Idle.stayAwake && Idle.others > 0
+        text: Idle.others
     }
 
     Ui.Popup {
         id: popup
 
-        anchorItem: chip
+        anchorItem: root
         barScreen: root.barScreen
         cardWidth: 340
 

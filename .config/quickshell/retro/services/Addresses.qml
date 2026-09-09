@@ -2,7 +2,6 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
-import Quickshell.Io
 
 // The machine's IP addresses, per interface, for the network popup.
 //
@@ -37,17 +36,13 @@ Singleton {
     property var raw: []
 
     function refresh() {
-        if (!addrs.running)
-            addrs.running = true;
-        if (!routes.running)
-            routes.running = true;
+        addrs.run();
+        routes.run();
     }
 
     function refreshPublic() {
-        if (fetcher.running)
-            return;
         root.publicPending = true;
-        fetcher.running = true;
+        fetcher.run();
     }
 
     // wl-copy forks a child that stays alive to serve pastes, so it must not
@@ -86,10 +81,8 @@ Singleton {
     }
 
     onWatchingChanged: {
-        if (root.watching) {
-            root.refresh();
+        if (root.watching)
             root.refreshPublic();
-        }
     }
 
     // The exit address is the point of showing it, so follow the tunnel.
@@ -103,82 +96,72 @@ Singleton {
     }
 
     Timer {
-        running: root.watching
-        interval: 3000
-        repeat: true
-        onTriggered: root.refresh()
-    }
-
-    Timer {
         id: copiedReset
 
         interval: 900
         onTriggered: root.copied = ""
     }
 
-    Process {
+    Command {
         id: addrs
 
         command: ["ip", "-j", "addr", "show"]
+        polling: root.watching
+        interval: 3000
 
-        stdout: StdioCollector {
-            onStreamFinished: {
-                try {
-                    root.raw = JSON.parse(text);
-                } catch (e) {
-                    root.raw = [];
-                }
-                root.rebuild();
+        onCollected: (text) => {
+            try {
+                root.raw = JSON.parse(text);
+            } catch (e) {
+                root.raw = [];
             }
+            root.rebuild();
         }
     }
 
-    Process {
+    Command {
         id: routes
 
         command: ["ip", "-j", "route", "show", "default"]
+        polling: root.watching
+        interval: 3000
 
-        stdout: StdioCollector {
-            onStreamFinished: {
-                var dev = "";
-                try {
-                    var list = JSON.parse(text);
-                    // Lowest metric wins, which is the one the kernel uses.
-                    var best = null;
-                    for (var i = 0; i < list.length; i++) {
-                        if (best === null || (list[i].metric || 0) < (best.metric || 0))
-                            best = list[i];
-                    }
-                    if (best)
-                        dev = best.dev || "";
-                } catch (e) {
+        onCollected: (text) => {
+            var dev = "";
+            try {
+                var list = JSON.parse(text);
+                // Lowest metric wins, which is the one the kernel uses.
+                var best = null;
+                for (var i = 0; i < list.length; i++) {
+                    if (best === null || (list[i].metric || 0) < (best.metric || 0))
+                        best = list[i];
                 }
-                root.defaultDevice = dev;
-                root.rebuild();
+                if (best)
+                    dev = best.dev || "";
+            } catch (e) {
             }
+            root.defaultDevice = dev;
+            root.rebuild();
         }
     }
 
-    Process {
+    Command {
         id: fetcher
 
         command: ["curl", "-s", "--max-time", "4", "https://ipinfo.io/json"]
 
-        stdout: StdioCollector {
-            onStreamFinished: {
-                try {
-                    var info = JSON.parse(text);
-                    root.publicInfo = info.ip ? {
-                        ip: info.ip,
-                        city: info.city || "",
-                        org: info.org || ""
-                    } : null;
-                } catch (e) {
-                    root.publicInfo = null;
-                }
-                root.publicPending = false;
+        onCollected: (text) => {
+            try {
+                var info = JSON.parse(text);
+                root.publicInfo = info.ip ? {
+                    ip: info.ip,
+                    city: info.city || "",
+                    org: info.org || ""
+                } : null;
+            } catch (e) {
+                root.publicInfo = null;
             }
+            root.publicPending = false;
         }
     }
-
 }

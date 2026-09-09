@@ -13,7 +13,7 @@ Item {
     id: root
 
     property int digit: -1
-    property real ghost: 0.12
+    property real ghost: Config.lcdGhost
     property int thickness: 5
     property color color: Config.colors.text
 
