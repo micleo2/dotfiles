@@ -14,6 +14,11 @@ Scope {
     id: barScope
     property bool barVisible: true
     property double topMargin: 8
+    // Room under the chips. Their drop shadow reaches 4px below the box, so
+    // centering the box alone leaves the shadow flush against the window
+    // border when Hyprland gaps are 0; this pads the bottom and the chips
+    // are nudged up by half of it to keep the silhouette centered.
+    property int bottomPad: 2
     property double sideMargin: 8
 
     IpcHandler {
@@ -44,7 +49,7 @@ Scope {
                     left: true
                     right: true
                 }
-                implicitHeight: Config.settings.bar.height
+                implicitHeight: Config.settings.bar.height + barScope.bottomPad
 
                 /*=== Taskbar Background ===*/
                 // The bar toggles between an opaque and a fully transparent
@@ -90,84 +95,16 @@ Scope {
                     anchors.leftMargin: barScope.sideMargin
                     layoutDirection: Qt.LeftToRight
                     spacing: 11
-                    height: parent.height - barScope.topMargin
+                    height: parent.height - barScope.topMargin - barScope.bottomPad
+                    anchors.verticalCenterOffset: -barScope.bottomPad / 2
                     // Workspaces
-                    Item {
-                        id: workspaces_container
-                        implicitHeight: parent.height
-                        implicitWidth: workspaces.width
-                        Rectangle {
-                            id: background2
-                            // 1px button edge, matching Ui.Chip: the frame's silhouette one
-                            // pixel down and right, drawn first so the frame covers the rest.
-                            Rectangle {
-                                anchors.fill: background2
-                                anchors.leftMargin: -1
-                                anchors.topMargin: -1
-                                anchors.rightMargin: -3
-                                anchors.bottomMargin: -3
-                                color: Config.colors.outline
-                            }
-                            anchors.fill: workspaces_container
-                            color: "transparent"
-                            // dark grey fill
-                            Rectangle {
-                                anchors.fill: background2
-                                border.width: 0
-                                color: Config.colors.shadow
-                            }
-                            // black outline
-                            Rectangle {
-                                anchors.fill: background2
-                                color: "transparent"
-                                border.width: 2
-                                anchors.margins: -2
-                            }
-                        }
-                        Widgets.Workspaces {
-                            id: workspaces
-                            taskbarWindow: taskbar
-                        }
+                    Widgets.WorkspacesWidget {
+                        Layout.fillHeight: true
+                        taskbarWindow: taskbar
                     }
                     // Focused window
-                    Item {
-                        id: focusedwindow_container
-                        visible: FocusedWindow.should_show
-                        implicitHeight: parent.height
-                        implicitWidth: focusedwindow.width + 8
-                        Rectangle {
-                            id: focusedwindow_decoration
-                            // 1px button edge, matching Ui.Chip: the frame's silhouette one
-                            // pixel down and right, drawn first so the frame covers the rest.
-                            Rectangle {
-                                anchors.fill: focusedwindow_decoration
-                                anchors.leftMargin: -1
-                                anchors.topMargin: -1
-                                anchors.rightMargin: -3
-                                anchors.bottomMargin: -3
-                                color: Config.colors.outline
-                            }
-                            anchors.fill: focusedwindow_container
-                            color: "transparent"
-                            // dark grey fill
-                            Rectangle {
-                                anchors.fill: focusedwindow_decoration
-                                border.width: 0
-                                color: Config.colors.shadow
-                            }
-                            // black outline
-                            Rectangle {
-                                anchors.fill: focusedwindow_decoration
-                                color: "transparent"
-                                border.width: 2
-                                anchors.margins: -2
-                            }
-                        }
-                        Widgets.FocusedWindowWidget {
-                            id: focusedwindow
-                            anchors.verticalCenter: parent.verticalCenter
-                            anchors.horizontalCenter: parent.horizontalCenter
-                        }
+                    Widgets.FocusedWindowWidget {
+                        Layout.fillHeight: true
                     }
                 }
 
@@ -177,83 +114,17 @@ Scope {
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.horizontalCenter: parent.horizontalCenter
                     spacing: 11
-                    height: parent.height - barScope.topMargin
+                    height: parent.height - barScope.topMargin - barScope.bottomPad
+                    anchors.verticalCenterOffset: -barScope.bottomPad / 2
 
                     // Clock
-                    Item {
-                        id: clock_container
-                        implicitHeight: parent.height
-                        implicitWidth: clock.width + 4
-                        Rectangle {
-                            id: clockbg
-                            // 1px button edge, matching Ui.Chip: the frame's silhouette one
-                            // pixel down and right, drawn first so the frame covers the rest.
-                            Rectangle {
-                                anchors.fill: clockbg
-                                anchors.leftMargin: -1
-                                anchors.topMargin: -1
-                                anchors.rightMargin: -3
-                                anchors.bottomMargin: -3
-                                color: Config.colors.outline
-                            }
-                            anchors.fill: clock_container
-                            Rectangle {
-                                anchors.fill: clockbg
-                                border.width: 0
-                                color: Config.colors.shadow
-                            }
-                            Rectangle {
-                                anchors.fill: clockbg
-                                color: "transparent"
-                                border.width: 2
-                                anchors.margins: -2
-                            }
-                        }
-                        Widgets.ClockWidget {
-                            id: clock
-                            anchors.right: parent.right
-                            anchors.verticalCenter: parent.verticalCenter
-                            anchors.rightMargin: 5
-                        }
+                    Widgets.ClockWidget {
+                        Layout.fillHeight: true
                     }
 
                     // Weather
-                    Item {
-                        id: weather_container
-                        visible: Weather.temp !== ""
-                        implicitHeight: parent.height
-                        implicitWidth: weatherWidget.width + 8
-                        Rectangle {
-                            id: weatherbg
-                            // 1px button edge, matching Ui.Chip: the frame's silhouette one
-                            // pixel down and right, drawn first so the frame covers the rest.
-                            Rectangle {
-                                anchors.fill: weatherbg
-                                anchors.leftMargin: -1
-                                anchors.topMargin: -1
-                                anchors.rightMargin: -3
-                                anchors.bottomMargin: -3
-                                color: Config.colors.outline
-                            }
-                            anchors.fill: weather_container
-                            color: "transparent"
-                            Rectangle {
-                                anchors.fill: weatherbg
-                                border.width: 0
-                                color: Config.colors.shadow
-                            }
-                            Rectangle {
-                                anchors.fill: weatherbg
-                                color: "transparent"
-                                border.width: 2
-                                anchors.margins: -2
-                            }
-                        }
-                        Widgets.WeatherWidget {
-                            id: weatherWidget
-                            anchors.verticalCenter: parent.verticalCenter
-                            anchors.horizontalCenter: parent.horizontalCenter
-                        }
+                    Widgets.WeatherWidget {
+                        Layout.fillHeight: true
                     }
                 }
 
@@ -265,47 +136,11 @@ Scope {
                     anchors.rightMargin: barScope.sideMargin
                     layoutDirection: Qt.LeftToRight
                     spacing: 11
-                    height: parent.height - barScope.topMargin
-                    // System Tray
-                    Item {
-                        id: systray_container
-                        // No applets, no box: an invisible item is skipped by
-                        // the layout, so the frame goes with it.
-                        visible: sysTray.hasItems
-                        implicitHeight: parent.height
-                        implicitWidth: sysTray.width + 12
-                        Rectangle {
-                            id: systraybg
-                            // 1px button edge, matching Ui.Chip: the frame's silhouette one
-                            // pixel down and right, drawn first so the frame covers the rest.
-                            Rectangle {
-                                anchors.fill: systraybg
-                                anchors.leftMargin: -1
-                                anchors.topMargin: -1
-                                anchors.rightMargin: -3
-                                anchors.bottomMargin: -3
-                                color: Config.colors.outline
-                            }
-                            anchors.fill: systray_container
-                            color: "transparent"
-                            Rectangle {
-                                anchors.fill: systraybg
-                                border.width: 0
-                                color: Config.colors.shadow
-                            }
-                            Rectangle {
-                                anchors.fill: systraybg
-                                color: "transparent"
-                                border.width: 2
-                                anchors.margins: -2
-                            }
-                        }
-                        Widgets.SysTray {
-                            id: sysTray
-                            taskbarWindow: taskbar
-                            anchors.verticalCenter: parent.verticalCenter
-                            anchors.horizontalCenter: parent.horizontalCenter
-                        }
+                    height: parent.height - barScope.topMargin - barScope.bottomPad
+                    anchors.verticalCenterOffset: -barScope.bottomPad / 2
+                    // System tray
+                    Widgets.SysTrayWidget {
+                        Layout.fillHeight: true
                     }
 
                     // Laptop modules (wifi, bluetooth, display, idle, battery).
@@ -317,8 +152,7 @@ Scope {
                         primary: root.modelData === Quickshell.screens[0]
                     }
 
-                    // Volume. Brings its own Chip, so it needs no decoration
-                    // wrapper here.
+                    // Volume
                     Widgets.VolumeWidget {
                         Layout.fillHeight: true
                         barScreen: root.modelData

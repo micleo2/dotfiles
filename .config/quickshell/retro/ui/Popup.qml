@@ -233,7 +233,7 @@ Scope {
             y: card.y - 2 + root.shadowOffset
             width: card.width + 4
             height: card.height + 4
-            color: Config.colors.outline
+            color: Config.colors.dropShadow
         }
 
         Item {

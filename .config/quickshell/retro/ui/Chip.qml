@@ -20,8 +20,9 @@ Item {
     // original blocks used, so the non-default palettes actually apply.
     property color borderColor: Config.colors.outline
     property color fillColor: Config.colors.shadow
+    property color shadowColor: Config.colors.dropShadow
 
-    // While a button is held, the face shifts onto its edge, so it reads as
+    // While a button is held, the face shifts onto its shadow, so it reads as
     // pushed in rather than merely highlighted.
     readonly property bool pressed: press.pressed
 
@@ -31,22 +32,23 @@ Item {
     implicitWidth: inner.implicitWidth + root.padding * 2
     implicitHeight: parent ? parent.height : 0
 
-    // The edge: the frame's silhouette one pixel down and right. Drawn first so
-    // the face covers all but that one-pixel L.
+    // The drop shadow: the frame's silhouette two pixels down and right, in
+    // its own mid tone so it reads as a shape behind the frame rather than a
+    // thicker outline. Drawn first so the face covers all but a two-pixel L.
     Rectangle {
         visible: !root.pressed
-        x: -1
-        y: -1
+        x: 0
+        y: 0
         width: root.width + 4
         height: root.height + 4
-        color: root.borderColor
+        color: root.shadowColor
     }
 
     Item {
         id: face
 
-        x: root.pressed ? 1 : 0
-        y: root.pressed ? 1 : 0
+        x: root.pressed ? 2 : 0
+        y: root.pressed ? 2 : 0
         width: root.width
         height: root.height
 
