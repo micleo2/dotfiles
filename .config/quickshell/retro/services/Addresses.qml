@@ -2,6 +2,7 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import Quickshell.Networking
 
 // The machine's IP addresses, per interface, for the network popup.
 //
@@ -20,8 +21,12 @@ Singleton {
     property var entries: []
     property string defaultDevice: ""
 
-    // Set by the popup while it is on screen; nothing polls otherwise.
+    // Set by the popup while it is on screen; nothing polls otherwise, except
+    // the default route on a machine without NetworkManager (systemd-networkd
+    // on the desktop): Quickshell.Networking sees no devices there, so the
+    // route is the only sign of a link for the chip.
     property bool watching: false
+    readonly property bool trackingUplink: Networking.backend === NetworkBackendType.None
 
     // The address most recently copied, cleared shortly after, so the row can
     // acknowledge the click.
@@ -123,8 +128,8 @@ Singleton {
         id: routes
 
         command: ["ip", "-j", "route", "show", "default"]
-        polling: root.watching
-        interval: 3000
+        polling: root.watching || root.trackingUplink
+        interval: root.watching ? 3000 : 15000
 
         onCollected: (text) => {
             var dev = "";

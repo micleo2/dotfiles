@@ -21,6 +21,8 @@ Singleton {
     // { uuid, name, active }
     property var connections: []
     property string error: ""
+    // nmcli is installed; the desktop runs systemd-networkd and has none.
+    property bool available: false
 
     // Set by the popup while it is on screen. Nothing here polls when nobody is
     // looking; there is no bar indicator that would need the state otherwise.
@@ -59,7 +61,7 @@ Singleton {
         // three splits are unambiguous and the remainder is the name, so no
         // unescaping is needed for the fields that matter.
         command: ["nmcli", "-t", "-f", "UUID,TYPE,STATE,NAME", "connection", "show"]
-        polling: root.watching
+        polling: root.watching && root.available
         interval: 2000
 
         onCollected: (text) => {
@@ -84,6 +86,15 @@ Singleton {
             }
             root.connections = out;
             root.pendingUuid = "";
+        }
+    }
+
+    Process {
+        command: ["sh", "-c", "command -v nmcli >/dev/null"]
+        running: true
+
+        onExited: (exitCode) => { // qmllint disable signal-handler-parameters
+            root.available = exitCode === 0;
         }
     }
 
