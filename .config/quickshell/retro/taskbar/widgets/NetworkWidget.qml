@@ -134,6 +134,21 @@ Ui.Chip {
             root.failed = null;
     }
 
+    // The list is shown in two sections, saved networks then the rest. The
+    // sort already puts saved first; the split only makes that visible, so
+    // with dozens in range the saved handful is not hunted for.
+    function slice(known) {
+        var out = [];
+        for (var i = 0; i < root.sorted.length; i++) {
+            if (root.sorted[i].known === known)
+                out.push(root.sorted[i]);
+        }
+        return out;
+    }
+
+    readonly property var saved: Networking.wifiEnabled ? root.slice(true) : []
+    readonly property var nearby: Networking.wifiEnabled ? root.slice(false) : []
+
     function activate(network) {
         if (network.connected) {
             network.disconnect();
@@ -332,6 +347,14 @@ Ui.Chip {
             onToggled: (value) => Networking.wifiEnabled = value
         }
 
+        // The headers hide with their rows: the "Wi-Fi" header and the toggle
+        // above are all there is to see while the radio is off.
+        Ui.SectionLabel {
+            visible: root.saved.length > 0
+            sub: true
+            text: "Saved"
+        }
+
         Repeater {
             // Diffed by identity rather than fed the array: `sorted` is fresh
             // on every scan tick, since it reads each network's signal, and a
@@ -340,8 +363,26 @@ Ui.Chip {
             // seconds. With the diff, a reorder moves rows and only a network
             // that actually appeared gets a new one.
             model: ScriptModel {
-                values: Networking.wifiEnabled ? root.sorted : []
+                values: root.saved
             }
+            delegate: networkRow
+        }
+
+        Ui.SectionLabel {
+            visible: root.nearby.length > 0
+            sub: true
+            text: "Nearby"
+        }
+
+        Repeater {
+            model: ScriptModel {
+                values: root.nearby
+            }
+            delegate: networkRow
+        }
+
+        Component {
+            id: networkRow
 
             Column {
                 id: entry
