@@ -41,11 +41,17 @@ Scope {
             }
 
             Image {
+                id: image
+
                 anchors.fill: parent
                 visible: window.path !== ""
                 source: window.path !== "" ? "file://" + window.path : ""
                 fillMode: Image.PreserveAspectCrop
                 asynchronous: true
+                // Pixel art is authored well under the panel's size, and
+                // bilinear scaling turns it to mush; nearest keeps a 2x or 3x
+                // step pixel-exact. Anything near native is smoothed as usual.
+                smooth: image.sourceSize.width === 0 || image.sourceSize.width * 1.5 > window.width * window.screen.devicePixelRatio
             }
         }
     }
