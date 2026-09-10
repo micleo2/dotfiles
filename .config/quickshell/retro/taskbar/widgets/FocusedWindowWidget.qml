@@ -13,12 +13,10 @@ Ui.Chip {
 
     visible: FocusedWindow.should_show
 
-    padding: 4
-
     RowLayout {
         anchors.verticalCenter: parent.verticalCenter
         layoutDirection: Qt.LeftToRight
-        spacing: 4
+        spacing: root.spacing
 
         IconImage {
             visible: FocusedWindow.application_icon_path !== ""

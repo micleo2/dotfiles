@@ -56,6 +56,7 @@ Ui.Chip {
 
     Ui.Glyph {
         anchors.verticalCenter: parent.verticalCenter
+        slot: Config.settings.bar.iconSlot
         color: root.low ? Config.colors.urgent : Config.colors.text
         text: root.glyph()
     }

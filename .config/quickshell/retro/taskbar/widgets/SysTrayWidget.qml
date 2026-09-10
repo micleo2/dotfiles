@@ -23,12 +23,11 @@ Ui.Chip {
 
     visible: root.hasItems
 
-    padding: 6
-
     RowLayout {
         id: sysTrayRow
 
         anchors.verticalCenter: parent.verticalCenter
+        spacing: root.spacing
 
         Repeater {
             id: sysTray

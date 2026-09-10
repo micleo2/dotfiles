@@ -162,6 +162,7 @@ Ui.Chip {
 
     Ui.Glyph {
         anchors.verticalCenter: parent.verticalCenter
+        slot: Config.settings.bar.iconSlot
         opacity: root.adapter && root.adapter.enabled ? 1 : 0.5
         text: {
             if (!root.adapter || !root.adapter.enabled)
