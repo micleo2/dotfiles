@@ -55,7 +55,7 @@ Singleton {
             "text": "#000000",
             "outline": "#000000",
             "outlineGradientFade": "#161616",
-            "defaultWallpaperPath": "wallpapers/1-totoro.png"
+            "defaultWallpaperPath": "wallpapers/pixel-walk.jpg"
         },
         "gleep": {
             "base": "#bae6c5",
@@ -66,7 +66,7 @@ Singleton {
             "text": "#0d1913",
             "outline": "#21351a",
             "outlineGradientFade": "#284223",
-            "defaultWallpaperPath": ""
+            "defaultWallpaperPath": "wallpapers/secluded-grove.png"
         },
         // Phosphor on black. Text and outlines share the one green, so every
         // frame and edge reads as a lit trace on a dark tube.
@@ -79,7 +79,7 @@ Singleton {
             "text": "#00ff41",
             "outline": "#00ff41",
             "outlineGradientFade": "#00b32d",
-            "defaultWallpaperPath": ""
+            "defaultWallpaperPath": "wallpapers/leaves.png"
         },
         // morhetz/gruvbox, dark: bg/bg1/bg2 for the surfaces, fg for text,
         // bg3 for the frames so they sit between the face and the bar rather
@@ -93,7 +93,7 @@ Singleton {
             "text": "#ebdbb2",
             "outline": "#665c54",
             "outlineGradientFade": "#504945",
-            "defaultWallpaperPath": ""
+            "defaultWallpaperPath": "wallpapers/dock.png"
         }
     }
     property var settings
