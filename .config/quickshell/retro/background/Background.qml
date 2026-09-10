@@ -16,11 +16,14 @@ Scope {
 
             required property var modelData
 
+            // Relative to the config, so the checkout carries its wallpapers.
             readonly property string path: {
                 var p = String(Config.colors.defaultWallpaperPath || "");
+                if (p === "" || p.indexOf("/") === 0)
+                    return p;
                 if (p.indexOf("~/") === 0)
                     return Quickshell.env("HOME") + p.substring(1);
-                return p;
+                return Quickshell.shellPath(p);
             }
 
             screen: modelData
