@@ -14,7 +14,12 @@ Ui.Chip {
 
     // No applets, no box: the whole slot hides, frame included, so the bar
     // closes up rather than leaving an empty box behind.
-    readonly property bool hasItems: SystemTray.items.values.length > 0
+    // Passive is the applet's own "nothing to see": a tray that honours it
+    // is the point of the status field.
+    readonly property var shown: SystemTray.items.values.filter(function (item) {
+        return item.status !== Status.Passive;
+    })
+    readonly property bool hasItems: root.shown.length > 0
 
     visible: root.hasItems
 
@@ -28,7 +33,9 @@ Ui.Chip {
         Repeater {
             id: sysTray
 
-            model: SystemTray.items
+            model: ScriptModel {
+                values: root.shown
+            }
 
             MouseArea {
                 id: trayItem
@@ -38,21 +45,26 @@ Ui.Chip {
 
                 implicitWidth: Config.settings.bar.trayIconSize
                 implicitHeight: Config.settings.bar.trayIconSize
+                acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
                 onClicked: (event) => {
                     switch (event.button) {
                     case Qt.LeftButton:
-                        if (item.hasMenu)
+                        if (item.onlyMenu)
                             menu.open();
-
+                        else
+                            item.activate();
+                        break;
+                    case Qt.MiddleButton:
+                        item.secondaryActivate();
                         break;
                     case Qt.RightButton:
                         if (item.hasMenu)
                             menu.open();
-
                         break;
                     }
                     event.accepted = true;
                 }
+                onWheel: (wheel) => item.scroll(wheel.angleDelta.y, false)
 
                 QsMenuAnchor {
                     id: menu
