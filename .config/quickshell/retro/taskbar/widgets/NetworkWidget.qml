@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import Quickshell
 import Quickshell.Networking
 import "../../ui" as Ui
 import "../.."
@@ -105,26 +106,12 @@ Ui.Chip {
         return list;
     }
 
-    // What the list actually shows. A Repeater fed a fresh array destroys and
-    // recreates every row, and `sorted` is fresh on every scan tick, since it
-    // reads each network's signal. That tore down the passphrase field, text
-    // and all, every few seconds. So the list is frozen while a field is up
-    // and catches up the moment it goes away.
-    property var listed: []
-
-    function refresh() {
-        if (root.pending === null)
-            root.listed = root.sorted;
-    }
-
+    // The network under the field can vanish from the scan; its object dies
+    // with it, so the field has to go too.
     onSortedChanged: {
-        // The network under the field can vanish from the scan; its object
-        // dies with it, so the field has to go too.
         if (root.pending !== null && root.sorted.indexOf(root.pending) === -1)
             root.pending = null;
-        root.refresh();
     }
-    onPendingChanged: root.refresh()
 
     function failureText(reason) {
         switch (reason) {
@@ -214,14 +201,27 @@ Ui.Chip {
         barScreen: root.barScreen
         cardWidth: 360
 
-        // Scanning is expensive and pointless while nobody is looking.
+        // Scanning is expensive and pointless while nobody is looking. The
+        // scanner is switched a beat after the popup, not in the click: the
+        // switch makes every unsaved network appear at once, and building
+        // those rows is better spent after the popup and the released chip
+        // have painted.
         onOpenedChanged: {
-            if (root.device)
-                root.device.scannerEnabled = popup.opened;
+            scanSwitch.restart();
             if (!popup.opened)
                 root.pending = null;
             Vpn.watching = popup.opened;
             Addresses.watching = popup.opened;
+        }
+
+        Timer {
+            id: scanSwitch
+
+            interval: 50
+            onTriggered: {
+                if (root.device)
+                    root.device.scannerEnabled = popup.opened;
+            }
         }
 
         // First, above the wifi list. That list scrolls and is routinely long
@@ -333,7 +333,15 @@ Ui.Chip {
         }
 
         Repeater {
-            model: Networking.wifiEnabled ? root.listed : []
+            // Diffed by identity rather than fed the array: `sorted` is fresh
+            // on every scan tick, since it reads each network's signal, and a
+            // Repeater handed a fresh array destroys and recreates every row.
+            // That tore down the passphrase field, text and all, every few
+            // seconds. With the diff, a reorder moves rows and only a network
+            // that actually appeared gets a new one.
+            model: ScriptModel {
+                values: Networking.wifiEnabled ? root.sorted : []
+            }
 
             Column {
                 id: entry

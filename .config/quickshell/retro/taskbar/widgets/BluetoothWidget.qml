@@ -54,24 +54,6 @@ Ui.Chip {
         return list;
     }
 
-    // The Repeater is fed this, and it is only replaced when the *order* really
-    // changes. `sorted` re-evaluates on every BlueZ property update — of which
-    // there are many per second during a scan — and handing a Repeater a fresh
-    // array each time destroys and rebuilds every delegate for nothing.
-    property var displayDevices: []
-
-    function addressesOf(list) {
-        var out = [];
-        for (var i = 0; i < list.length; i++)
-            out.push(list[i].address);
-        return out.join(",");
-    }
-
-    onSortedChanged: {
-        if (root.addressesOf(root.sorted) !== root.addressesOf(root.displayDevices))
-            root.displayDevices = root.sorted;
-    }
-
     // BlueZ exposes two names: Name (what the device advertised, read-only) and
     // Alias (a writable override). Prefer the advertised name, fall back to the
     // alias so a rename the user made in blueman is honoured, then the address.
@@ -173,9 +155,18 @@ Ui.Chip {
         barScreen: root.barScreen
 
         // Discovery burns power and floods the list; only scan while visible.
-        onOpenedChanged: {
-            if (root.adapter && root.adapter.enabled)
-                root.adapter.discovering = popup.opened;
+        // Switched a beat after the popup rather than in the click, so the
+        // popup and the released chip paint before the list churns.
+        onOpenedChanged: discoverySwitch.restart()
+
+        Timer {
+            id: discoverySwitch
+
+            interval: 50
+            onTriggered: {
+                if (root.adapter && root.adapter.enabled)
+                    root.adapter.discovering = popup.opened;
+            }
         }
 
         Ui.PopupToggle {
@@ -203,7 +194,14 @@ Ui.Chip {
         }
 
         Repeater {
-            model: root.displayDevices
+            // Diffed by identity: `sorted` re-evaluates on every BlueZ
+            // property update, of which there are many per second during a
+            // scan, and a Repeater handed a fresh array each time destroys
+            // and rebuilds every delegate for nothing. With the diff, only a
+            // device that actually appeared gets a row built.
+            model: ScriptModel {
+                values: root.sorted
+            }
 
             Ui.PopupRow {
                 required property var modelData
