@@ -7,6 +7,10 @@
         {
             "app": "chromium",
             "text": "/^\\s*www\\.messenger\\.com\\s*$/"
+        },
+        {
+            "app": "messenger",
+            "text": "www.messenger.com"
         }
     ]
 }
