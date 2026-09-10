@@ -95,7 +95,9 @@ Singleton {
             return;
         if (root.mode === "apps") {
             root.bump(item.id);
-            Quickshell.execDetached(["gtk-launch", item.id]);
+            // gtk-launch appends ".desktop" only when the name lacks it, so
+            // an id like org.telegram.desktop would otherwise resolve to nothing.
+            Quickshell.execDetached(["gtk-launch", item.id + ".desktop"]);
             root.dismiss();
         } else {
             root.answer(item.line);
@@ -150,7 +152,7 @@ Singleton {
                 id: entry.id,
                 line: "",
                 count: root.counts[entry.id] || 0,
-                search: [entry.name, detail, entry.comment || "", keywords.join(" ")].join(" ")
+                search: [entry.name, entry.id, detail, entry.comment || "", keywords.join(" ")].join(" ")
             });
         }
         out.sort(function (a, b) {
