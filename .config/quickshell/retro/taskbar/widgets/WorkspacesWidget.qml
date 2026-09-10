@@ -21,7 +21,7 @@ Ui.Chip {
 
         property bool usingHyprland: Hyprland.workspaces.values.length == 0 ? false : true
         property var currentWorkspaces: Hyprland.workspaces.values.filter((w) => {
-            return w.monitor.name == root.taskbarWindow.screen.name && w.id >= 0;
+            return w.id >= 0 && w.monitor !== null && w.monitor.name == root.taskbarWindow.screen.name;
         })
 
         // Fill the face so the cell backgrounds meet the frame whatever
@@ -38,7 +38,11 @@ Ui.Chip {
                 required property var modelData
                 required property int index
 
-                readonly property int focusedWindowId: workspaces.usingHyprland ? Hyprland.focusedWorkspace.id : I3.focusedWorkspace.number
+                readonly property int focusedWindowId: {
+                    if (workspaces.usingHyprland)
+                        return Hyprland.focusedWorkspace ? Hyprland.focusedWorkspace.id : -1;
+                    return I3.focusedWorkspace ? I3.focusedWorkspace.number : -1;
+                }
 
                 function getColor() {
                     if (modelData.urgent) {
