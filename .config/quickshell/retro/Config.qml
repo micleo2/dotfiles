@@ -57,39 +57,6 @@ Singleton {
             "outlineGradientFade": "#161616",
             "defaultWallpaperPath": "wallpapers/1-totoro.png"
         },
-        "yorha": {
-            "base": "#d9caba",
-            "shadow": "#baafa1",
-            "highlight": "#f0e2d3",
-            "urgent": "#ff854c",
-            "accent": "#626335",
-            "text": "#3e3d38",
-            "outline": "#3d3d39",
-            "outlineGradientFade": "#5b5b45",
-            "defaultWallpaperPath": ""
-        },
-        "cherry": {
-            "base": "#f4c9ef",
-            "shadow": "#c7a4cc",
-            "highlight": "#f9d0f7",
-            "urgent": "#ff936c",
-            "accent": "#c950bb",
-            "text": "#321d32",
-            "outline": "#20091d",
-            "outlineGradientFade": "#3e233e",
-            "defaultWallpaperPath": ""
-        },
-        "indigo": {
-            "base": "#bac4e6",
-            "shadow": "#7e8bad",
-            "highlight": "#d0def9",
-            "urgent": "#e83939",
-            "accent": "#3e7c99",
-            "text": "#0d0d19",
-            "outline": "#1a2135",
-            "outlineGradientFade": "#223143",
-            "defaultWallpaperPath": ""
-        },
         "gleep": {
             "base": "#bae6c5",
             "shadow": "#93c48c",
@@ -112,6 +79,20 @@ Singleton {
             "text": "#00ff41",
             "outline": "#00ff41",
             "outlineGradientFade": "#00b32d",
+            "defaultWallpaperPath": ""
+        },
+        // morhetz/gruvbox, dark: bg/bg1/bg2 for the surfaces, fg for text,
+        // bg3 for the frames so they sit between the face and the bar rather
+        // than glow like matrix's, orange for urgent and green for accent.
+        "gruvbox": {
+            "base": "#282828",
+            "shadow": "#3c3836",
+            "highlight": "#504945",
+            "urgent": "#fe8019",
+            "accent": "#b8bb26",
+            "text": "#ebdbb2",
+            "outline": "#665c54",
+            "outlineGradientFade": "#504945",
             "defaultWallpaperPath": ""
         }
     }
