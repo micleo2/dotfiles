@@ -136,13 +136,21 @@ Scope {
         return at < 0 ? null : items[at];
     }
 
-    // delta is ±1 for a step and ±Infinity for an end. No wrap, like vim.
+    // delta is ±1 for a step, which wraps at either end, or ±Infinity for
+    // an end. The theme rows sit last, so from the top `k` is the shortest
+    // way there.
     function moveCursor(delta) {
         var items = root.navigables();
         if (items.length === 0)
             return;
         var at = root.cursorIndex(items);
-        var next = at < 0 ? (delta > 0 ? 0 : items.length - 1) : Math.max(0, Math.min(items.length - 1, at + delta));
+        var next;
+        if (at < 0)
+            next = delta > 0 ? 0 : items.length - 1;
+        else if (!isFinite(delta))
+            next = delta > 0 ? items.length - 1 : 0;
+        else
+            next = (at + delta + items.length) % items.length;
         root.cursorKey = items[next].rowKey;
         root.reveal(items[next]);
     }
