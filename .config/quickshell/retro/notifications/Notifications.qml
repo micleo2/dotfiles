@@ -384,13 +384,34 @@ Singleton {
         notification.closed.connect(function (reason) {
             root.forget(notification, reason);
         });
-        notification.summaryChanged.connect(function () {
-            root.refresh(notification);
-        });
-        notification.bodyChanged.connect(function () {
-            root.refresh(notification);
-        });
+        var updates = ["summaryChanged", "bodyChanged", "appNameChanged", "urgencyChanged", "expireTimeoutChanged", "hintsChanged"];
+        for (var s = 0; s < updates.length; s++) {
+            notification[updates[s]].connect(function () {
+                root.queueRefresh(notification);
+            });
+        }
         root.popups = [notification].concat(root.popups);
+    }
+
+    // A replaces-id update lands as one signal per changed field; one rules
+    // pass per update, not per field. Qt.callLater alone would keep only the
+    // last argument when two toasts update in the same tick.
+    property var dirty: []
+
+    function queueRefresh(notification) {
+        if (root.dirty.indexOf(notification) !== -1)
+            return;
+        root.dirty.push(notification);
+        Qt.callLater(root.flushRefresh);
+    }
+
+    function flushRefresh() {
+        var list = root.dirty;
+        root.dirty = [];
+        for (var i = 0; i < list.length; i++) {
+            if (root.popups.indexOf(list[i]) !== -1)
+                root.refresh(list[i]);
+        }
     }
 
     // A sender rewriting a live toast can turn it into something blocked;
