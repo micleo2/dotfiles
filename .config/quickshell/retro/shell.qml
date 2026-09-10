@@ -15,9 +15,12 @@ import "lock" as Lock_
 import "calc" as Calc
 import "launcher" as Launcher_
 import "keymap" as Keymap_
+import "background" as Background_
 
 Scope {
     id: root
+
+    Background_.Background {}
 
     Taskbar.Bar {}
 
