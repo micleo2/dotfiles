@@ -106,11 +106,29 @@ Ui.Chip {
         return list;
     }
 
+    // The saved network whose forget is awaiting its second click, or null.
+    // Forgetting drops the passphrase, so one stray right-click must not do
+    // it: the first asks, the second (on the same row) does.
+    property var forgetting: null
+
+    function forget(network) {
+        if (!network.known)
+            return;
+        if (root.forgetting === network) {
+            root.forgetting = null;
+            network.forget();
+        } else {
+            root.forgetting = network;
+        }
+    }
+
     // The network under the field can vanish from the scan; its object dies
-    // with it, so the field has to go too.
+    // with it, so the field and the pending forget have to go too.
     onSortedChanged: {
         if (root.pending !== null && root.sorted.indexOf(root.pending) === -1)
             root.pending = null;
+        if (root.forgetting !== null && root.sorted.indexOf(root.forgetting) === -1)
+            root.forgetting = null;
     }
 
     function failureText(reason) {
@@ -223,8 +241,10 @@ Ui.Chip {
         // have painted.
         onOpenedChanged: {
             scanSwitch.restart();
-            if (!popup.opened)
+            if (!popup.opened) {
                 root.pending = null;
+                root.forgetting = null;
+            }
             Vpn.watching = popup.opened;
             Addresses.watching = popup.opened;
         }
@@ -393,18 +413,41 @@ Ui.Chip {
                 spacing: 4
 
                 Ui.PopupRow {
+                    id: row
+
                     rowKey: "wifi:" + entry.modelData.name
+
+                    readonly property bool asking: root.forgetting === entry.modelData
 
                     glyph: root.glyphFor(entry.modelData)
                     text: entry.modelData.name !== "" ? entry.modelData.name : "(hidden)"
                     // The signal readout gives way to the verdict of the last
-                    // attempt, until the next one starts.
+                    // attempt, until the next one starts, and to the forget
+                    // question while one is open.
                     detail: {
+                        if (row.asking)
+                            return "forget?";
                         if (root.failed === entry.modelData)
                             return root.failureText(root.failReason);
                         return Math.round(root.strengthOf(entry.modelData)) + "%";
                     }
                     trailingGlyph: root.needsPassphrase(entry.modelData) ? "lock" : ""
+                    // Saved rows offer a forget button while pointed at. It
+                    // turns into the confirming check once asked.
+                    actionGlyph: {
+                        if (!entry.modelData.known)
+                            return "";
+                        if (row.asking)
+                            return "check";
+                        return row.hasCursor ? "delete" : "";
+                    }
+                    actionColor: row.asking ? Config.colors.urgent : Config.colors.text
+                    onActionClicked: root.forget(entry.modelData)
+                    // Moving off the row withdraws the question.
+                    onHasCursorChanged: {
+                        if (!row.hasCursor && row.asking)
+                            root.forgetting = null;
+                    }
                     selected: entry.modelData.connected
                     busy: entry.modelData.stateChanging
                     onClicked: {
@@ -414,11 +457,9 @@ Ui.Chip {
                         if (root.pending === entry.modelData)
                             passField.take();
                     }
-                    // Right-click forgets.
-                    onRightClicked: {
-                        if (entry.modelData.known)
-                            entry.modelData.forget();
-                    }
+                    // Right-click and Delete take the same two steps as the
+                    // button: ask, then forget.
+                    onRightClicked: root.forget(entry.modelData)
                 }
 
                 Ui.PopupField {

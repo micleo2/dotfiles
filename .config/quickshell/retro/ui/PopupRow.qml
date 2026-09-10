@@ -17,11 +17,17 @@ PopupControl {
     property bool busy: false
     // Rows that are pure readouts take no hover, no cursor and no clicks.
     property bool interactive: true
+    // An optional trailing action button: a glyph with its own click, drawn
+    // between the status and the selection marker. Empty hides it. Set it
+    // only while the row has the cursor to keep a list quiet until pointed at.
+    property string actionGlyph: ""
+    property color actionColor: Config.colors.text
 
     readonly property bool managed: root.rowKey !== ""
 
     signal clicked
     signal rightClicked
+    signal actionClicked
 
     // Readouts are skipped by the popup's keyboard cursor even if keyed.
     navigable: root.interactive
@@ -77,6 +83,8 @@ PopupControl {
         anchors.rightMargin: 4
         anchors.verticalCenter: parent.verticalCenter
         spacing: 4
+        // Above the row's own MouseArea, so the action button gets its click.
+        z: 1
 
         Label {
             anchors.verticalCenter: parent.verticalCenter
@@ -92,6 +100,44 @@ PopupControl {
             text: root.trailingGlyph
             size: Math.round(Config.settings.bar.fontSize * 0.85)
             opacity: 0.75
+        }
+
+        // The action button. Its hit area is padded past the glyph's ink so
+        // it is not a sliver, and the row's click never sees this press.
+        // Under the pointer it inverts, glyph on a filled square, so it reads
+        // as its own target inside the already-highlighted row.
+        Item {
+            anchors.verticalCenter: parent.verticalCenter
+            visible: root.actionGlyph !== ""
+            width: actionIcon.implicitWidth + 10
+            height: 22
+
+            Rectangle {
+                anchors.fill: parent
+                visible: actionPress.containsMouse
+                color: root.actionColor
+            }
+
+            Glyph {
+                id: actionIcon
+
+                anchors.centerIn: parent
+                text: root.actionGlyph
+                color: actionPress.containsMouse ? Config.colors.base : root.actionColor
+                size: Math.round(Config.settings.bar.fontSize * 0.85)
+            }
+
+            MouseArea {
+                id: actionPress
+
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: (mouse) => {
+                    mouse.accepted = true;
+                    root.actionClicked();
+                }
+            }
         }
 
         // Selection marker, aligned to the same right edge as PopupToggle's
