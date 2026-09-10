@@ -7,7 +7,7 @@ import "../../ui" as Ui
 import "../.."
 import "../../services"
 
-// Wifi and VPN.
+// Wifi, ethernet and VPN.
 //
 // Wifi runs entirely on Quickshell.Networking. VPN cannot: that module models
 // only wifi and wired devices, so WireGuard goes through nmcli in the Vpn
@@ -20,16 +20,23 @@ Ui.Chip {
     required property var barScreen
     required property bool primary
 
-    readonly property var device: {
+    function findDevice(type) {
         var devices = Networking.devices.values;
         for (var i = 0; i < devices.length; i++) {
-            if (devices[i].type === DeviceType.Wifi)
+            if (devices[i].type === type)
                 return devices[i];
         }
         return null;
     }
 
-    readonly property var networks: root.device ? root.device.networks.values : []
+    readonly property var wifiDevice: root.findDevice(DeviceType.Wifi)
+    readonly property var wiredDevice: root.findDevice(DeviceType.Wired)
+    // Without NetworkManager there are no devices to ask, so the default
+    // route stands in for "cable in".
+    readonly property bool nmBacked: Networking.backend === NetworkBackendType.NetworkManager
+    readonly property bool wired: root.wiredDevice !== null ? root.wiredDevice.connected : Addresses.defaultDevice !== ""
+
+    readonly property var networks: root.wifiDevice ? root.wifiDevice.networks.values : []
 
     readonly property var active: {
         for (var i = 0; i < root.networks.length; i++) {
@@ -39,7 +46,31 @@ Ui.Chip {
         return null;
     }
 
-    readonly property bool available: Modules.allow("network", root.device !== null)
+    // A wired-only machine still gets the VPN and IP sections; one without
+    // NetworkManager gets the IP section and a link glyph.
+    readonly property bool available: Modules.allow("network", !root.nmBacked || root.wifiDevice !== null || root.wiredDevice !== null)
+
+    // NetworkManager's own HTTP probe, when it is configured to run one
+    // (/etc/NetworkManager/conf.d, `connectivity.uri`). Portal means the probe
+    // was answered by something other than its check page.
+    readonly property bool connectivityKnown: Networking.canCheckConnectivity && Networking.connectivityCheckEnabled
+    readonly property bool portal: root.connectivityKnown && Networking.connectivity === NetworkConnectivity.Portal
+    readonly property bool limited: root.connectivityKnown && Networking.connectivity === NetworkConnectivity.Limited
+
+    // Kept asking while sign-in is needed; the browser is usually up and the
+    // popup closed by the time the portal lets the probe through.
+    Timer {
+        interval: 10000
+        repeat: true
+        running: root.portal || root.limited
+        onTriggered: Networking.checkConnectivity()
+    }
+
+    function openPortal() {
+        // A fixed plain-http URL so the portal's redirect does the work; the
+        // portal's own address is never trusted.
+        Quickshell.execDetached(["xdg-open", "http://ping.archlinux.org/nm-check.txt"]);
+    }
 
     // The network awaiting a passphrase, if any.
     property var pending: null
@@ -62,6 +93,16 @@ Ui.Chip {
         // NetworkManager reports 0-100; guard in case a backend uses 0-1.
         var raw = network.signalStrength;
         return raw <= 1 ? raw * 100 : raw;
+    }
+
+    function chipGlyph() {
+        if (root.portal)
+            return "captive_portal";
+        if (root.active)
+            return root.glyphFor(root.active);
+        if (root.wired || !root.wifiDevice)
+            return "lan";
+        return root.glyphFor(null);
     }
 
     function glyphFor(network) {
@@ -216,15 +257,20 @@ Ui.Chip {
     interactive: true
 
     onClicked: (mouse) => {
-        if (mouse.button === Qt.RightButton)
-            Networking.wifiEnabled = !Networking.wifiEnabled;
-        else
+        if (mouse.button === Qt.RightButton) {
+            if (root.wifiDevice)
+                Networking.wifiEnabled = !Networking.wifiEnabled;
+        } else {
             popup.toggle();
+        }
     }
 
     Ui.Glyph {
         anchors.verticalCenter: parent.verticalCenter
-        text: root.glyphFor(root.active)
+        // A cable out with no wifi to fall back on is the wired counterpart of
+        // the radio being off.
+        opacity: !root.wifiDevice && !root.wired ? 0.5 : 1
+        text: root.chipGlyph()
     }
 
     Ui.Popup {
@@ -254,15 +300,33 @@ Ui.Chip {
 
             interval: 50
             onTriggered: {
-                if (root.device)
-                    root.device.scannerEnabled = popup.opened;
+                if (root.wifiDevice)
+                    root.wifiDevice.scannerEnabled = popup.opened;
             }
+        }
+
+        Ui.PopupRow {
+            visible: root.portal
+            rowKey: "portal"
+
+            glyph: "captive_portal"
+            text: "Captive portal"
+            detail: "sign in"
+            onClicked: root.openPortal()
+        }
+
+        Ui.PopupRow {
+            visible: root.limited && !root.portal
+            interactive: false
+            glyph: "link_off"
+            text: "No internet"
         }
 
         // First, above the wifi list. That list scrolls and is routinely long
         // enough to bury anything below it; the VPN section is short and fixed,
         // so putting it here keeps it reachable without scrolling.
         Ui.SectionLabel {
+            visible: Vpn.available
             text: "VPN"
         }
 
@@ -287,7 +351,7 @@ Ui.Chip {
         Ui.PopupRow {
             // Explains itself rather than showing an empty gap on a machine
             // where the .conf has not been imported yet.
-            visible: Vpn.connections.length === 0
+            visible: Vpn.available && Vpn.connections.length === 0
             interactive: false
             text: "No WireGuard profiles"
             detail: "import with nmcli"
@@ -352,14 +416,36 @@ Ui.Chip {
             onClicked: Addresses.copy(info.ip)
         }
 
+        Ui.SectionLabel {
+            visible: root.wiredDevice !== null
+            text: "Ethernet"
+        }
+
+        Ui.PopupRow {
+            visible: root.wiredDevice !== null
+            interactive: false
+            glyph: "lan"
+            text: root.wiredDevice ? root.wiredDevice.name : ""
+            detail: {
+                if (!root.wiredDevice)
+                    return "";
+                if (root.wired)
+                    return root.wiredDevice.linkSpeed > 0 ? root.wiredDevice.linkSpeed + " Mb/s" : "connected";
+                return ConnectionState.toString(root.wiredDevice.state).toLowerCase();
+            }
+        }
+
         // The radio toggle belongs to the wifi group, so it has to sit *under*
         // the Wi-Fi header. Left above it, between the VPN rows and the rule, it
-        // read as the last item of the VPN section.
+        // read as the last item of the VPN section. Both go with the radio:
+        // a wired-only machine has no Wi-Fi section at all.
         Ui.SectionLabel {
+            visible: root.wifiDevice !== null
             text: "Wi-Fi"
         }
 
         Ui.PopupToggle {
+            visible: root.wifiDevice !== null
             rowKey: "wifi-enabled"
 
             text: "Enabled"
