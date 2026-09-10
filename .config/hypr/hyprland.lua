@@ -13,17 +13,11 @@ hl.on("hyprland.start", function()
 	-- hl.exec_cmd(
 	-- 	"kitty +kitten panel -o clear_all_mouse_actions=no -o default_pointer_shape=arrow -o pointer_shape_when_dragging=arrow -o font_size=20 --edge=background ~/dotfiles/scripts/hypr/ttfx-background.sh"
 	-- )
+	-- The shell draws the wallpaper too, so nothing can show before the lock.
 	if machine.lock_on_start then
 		hl.exec_cmd("RETRO_LOCK_ON_START=1 QT_FONT_DPI= qs -c retro")
-		-- Hold the wallpaper back until that lock is up, so the only thing on
-		-- screen before the lock is the compositor's black background. Falls back
-		-- to starting anyway after 3s.
-		hl.exec_cmd(
-			[[sh -c 'for _ in $(seq 30); do [ "$(qs -c retro ipc call lock isLocked 2>/dev/null)" = true ] && break; sleep 0.1; done; exec hyprpaper']]
-		)
 	else
 		hl.exec_cmd("QT_FONT_DPI= qs -c retro")
-		hl.exec_cmd("hyprpaper")
 	end
 	hl.exec_cmd("QT_FONT_DPI= qs -c gw-idle")
 	hl.exec_cmd("hyprpm reload")

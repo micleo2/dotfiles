@@ -55,7 +55,7 @@ Singleton {
             "text": "#000000",
             "outline": "#000000",
             "outlineGradientFade": "#161616",
-            "defaultWallpaperPath": ""
+            "defaultWallpaperPath": "~/Downloads/wallpapers/1-totoro.png"
         },
         "yorha": {
             "base": "#d9caba",
