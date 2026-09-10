@@ -43,6 +43,18 @@ Ui.Chip {
     // The network awaiting a passphrase, if any.
     property var pending: null
 
+    // The network the user last asked to connect, watched for the outcome.
+    // Kept on the widget rather than in a row: rows come and go with the
+    // list, and NetworkManager reports a failure seconds after the click.
+    property var attempted: null
+
+    // The network whose last attempt failed, and why. NetworkManager keeps
+    // the profile it created for a wrong passphrase, so the network turns
+    // `known` and a plain connect() would retry the bad key forever with no
+    // word to the user. This is what makes the next click ask again.
+    property var failed: null
+    property int failReason: ConnectionFailReason.Unknown
+
     visible: root.available
 
     function strengthOf(network) {
@@ -93,16 +105,92 @@ Ui.Chip {
         return list;
     }
 
+    // What the list actually shows. A Repeater fed a fresh array destroys and
+    // recreates every row, and `sorted` is fresh on every scan tick, since it
+    // reads each network's signal. That tore down the passphrase field, text
+    // and all, every few seconds. So the list is frozen while a field is up
+    // and catches up the moment it goes away.
+    property var listed: []
+
+    function refresh() {
+        if (root.pending === null)
+            root.listed = root.sorted;
+    }
+
+    onSortedChanged: {
+        // The network under the field can vanish from the scan; its object
+        // dies with it, so the field has to go too.
+        if (root.pending !== null && root.sorted.indexOf(root.pending) === -1)
+            root.pending = null;
+        root.refresh();
+    }
+    onPendingChanged: root.refresh()
+
+    function failureText(reason) {
+        switch (reason) {
+        case ConnectionFailReason.NoSecrets:
+            return "wrong passphrase";
+        case ConnectionFailReason.WifiClientDisconnected:
+        case ConnectionFailReason.WifiClientFailed:
+        case ConnectionFailReason.WifiAuthTimeout:
+            return "auth failed";
+        case ConnectionFailReason.WifiNetworkLost:
+            return "network lost";
+        default:
+            return "failed";
+        }
+    }
+
+    function attempt(network) {
+        root.attempted = network;
+        if (root.failed === network)
+            root.failed = null;
+    }
+
     function activate(network) {
         if (network.connected) {
             network.disconnect();
             return;
         }
-        if (network.known || !root.needsPassphrase(network)) {
-            network.connect();
+        // A failed network is asked for its passphrase again even though it
+        // is `known`: connectWithPsk overwrites the saved key, so this is the
+        // retry. Forgetting first is not needed.
+        var askAgain = root.failed === network;
+        if (root.needsPassphrase(network) && (!network.known || askAgain)) {
+            root.pending = network;
             return;
         }
-        root.pending = network;
+        root.attempt(network);
+        network.connect();
+    }
+
+    Connections {
+        target: root.attempted
+
+        function onConnectionFailed(reason) {
+            root.failed = root.attempted;
+            root.failReason = reason;
+        }
+    }
+
+    // The failure label is stale once the network is up, whoever connected it.
+    Connections {
+        target: root.failed
+
+        function onConnectedChanged() {
+            if (root.failed.connected)
+                root.failed = null;
+        }
+    }
+
+    Connections {
+        target: Networking
+
+        function onWifiEnabledChanged() {
+            // The rows are gone with the radio, and the field with them.
+            if (!Networking.wifiEnabled)
+                root.pending = null;
+        }
     }
 
     interactive: true
@@ -245,7 +333,7 @@ Ui.Chip {
         }
 
         Repeater {
-            model: Networking.wifiEnabled ? root.sorted : []
+            model: Networking.wifiEnabled ? root.listed : []
 
             Column {
                 id: entry
@@ -260,7 +348,13 @@ Ui.Chip {
 
                     glyph: root.glyphFor(entry.modelData)
                     text: entry.modelData.name !== "" ? entry.modelData.name : "(hidden)"
-                    detail: Math.round(root.strengthOf(entry.modelData)) + "%"
+                    // The signal readout gives way to the verdict of the last
+                    // attempt, until the next one starts.
+                    detail: {
+                        if (root.failed === entry.modelData)
+                            return root.failureText(root.failReason);
+                        return Math.round(root.strengthOf(entry.modelData)) + "%";
+                    }
                     trailingGlyph: root.needsPassphrase(entry.modelData) ? "lock" : ""
                     selected: entry.modelData.connected
                     busy: entry.modelData.stateChanging
@@ -271,8 +365,7 @@ Ui.Chip {
                         if (root.pending === entry.modelData)
                             passField.take();
                     }
-                    // Right-click forgets, which is also how you recover from a
-                    // saved-but-wrong passphrase.
+                    // Right-click forgets.
                     onRightClicked: {
                         if (entry.modelData.known)
                             entry.modelData.forget();
@@ -287,12 +380,18 @@ Ui.Chip {
                     // Hiding hands the keyboard back to the list, or the popup
                     // would go deaf after a passphrase is submitted.
                     onVisibleChanged: {
-                        if (visible)
+                        if (visible) {
+                            // Never a rejected passphrase from last time.
+                            text = "";
                             take();
-                        else
+                        } else {
                             popup.reclaimFocus();
+                        }
                     }
                     onAccepted: (value) => {
+                        if (value === "")
+                            return;
+                        root.attempt(entry.modelData);
                         entry.modelData.connectWithPsk(value);
                         root.pending = null;
                     }
