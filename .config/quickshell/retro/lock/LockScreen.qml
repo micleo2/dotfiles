@@ -19,7 +19,8 @@ import ".."
 // greetd auto-login makes this the login screen) the shell locks itself on
 // its first load, the way quickshell's own lockscreen example does. The
 // flag below survives config reloads, so a save does not lock again, and a
-// shell restarted by hand carries no such variable.
+// shell restarted by hand carries no such variable. The lock itself rides
+// the same object across a reload.
 Scope {
     id: root
 
@@ -55,7 +56,12 @@ Scope {
     Connections {
         target: Lock
 
+        function onFailedAttemptsChanged() {
+            startup.failedAttempts = Lock.failedAttempts;
+        }
+
         function onLockedChanged() {
+            startup.locked = Lock.locked;
             if (Lock.locked) {
                 root.requestSessionLock();
             } else {
@@ -80,11 +86,21 @@ Scope {
     PersistentProperties {
         id: startup
 
-        reloadableId: "lockStartup"
+        reloadableId: "lockState"
         property bool handled: false
+        // Mirrors Lock.locked: a save while locked destroys the session lock
+        // with the old tree, and Hyprland (allow_session_lock_restore) lets the
+        // new one take it back only if it asks.
+        property bool locked: false
+        property int failedAttempts: 0
 
         // Runs once the tree is built, on the first load and every reload.
         onLoaded: {
+            if (startup.locked && !Lock.locked) {
+                Lock.logEvent("lock-restored");
+                Lock.lock();
+                Lock.failedAttempts = startup.failedAttempts;
+            }
             if (startup.handled)
                 return;
             startup.handled = true;
