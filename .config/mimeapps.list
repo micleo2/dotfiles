@@ -23,6 +23,11 @@ application/vnd.usd=f3d.desktop
 application/vnd.usdc=f3d.desktop
 model/3mf=bambu-studio-3mf.desktop
 application/vnd.ms-3mfdocument=bambu-studio-3mf.desktop
+text/html=chromium.desktop
+x-scheme-handler/http=chromium.desktop
+x-scheme-handler/https=chromium.desktop
+x-scheme-handler/about=chromium.desktop
+x-scheme-handler/unknown=chromium.desktop
 
 [Added Associations]
 image/png=org.kde.gwenview.desktop;
