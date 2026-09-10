@@ -86,6 +86,9 @@ Scope {
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
             exclusiveZone: 0
             color: "transparent"
+            // Empty region: the strip spans the screen's width and must not
+            // eat clicks along the bottom for the 1.5s it is up.
+            mask: Region {}
             // Sized from the bezel, its bottom margin and its shadow, with a
             // little air; a fixed height clipped the top of the bezel.
             implicitHeight: bezel.height + bezel.anchors.bottomMargin + bezel.shadowOffset + 4
