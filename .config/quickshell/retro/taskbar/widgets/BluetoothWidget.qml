@@ -78,45 +78,75 @@ Ui.Chip {
         return root.normalizedAddress(alias) !== root.normalizedAddress(device.address);
     }
 
+    // The device whose pairing is in flight. A fresh pair is not trusted, so
+    // BlueZ would refuse its reconnects; trusting and connecting once paired
+    // makes one click do what bluetoothctl's pair/trust/connect does.
+    property var pairingTarget: null
+
     function activate(device) {
-        if (device.connected)
+        if (device.connected) {
             device.disconnect();
-        else if (device.paired || device.bonded)
+            return;
+        }
+        if (device.paired || device.bonded) {
             device.connect();
-        else
-            device.pair();
+            return;
+        }
+        root.pairingTarget = device;
+        device.pair();
     }
 
+    function settlePairing() {
+        var device = root.pairingTarget;
+        if (!device)
+            return;
+        if (device.paired) {
+            root.pairingTarget = null;
+            device.trusted = true;
+            device.connect();
+        } else if (!device.pairing) {
+            root.pairingTarget = null;
+        }
+    }
+
+    Connections {
+        target: root.pairingTarget
+
+        function onPairedChanged() {
+            root.settlePairing();
+        }
+
+        // Paired may still be landing when the pair call returns, so the
+        // verdict is read a turn later.
+        function onPairingChanged() {
+            Qt.callLater(root.settlePairing);
+        }
+    }
+
+    // Powered is not persistent: BlueZ's AutoEnable powers every adapter back
+    // up at boot. An rfkill soft block is restored by systemd-rfkill, so it is
+    // the block that makes "off" stick, and the unblock that lets "on" work.
     function setPower(value) {
         if (!root.adapter)
             return;
-        root.adapter.enabled = value;
-        if (value)
+        if (value) {
+            Quickshell.execDetached(["rfkill", "unblock", "bluetooth"]);
+            root.adapter.enabled = true;
             rfkillGuard.restart();
+        } else {
+            root.adapter.enabled = false;
+            Quickshell.execDetached(["rfkill", "block", "bluetooth"]);
+        }
     }
 
     Timer {
         id: rfkillGuard
 
-        // BlueZ cannot power on through an rfkill soft block, and the adapter
-        // just stays disabled with no error. Omarchy shells out to
-        // omarchy-bluetooth-power for exactly this reason; this is the same
-        // recovery, only attempted once and only when the direct route failed.
+        // The unblock and the power-on race; a set that landed while still
+        // blocked fails silently, so it is repeated once the block is gone.
         interval: 1500
         onTriggered: {
-            if (root.adapter && !root.adapter.enabled) {
-                Quickshell.execDetached(["rfkill", "unblock", "bluetooth"]);
-                retryPower.restart();
-            }
-        }
-    }
-
-    Timer {
-        id: retryPower
-
-        interval: 400
-        onTriggered: {
-            if (root.adapter)
+            if (root.adapter && !root.adapter.enabled)
                 root.adapter.enabled = true;
         }
     }
