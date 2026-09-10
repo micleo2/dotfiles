@@ -11,8 +11,13 @@ import ".."
 //   * a Wayland idle-inhibit lock, held by IdleWidget because it has a surface
 //     to attach one to, suppresses compositor-side idling. hypridle honours
 //     it, so stay-awake also means no auto-lock (see hypr/hypridle.conf).
-//   * a logind inhibitor blocks suspend and lid-close, which is what actually
-//     puts this machine to sleep right now. This is the half that does work.
+//   * a logind inhibitor blocks suspend, which is what actually puts this
+//     machine to sleep right now. This is the half that does work.
+//
+// Closing the lid must always suspend and lock, stay-awake or not. logind's
+// LidSwitchIgnoreInhibited= defaults to yes, so the lid ignores high-level
+// "sleep" blockers and is stopped only by a low-level handle-lid-switch lock.
+// Never add handle-lid-switch to the inhibitor below.
 Singleton {
     id: root
 
@@ -138,7 +143,7 @@ Singleton {
         // Quickshell kills the child when running goes false, which is what
         // releases the lock; `sleep infinity` just holds it open until then.
         running: root.stayAwake
-        command: ["systemd-inhibit", "--what=idle:sleep:handle-lid-switch", "--who=retro-shell", "--why=Stay awake", "--mode=block", "sleep", "infinity"]
+        command: ["systemd-inhibit", "--what=idle:sleep", "--who=retro-shell", "--why=Stay awake", "--mode=block", "sleep", "infinity"]
     }
 
     IpcHandler {
