@@ -76,6 +76,7 @@ PopupControl {
 
     MouseArea {
         anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
         onPressed: (mouse) => {
             mouse.accepted = true;
             root.moved(root.indexAt(mouse.x));

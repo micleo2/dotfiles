@@ -106,7 +106,10 @@ PopupControl {
 
     MouseArea {
         anchors.fill: parent
-        enabled: root.interactive
+        // Hidden rather than disabled: a disabled MouseArea keeps its arrow
+        // cursor, but a readout should not show one over a hand-cursor list.
+        visible: root.interactive
+        cursorShape: Qt.PointingHandCursor
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         onClicked: (mouse) => {
             mouse.accepted = true;

@@ -44,7 +44,9 @@ Item {
         id: hover
 
         acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
-        cursorShape: Qt.PointingHandCursor
+        // No cursorShape here: a control's MouseArea sits on top and owns an
+        // arrow cursor of its own, which would shadow it (see Chip). Each
+        // control puts the hand on its MouseArea instead.
 
         // Enter only, and only on real motion (see Popups.pointerMoved).
         // Leaving deliberately does not clear the cursor, so the highlight
