@@ -81,6 +81,9 @@ abbr --add uz unzip
 set -Ux EDITOR nvim
 
 # Setup zoxide
+# Never learn network mounts: a dead automount makes `zoxide query` stall
+# for 90s (see hypr SUPER+Z / SUPER+U,P). Overrides the $HOME-only default.
+set -gx _ZO_EXCLUDE_DIRS "$HOME:/mnt/*"
 zoxide init fish | source
 
 # yazi
