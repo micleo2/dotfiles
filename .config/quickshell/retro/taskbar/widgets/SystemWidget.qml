@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import "../.."
 import "../../ui" as Ui
 import "../../services"
 
@@ -27,6 +28,7 @@ Ui.Chip {
 
     Ui.Glyph {
         anchors.verticalCenter: parent.verticalCenter
+        slot: Config.settings.bar.iconSlot
         text: "memory_alt"
     }
 

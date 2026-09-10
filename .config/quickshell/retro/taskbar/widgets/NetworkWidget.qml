@@ -267,6 +267,7 @@ Ui.Chip {
 
     Ui.Glyph {
         anchors.verticalCenter: parent.verticalCenter
+        slot: Config.settings.bar.iconSlot
         // A cable out with no wifi to fall back on is the wired counterpart of
         // the radio being off.
         opacity: !root.wifiDevice && !root.wired ? 0.5 : 1

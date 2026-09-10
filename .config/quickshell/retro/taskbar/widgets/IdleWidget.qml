@@ -50,6 +50,7 @@ Ui.Chip {
 
     Ui.Glyph {
         anchors.verticalCenter: parent.verticalCenter
+        slot: Config.settings.bar.iconSlot
         opacity: Idle.stayAwake || Idle.others > 0 ? 1 : 0.5
         text: "coffee"
     }

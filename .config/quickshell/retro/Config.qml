@@ -126,6 +126,10 @@ Singleton {
             // Grows with the text-size control. At the default 12px the
             // font is 22 and this is exactly the original 32.
             property int height: Math.max(32, fontSize + 10)
+            // Square every bar icon sits in: the chip face height at the
+            // default size, so a glyph, the speaker art and the weather
+            // icon all take the same room whatever their ink.
+            property int iconSlot: fontSize + 2
             property int trayIconSize: 18
             property bool monochromeTrayIcons: true
         }

@@ -26,8 +26,8 @@ Ui.Chip {
 
     Item {
         anchors.verticalCenter: parent.verticalCenter
-        width: 24
-        height: 24
+        width: Config.settings.bar.iconSlot
+        height: Config.settings.bar.iconSlot
 
         Image {
             id: speaker

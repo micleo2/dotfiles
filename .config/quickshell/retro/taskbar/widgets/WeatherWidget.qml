@@ -11,17 +11,16 @@ Ui.Chip {
 
     visible: Weather.temp !== ""
 
-    padding: 4
-
-    Row {
+    Item {
         anchors.verticalCenter: parent.verticalCenter
+        width: Config.settings.bar.iconSlot
+        height: Config.settings.bar.iconSlot
 
         Ui.Label {
             id: iconText
 
             text: Weather.icon
             size: Math.round(Config.settings.bar.fontSize * 0.9)
-            anchors.verticalCenter: parent.verticalCenter
             visible: false
         }
 
@@ -29,15 +28,14 @@ Ui.Chip {
             source: iconText
             width: iconText.implicitWidth
             height: iconText.implicitHeight
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.centerIn: parent
             saturation: -1
             contrast: 0.7
         }
-
-        Ui.Label {
-            text: Weather.temp
-            anchors.verticalCenter: parent.verticalCenter
-        }
     }
 
+    Ui.Label {
+        text: Weather.temp
+        anchors.verticalCenter: parent.verticalCenter
+    }
 }

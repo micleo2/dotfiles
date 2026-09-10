@@ -45,6 +45,7 @@ Ui.Chip {
 
     Ui.Glyph {
         anchors.verticalCenter: parent.verticalCenter
+        slot: Config.settings.bar.iconSlot
         text: Qmk.capsWord ? "keyboard_capslock" : "keyboard"
     }
 
