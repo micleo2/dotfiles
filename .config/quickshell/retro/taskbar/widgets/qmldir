@@ -14,3 +14,4 @@ SystemWidget 1.0 SystemWidget.qml
 NotificationWidget 1.0 NotificationWidget.qml
 KeyboardWidget 1.0 KeyboardWidget.qml
 ControllerWidget 1.0 ControllerWidget.qml
+ControlCenterWidget 1.0 ControlCenterWidget.qml
