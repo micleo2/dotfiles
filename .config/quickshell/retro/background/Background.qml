@@ -5,8 +5,9 @@ import ".."
 
 // The wallpaper, one window per output on the background layer, taken from
 // the theme in use so a palette change swaps it in the same frame the chips
-// recolour. In-process rather than hyprpaper so it cannot come up before the
-// lock at session start: the lock surface and this are the one client.
+// recolour. In-process rather than a separate wallpaper daemon so it cannot
+// come up before the lock at session start: the lock surface and this are the
+// one client.
 Scope {
     Variants {
         model: Quickshell.screens

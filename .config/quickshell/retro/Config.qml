@@ -55,7 +55,7 @@ Singleton {
             "text": "#000000",
             "outline": "#000000",
             "outlineGradientFade": "#161616",
-            "defaultWallpaperPath": "wallpapers/pixel-walk.jpg"
+            "defaultWallpaperPath": "wallpapers/1-totoro.png"
         },
         "gleep": {
             "base": "#bae6c5",

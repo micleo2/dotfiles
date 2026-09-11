@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # setup software from pacman
-sudo pacman -S --needed hyprpaper fzf unixodbc f3d gum
+sudo pacman -S --needed fzf unixodbc f3d gum
 # needed by hyprpm
 sudo pacman -S --needed cmake cpio
 
