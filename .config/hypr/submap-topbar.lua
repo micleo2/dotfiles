@@ -12,6 +12,7 @@ end
 local submap_options_per_key = {
 	n = { label = "network", exec_cmd = panel("network") },
 	b = { label = "bluetooth", exec_cmd = panel("bluetooth") },
+	g = { label = "gamepad", exec_cmd = panel("controller") },
 	d = { label = "display", exec_cmd = panel("display") },
 	c = { label = "caffeinate", exec_cmd = "qs -c retro ipc call idle toggle" },
 	p = { label = "power", exec_cmd = panel("battery") },
