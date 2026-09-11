@@ -2,7 +2,8 @@ import Quickshell.Io
 
 // The IPC surface every popup chip offers: toggle, open and close, and
 // focus, which opens with the keyboard cursor placed for the SUPER+T submap
-// (hypr/submap-topbar.lua) and does nothing while the chip is hidden. A
+// (hypr/submap-topbar.lua). Nothing opens while the chip is hidden: the
+// card would hang at a phantom spot under a chip that is not there. A
 // widget adds its own verbs after these.
 //
 // The widget's Ui.Popup is found by its id, `popup`, through the scope the
@@ -17,12 +18,20 @@ import Quickshell.Io
 // `qs ipc` CLI parser (see submap/SubmapOverlay.qml).
 IpcHandler {
     // qmllint disable unqualified
+    function shown(): bool {
+        return popup.anchorItem && popup.anchorItem.visible;
+    }
+
     function toggle(): void {
-        popup.toggle();
+        if (popup.opened)
+            popup.close();
+        else if (shown())
+            popup.open();
     }
 
     function open(): void {
-        popup.open();
+        if (shown())
+            popup.open();
     }
 
     function close(): void {
@@ -30,7 +39,7 @@ IpcHandler {
     }
 
     function focus(): void {
-        if (popup.anchorItem && popup.anchorItem.visible)
+        if (shown())
             popup.openWithCursor();
     }
     // qmllint enable unqualified

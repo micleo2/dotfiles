@@ -16,7 +16,10 @@ import ".."
 //
 // A module missing from the map is "auto". The hardware predicate applies even
 // to an explicit `true`, so opting a module in on a machine that cannot
-// support it is a no-op rather than a broken widget.
+// support it is a no-op rather than a broken widget. A module that is not a
+// laptop thing at all (notifications, a plugged-in gamepad) passes
+// `everywhere`, which makes "auto" mean every machine instead; `false` still
+// hides it.
 Singleton {
     id: root
 
@@ -25,7 +28,7 @@ Singleton {
         return value === undefined ? "auto" : value;
     }
 
-    function allow(id, hardware) {
+    function allow(id, hardware, everywhere) {
         if (!hardware)
             return false;
         var value = root.setting(id);
@@ -33,6 +36,6 @@ Singleton {
             return false;
         if (value === true)
             return true;
-        return Host.isLaptop;
+        return everywhere === true || Host.isLaptop;
     }
 }

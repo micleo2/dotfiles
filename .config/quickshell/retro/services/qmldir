@@ -16,3 +16,5 @@ singleton Qmk 1.0 Qmk.qml
 singleton Screens 1.0 Screens.qml
 singleton BatteryHistory 1.0 BatteryHistory.qml
 Command 1.0 Command.qml
+singleton Controllers 1.0 Controllers.qml
+Daemon 1.0 Daemon.qml

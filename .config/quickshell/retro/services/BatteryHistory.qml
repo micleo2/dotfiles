@@ -33,14 +33,9 @@ Singleton {
     property bool loading: false
     property string error: ""
 
-    readonly property var device: {
-        var list = UPower.devices.values;
-        for (var i = 0; i < list.length; i++) {
-            if (list[i].type === UPowerDeviceType.Battery && list[i].isLaptopBattery)
-                return list[i];
-        }
-        return null;
-    }
+    readonly property var device: Host.findDevice(UPowerDeviceType.Battery, function (d) {
+        return d.isLaptopBattery;
+    })
 
     // upowerd names the object after the sysfs path, with characters outside
     // [A-Za-z0-9] escaped. "BAT1" needs none; a stranger name would.

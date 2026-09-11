@@ -15,10 +15,9 @@ Ui.Chip {
     readonly property var battery: UPower.displayDevice
     readonly property bool available: Modules.allow("battery", Host.isLaptop)
 
-    // UPower reports a 0-1 fraction, not a percentage.
-    readonly property int percent: root.battery ? Math.round(root.battery.percentage * 100) : 0
-    readonly property bool charging: root.battery && (root.battery.state === UPowerDeviceState.Charging || root.battery.state === UPowerDeviceState.PendingCharge)
-    readonly property bool full: root.battery && root.battery.state === UPowerDeviceState.FullyCharged
+    readonly property int percent: Host.percent(root.battery)
+    readonly property bool charging: Host.charging(root.battery)
+    readonly property bool full: Host.full(root.battery)
     readonly property bool low: !root.charging && !root.full && root.percent <= 15
 
     visible: root.available
