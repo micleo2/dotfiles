@@ -11,7 +11,7 @@ import ".."
 // nodes and speaks JSON lines both ways, tagged with the board's name, so
 // the shell needs no HID binding and the bridge can be tried from a
 // terminal. The bridge keeps looking for boards while they are unplugged,
-// and is restarted if it ever exits, so `present` follows the cables.
+// and is restarted if it ever exits (Daemon), so `present` follows the cables.
 //
 // Every board's last state is kept in `boards`; the flat properties below
 // mirror the *active* one, which is whichever board was typed on last (or
@@ -275,11 +275,11 @@ Singleton {
         }
     }
 
-    Process {
+    Daemon {
         id: bridge
 
         command: ["python3", root.bridgePath]
-        running: true
+        wanted: true
         stdinEnabled: true
 
         stdout: SplitParser {
@@ -297,15 +297,7 @@ Singleton {
             root.present = [];
             root.active = "";
             root.pressed = [];
-            restart.restart();
         }
-    }
-
-    Timer {
-        id: restart
-
-        interval: 3000
-        onTriggered: bridge.running = true
     }
 
     IpcHandler {

@@ -16,9 +16,8 @@ Ui.Chip {
     required property var barScreen
     required property bool primary
 
-    // On by default everywhere; "notifications": false in settings.json hides
-    // it. (Modules.allow would read the default as laptop-only.)
-    readonly property bool available: Modules.setting("notifications") !== false
+    // On by default everywhere; "notifications": false in settings.json hides it.
+    readonly property bool available: Modules.allow("notifications", true, true)
     readonly property int count: Notifications.history.length
 
     visible: root.available
