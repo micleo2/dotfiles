@@ -79,7 +79,7 @@ Singleton {
             "text": "#00ff41",
             "outline": "#00ff41",
             "outlineGradientFade": "#00b32d",
-            "defaultWallpaperPath": "wallpapers/leaves.png"
+            "defaultWallpaperPath": "wallpapers/phosphor-forest.png"
         },
         // morhetz/gruvbox, dark: bg/bg1/bg2 for the surfaces, fg for text,
         // bg3 for the frames so they sit between the face and the bar rather
