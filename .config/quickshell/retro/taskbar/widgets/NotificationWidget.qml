@@ -16,8 +16,7 @@ Ui.Chip {
     required property var barScreen
     required property bool primary
 
-    // On by default everywhere; "notifications": false in settings.json hides it.
-    readonly property bool available: Modules.allow("notifications", true, true)
+    readonly property bool available: Modules.allow("notifications", true)
     readonly property int count: Notifications.history.length
 
     visible: root.available
@@ -37,6 +36,13 @@ Ui.Chip {
     Component.onCompleted: {
         if (root.primary)
             Notifications.panel = popup;
+    }
+
+    // Switched off in the control center, the chip goes and the popup with
+    // it; the server must not keep a handle to a card that is gone.
+    Component.onDestruction: {
+        if (Notifications.panel === popup)
+            Notifications.panel = null;
     }
 
     interactive: true

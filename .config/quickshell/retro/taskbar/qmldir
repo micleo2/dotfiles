@@ -1,3 +1,4 @@
 module Taskbar
 Bar 1.0 Bar.qml
 BarModules 1.0 BarModules.qml
+BarSlot 1.0 BarSlot.qml

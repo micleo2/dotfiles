@@ -45,6 +45,10 @@ Scope {
             root.cursorKey = "";
     }
 
+    // A chip switched off in the control center takes its popup with it;
+    // the shell-wide "which popup is open" must not be left pointing at it.
+    Component.onDestruction: root.close()
+
     default property alias content: cardContent.data
 
     // The bar window the chip lives in, for the focus grab.

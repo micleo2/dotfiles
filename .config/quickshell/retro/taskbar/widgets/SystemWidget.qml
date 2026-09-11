@@ -15,9 +15,9 @@ Ui.Chip {
     required property var barScreen
     required property bool primary
 
-    readonly property bool available: Modules.allow("system", true)
+    readonly property bool available: Modules.allow("system", SystemStats.gpuAvailable)
 
-    visible: root.available && SystemStats.gpuAvailable
+    visible: root.available
 
     function gib(mib) {
         return (mib / 1024).toFixed(1);

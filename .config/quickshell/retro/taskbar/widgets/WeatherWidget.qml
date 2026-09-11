@@ -9,7 +9,9 @@ import "../../services"
 Ui.Chip {
     id: root
 
-    visible: Weather.temp !== ""
+    readonly property bool available: Weather.temp !== ""
+
+    visible: root.available
 
     Item {
         anchors.verticalCenter: parent.verticalCenter

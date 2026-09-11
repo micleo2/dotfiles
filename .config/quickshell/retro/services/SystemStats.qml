@@ -13,8 +13,8 @@ import Quickshell
 Singleton {
     id: root
 
-    // Nothing polls unless some machine actually enabled the module.
-    readonly property bool enabled: Modules.allow("system", true)
+    // Nothing polls unless this machine has the module on.
+    readonly property bool enabled: Modules.on("system")
 
     // 0-100. Stays 0 until the second sample provides a delta.
     property int cpuPercent: 0
