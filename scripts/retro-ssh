@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Pick an ssh host in the retro launcher and open it in kitty's ssh kitten.
 
-Hosts: $XDG_STATE_HOME/quickshell/retro/ssh-hosts, one target per line.
+Hosts: $XDG_STATE_HOME/quickshell/retro/ssh-hosts, one target per line. A
+trailing `tmux` token attaches to (or creates) a tmux session named after
+the host instead of landing in a plain login shell.
 """
 
 import argparse
@@ -10,12 +12,40 @@ import re
 import shlex
 import subprocess
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 
 HEADER = """\
 # ssh hosts for retro-ssh (SUPER+U, s). One target per line, split like a
-# shell command line: `host`, `user@host`, `-p 2222 user@host`.
+# shell command line: `host`, `user@host`, `-p 2222 user@host`. A trailing
+# `tmux` token (`user@host tmux`) attaches to, or creates, a tmux session on
+# the host named after it (`host`, minus any `.local`).
 """
+
+TMUX_MARKER = "tmux"
+
+
+@dataclass(frozen=True)
+class Host:
+    label: str
+    args: list[str]
+
+
+def tmux_session_name(target: list[str]) -> str:
+    host = [t for t in target if not t.startswith("-")][-1]
+    return host.rpartition("@")[2].removesuffix(".local")
+
+
+def parse_host(line: str) -> Host:
+    args = shlex.split(line)
+    if args[-1] != TMUX_MARKER:
+        return Host(line, args)
+    target = args[:-1]
+    # ssh only allocates a pty for a login session; a remote command needs
+    # -t or tmux dies with "open terminal failed: not a terminal". The kitten
+    # passes -t through and still installs terminfo + shell integration first.
+    session = tmux_session_name(target)
+    return Host(line, ["-t", *target, "tmux", "new", "-A", "-s", session])
 
 
 def state_dir() -> Path:
@@ -49,23 +79,32 @@ def seed_from_known_hosts() -> list[str]:
     return seen
 
 
-def load_hosts(path: Path) -> list[str]:
+def load_hosts(path: Path) -> list[Host]:
     if not path.exists():
         path.write_text(HEADER + "".join(f"{host}\n" for host in seed_from_known_hosts()))
-    lines = (line.strip() for line in path.read_text().splitlines())
-    return [line for line in lines if line and not line.startswith("#")]
+    hosts: list[Host] = []
+    for line in path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        try:
+            hosts.append(parse_host(line))
+        except (ValueError, IndexError) as error:
+            print(f"retro-ssh: bad line in {path}: {line!r}: {error}", file=sys.stderr)
+    return hosts
 
 
-def pick(hosts: list[str]) -> str | None:
+def pick(hosts: list[Host]) -> Host | None:
     result = subprocess.run(
         ["retro-launcher", "-p", "ssh"],
-        input="".join(f"{host}\n" for host in hosts),
+        input="".join(f"{host.label}\n" for host in hosts),
         capture_output=True,
         text=True,
     )
     if result.returncode != 0:
         return None
-    return result.stdout.strip() or None
+    label = result.stdout.strip()
+    return next((host for host in hosts if host.label == label), None)
 
 
 def main() -> int:
@@ -73,19 +112,19 @@ def main() -> int:
         prog="retro-ssh",
         description="Pick an ssh host in the retro launcher and open it in kitty's ssh kitten.",
     )
-    parser.parse_args()
+    parser.add_argument(
+        "--print", action="store_true", help="print the kitten args for the pick instead of running it"
+    )
+    options = parser.parse_args()
 
-    hosts_file = state_dir() / "ssh-hosts"
-    choice = pick(load_hosts(hosts_file))
-    if choice is None:
+    host = pick(load_hosts(state_dir() / "ssh-hosts"))
+    if host is None:
         return 1
-    try:
-        args = shlex.split(choice)
-    except ValueError as error:
-        print(f"retro-ssh: bad line in {hosts_file}: {choice!r}: {error}", file=sys.stderr)
-        return 1
+    if options.print:
+        print(shlex.join(["kitty", "kitten", "ssh", *host.args]))
+        return 0
     # `kitty +kitten ssh` runs in the current terminal; this opens a window.
-    os.execvp("kitty", ["kitty", "kitten", "ssh", *args])
+    os.execvp("kitty", ["kitty", "kitten", "ssh", *host.args])
 
 
 if __name__ == "__main__":
