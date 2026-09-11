@@ -53,6 +53,12 @@ RowLayout {
         primary: root.primary
     }
 
+    Widgets.ControllerWidget {
+        Layout.fillHeight: true
+        barScreen: root.barScreen
+        primary: root.primary
+    }
+
     Widgets.DisplayWidget {
         Layout.fillHeight: true
         barScreen: root.barScreen
