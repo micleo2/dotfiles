@@ -12,6 +12,9 @@ import ".."
 // the shell needs no HID binding and the bridge can be tried from a
 // terminal. The bridge keeps looking for boards while they are unplugged,
 // and is restarted if it ever exits (Daemon), so `present` follows the cables.
+// It runs only while the keyboard module is on (Modules): with the chip
+// switched off nothing polls for boards, and the OSD and keymap viewer have
+// no board to follow either.
 //
 // Every board's last state is kept in `boards`; the flat properties below
 // mirror the *active* one, which is whichever board was typed on last (or
@@ -279,7 +282,7 @@ Singleton {
         id: bridge
 
         command: ["python3", root.bridgePath]
-        wanted: true
+        wanted: Modules.on("keyboard")
         stdinEnabled: true
 
         stdout: SplitParser {

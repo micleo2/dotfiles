@@ -14,6 +14,8 @@ Ui.Chip {
 
     required property var taskbarWindow
 
+    readonly property bool available: true
+
     padding: 0
 
     RowLayout {

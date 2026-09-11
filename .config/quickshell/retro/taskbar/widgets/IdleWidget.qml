@@ -1,13 +1,14 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import Quickshell.Wayland
 import "../../ui" as Ui
 import "../.."
 import "../../services"
 
 // The stay-awake toggle. Left click flips it; right click opens a readout
 // of what is holding the screen awake right now, with nothing to choose.
+// The chip is only the switch: the locks themselves are held by Idle and
+// the bar window, so stay-awake outlives the chip being switched off.
 //
 // Three looks: urgent fill when stay-awake is forced here; plain fill with a
 // lit glyph and a count when something else holds the screen (a game, a
@@ -17,27 +18,11 @@ Ui.Chip {
     id: root
 
     required property var barScreen
-    required property var taskbarWindow
-    // The bar is instantiated per screen; only one of them should hold the lock.
     required property bool primary
 
     readonly property bool available: Modules.allow("idle", true)
 
     visible: root.available
-
-    // `available` settles only after settings.json and UPower have answered,
-    // so claiming the poll cannot be a one-shot at creation.
-    Binding {
-        target: Idle
-        property: "polling"
-        value: root.available
-        when: root.primary
-    }
-
-    IdleInhibitor {
-        window: root.taskbarWindow
-        enabled: root.primary && Idle.stayAwake
-    }
 
     interactive: true
     fillColor: Idle.stayAwake ? Config.colors.urgent : Config.colors.shadow

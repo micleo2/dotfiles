@@ -1,7 +1,10 @@
 import QtQuick
 import Quickshell
+import "../lock"
 pragma Singleton
 
+// The one clock. It ticks for the bar's clock chip and for the lock screen,
+// and stops when neither is showing.
 Singleton {
     id: root
 
@@ -15,6 +18,7 @@ Singleton {
     SystemClock {
         id: clock
 
+        enabled: Modules.on("clock") || Lock.inputActive
         precision: SystemClock.Seconds
     }
 

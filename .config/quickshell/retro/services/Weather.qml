@@ -38,10 +38,11 @@ Singleton {
         return "☁️";
     }
 
-    // Every half minute until the first forecast lands, then every ten.
+    // Every half minute until the first forecast lands, then every ten;
+    // not at all while the weather chip is switched off.
     Command {
         command: ["curl", "-s", "wttr.in/?format=j1"]
-        polling: true
+        polling: Modules.on("weather")
         interval: root.weatherTemp === "" ? 30000 : 600000
 
         onCollected: (text) => {

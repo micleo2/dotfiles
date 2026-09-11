@@ -16,11 +16,10 @@ Ui.Chip {
     required property var barScreen
     required property bool primary
 
-    // On by default everywhere; "controller": false in settings.json hides
-    // it. A pad being plugged in is the hardware test, and it cannot gate
-    // the scanning that finds one.
-    readonly property bool enabledHere: Modules.allow("controller", true, true)
-    readonly property bool available: root.enabledHere && Controllers.count > 0
+    // A pad being plugged in is the hardware test. The scanning that finds
+    // one runs on the module setting alone (Controllers), since it cannot
+    // wait for its own result.
+    readonly property bool available: Modules.allow("controller", Controllers.count > 0)
 
     visible: root.available
 
@@ -30,16 +29,6 @@ Ui.Chip {
     onAvailableChanged: {
         if (!root.available)
             popup.close();
-    }
-
-    // The bar is instantiated per screen; only the primary one runs the
-    // udev monitor and the scans. `enabledHere` settles after settings.json
-    // has loaded, so this cannot be a one-shot at creation.
-    Binding {
-        target: Controllers
-        property: "enabled"
-        value: root.enabledHere
-        when: root.primary
     }
 
     interactive: true

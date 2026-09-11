@@ -19,9 +19,9 @@ Ui.Chip {
     readonly property var shown: SystemTray.items.values.filter(function (item) {
         return item.status !== Status.Passive;
     })
-    readonly property bool hasItems: root.shown.length > 0
+    readonly property bool available: root.shown.length > 0
 
-    visible: root.hasItems
+    visible: root.available
 
     RowLayout {
         id: sysTrayRow

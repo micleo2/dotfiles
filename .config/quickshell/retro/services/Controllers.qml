@@ -25,12 +25,13 @@ import Quickshell.Services.UPower
 // native-path for it, which is the join. The scan's own capacity is the
 // fallback for the moment before upowerd has picked the pad up.
 //
-// Nothing runs unless `enabled`; the chip on the primary bar owns that, so a
-// second monitor does not spawn a second monitor process.
+// Nothing runs unless the controller module is on (Modules): a switched-off
+// chip must cost nothing, and this singleton is shared by every bar anyway,
+// so a second monitor never spawns a second monitor process.
 Singleton {
     id: root
 
-    property bool enabled: false
+    readonly property bool enabled: Modules.on("controller")
 
     readonly property string scanPath: Quickshell.shellDir + "/services/controllers/scan.py"
 

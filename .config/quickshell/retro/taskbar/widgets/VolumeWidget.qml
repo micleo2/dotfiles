@@ -12,6 +12,7 @@ Ui.Chip {
     required property var barScreen
     required property bool primary
 
+    readonly property bool available: true
     readonly property int stepPercent: Volume.stepPercent
 
     interactive: true

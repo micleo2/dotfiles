@@ -26,10 +26,10 @@ Singleton {
     // ------------------------------------------------------- who is awake --
 
     // The readout of what is holding the screen up. Polled slowly all the
-    // time once the chip has claimed it, so the chip can show at a glance
+    // time while the chip's module is on, so the chip can show at a glance
     // that something else holds the screen, and faster while the popup is
-    // looking.
-    property bool polling: false
+    // looking. Nothing at all while the module is off.
+    readonly property bool polling: Modules.on("idle")
     property bool watching: false
     property var clients: []
     property var inhibits: []

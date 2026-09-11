@@ -75,6 +75,15 @@ Scope {
                         radius: 0
                     }
                 }
+                // Stay awake's compositor half. It needs a surface to hang
+                // from, and it is the bar's rather than the stay-awake chip's
+                // so switching that chip off does not quietly let the screen
+                // lock while the logind half (Idle) still blocks sleep.
+                IdleInhibitor {
+                    window: taskbar
+                    enabled: root.primary && Idle.stayAwake
+                }
+
                 MouseArea {
                     id: barClickArea
                     anchors.fill: parent
@@ -101,14 +110,23 @@ Scope {
                     spacing: 11
                     height: parent.height - barScope.topMargin - barScope.bottomPad
                     anchors.verticalCenterOffset: -barScope.bottomPad / 2
-                    // Workspaces
-                    Widgets.WorkspacesWidget {
+                    // The switchboard for every other widget; never off itself.
+                    Widgets.ControlCenterWidget {
                         Layout.fillHeight: true
-                        taskbarWindow: taskbar
+                        barScreen: root.modelData
+                        primary: root.primary
                     }
-                    // Focused window
-                    Widgets.FocusedWindowWidget {
-                        Layout.fillHeight: true
+
+                    BarSlot {
+                        module: "workspaces"
+                        sourceComponent: Widgets.WorkspacesWidget {
+                            taskbarWindow: taskbar
+                        }
+                    }
+
+                    BarSlot {
+                        module: "window"
+                        sourceComponent: Widgets.FocusedWindowWidget {}
                     }
                 }
 
@@ -121,14 +139,14 @@ Scope {
                     height: parent.height - barScope.topMargin - barScope.bottomPad
                     anchors.verticalCenterOffset: -barScope.bottomPad / 2
 
-                    // Clock
-                    Widgets.ClockWidget {
-                        Layout.fillHeight: true
+                    BarSlot {
+                        module: "clock"
+                        sourceComponent: Widgets.ClockWidget {}
                     }
 
-                    // Weather
-                    Widgets.WeatherWidget {
-                        Layout.fillHeight: true
+                    BarSlot {
+                        module: "weather"
+                        sourceComponent: Widgets.WeatherWidget {}
                     }
                 }
 
@@ -142,32 +160,34 @@ Scope {
                     spacing: 11
                     height: parent.height - barScope.topMargin - barScope.bottomPad
                     anchors.verticalCenterOffset: -barScope.bottomPad / 2
-                    // System tray
-                    Widgets.SysTrayWidget {
-                        Layout.fillHeight: true
+                    BarSlot {
+                        module: "tray"
+                        sourceComponent: Widgets.SysTrayWidget {}
                     }
 
                     // Laptop modules (wifi, bluetooth, display, idle, battery).
                     // Which of these appear is decided by per-machine state (see Modules).
                     BarModules {
                         Layout.fillHeight: true
-                        taskbarWindow: taskbar
                         barScreen: root.modelData
                         primary: root.primary
                     }
 
-                    // Volume
-                    Widgets.VolumeWidget {
-                        Layout.fillHeight: true
-                        barScreen: root.modelData
-                        primary: root.primary
+                    BarSlot {
+                        module: "volume"
+                        sourceComponent: Widgets.VolumeWidget {
+                            barScreen: root.modelData
+                            primary: root.primary
+                        }
                     }
 
                     // Notifications: the bell, silencing, and history.
-                    Widgets.NotificationWidget {
-                        Layout.fillHeight: true
-                        barScreen: root.modelData
-                        primary: root.primary
+                    BarSlot {
+                        module: "notifications"
+                        sourceComponent: Widgets.NotificationWidget {
+                            barScreen: root.modelData
+                            primary: root.primary
+                        }
                     }
                 }
             }

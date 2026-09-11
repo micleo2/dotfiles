@@ -11,7 +11,9 @@ import "../../services"
 Ui.Chip {
     id: root
 
-    visible: FocusedWindow.should_show
+    readonly property bool available: FocusedWindow.should_show
+
+    visible: root.available
 
     RowLayout {
         anchors.verticalCenter: parent.verticalCenter
