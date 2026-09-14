@@ -66,22 +66,32 @@ Singleton {
     }
 
     function applyScale(monitor, scale) {
+        var ipc = monitor.lastIpcObject || {};
         var mode = monitor.width + "x" + monitor.height;
-        var rate = monitor.lastIpcObject && monitor.lastIpcObject.refreshRate;
-        if (rate)
-            mode += "@" + rate;
+        if (ipc.refreshRate)
+            mode += "@" + ipc.refreshRate;
         // Enough digits that Hyprland rounds back to the same 1/120 step.
         // Position stays `auto`: changing scale changes the logical size, and
         // pinning the old coordinates can overlap the neighbouring output.
         var value = scale.toFixed(6);
+        // The rule replaces the monitor's whole rule, so anything left out
+        // falls back to its default: without the current transform a rotated
+        // output snaps back to landscape.
+        var transform = ipc.transform !== undefined ? Number(ipc.transform) : null;
 
         if (Hyprland.usingLua) {
             // This config drives Hyprland through the Lua plugin, which
             // replaces the legacy parser — `hyprctl keyword` refuses outright
             // ("keyword can't work with non-legacy parsers. Use eval.").
-            Quickshell.execDetached(["hyprctl", "eval", 'hl.monitor({ output = "' + monitor.name + '", mode = "' + mode + '", position = "auto", scale = "' + value + '" })']);
+            var rule = 'output = "' + monitor.name + '", mode = "' + mode + '", position = "auto", scale = "' + value + '"';
+            if (transform !== null)
+                rule += ", transform = " + transform;
+            Quickshell.execDetached(["hyprctl", "eval", "hl.monitor({ " + rule + " })"]);
         } else {
-            Quickshell.execDetached(["hyprctl", "keyword", "monitor", monitor.name + "," + mode + ",auto," + value]);
+            var args = monitor.name + "," + mode + ",auto," + value;
+            if (transform !== null)
+                args += ",transform," + transform;
+            Quickshell.execDetached(["hyprctl", "keyword", "monitor", args]);
         }
         Settings.setMonitorScale(root.keyFor(monitor), scale);
         monitorRefresh.kick();
