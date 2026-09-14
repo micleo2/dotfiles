@@ -26,11 +26,8 @@ Item {
     readonly property bool pressed: press.pressed
 
     signal clicked(var mouse)
-    // One per wheel detent, direction +1 or -1. Touchpads send a stream of
-    // sub-notch deltas rather than one event per detent, so the remainder is
-    // carried between events or a slow drag does nothing and a fast one jumps.
+    // One per wheel detent, direction +1 or -1 (see WheelSteps).
     signal stepped(int direction)
-    property real wheelAccumulator: 0
 
     implicitWidth: inner.implicitWidth + root.padding * 2
     implicitHeight: parent ? parent.height : 0
@@ -74,21 +71,9 @@ Item {
         }
     }
 
-    WheelHandler {
+    WheelSteps {
         enabled: root.interactive
-        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
-        onWheel: (event) => {
-            event.accepted = true;
-            var delta = event.angleDelta.y !== 0 ? event.angleDelta.y : event.angleDelta.x;
-            // One detent is 120 units. Clamp so a flung touchpad cannot
-            // deliver a single enormous event.
-            root.wheelAccumulator += Math.max(-120, Math.min(120, delta));
-            while (Math.abs(root.wheelAccumulator) >= 120) {
-                var direction = root.wheelAccumulator > 0 ? 1 : -1;
-                root.wheelAccumulator -= direction * 120;
-                root.stepped(direction);
-            }
-        }
+        onStepped: (direction) => root.stepped(direction)
     }
 
     // The hand cursor has to sit on the MouseArea itself. Every MouseArea

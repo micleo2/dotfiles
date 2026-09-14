@@ -16,5 +16,6 @@ PopupSlider 1.0 PopupSlider.qml
 PopupToggle 1.0 PopupToggle.qml
 SectionLabel 1.0 SectionLabel.qml
 Shadow 1.0 Shadow.qml
+WheelSteps 1.0 WheelSteps.qml
 singleton Popups 1.0 Popups.qml
 singleton Readline 1.0 Readline.qml

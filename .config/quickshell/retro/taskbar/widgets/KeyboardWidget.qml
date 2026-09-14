@@ -11,8 +11,8 @@ import "../../keymap" as Keymap_
 //
 // The chip shows the active board's layer name from its exported keymap
 // (keymap/<board>.json) and scrolls the backlight. The popup has the backlight slider and
-// toggle, one row per layer to toggle it from the mouse, and a row that
-// opens the layout viewer.
+// toggle (scrolling over that section steps it too), one row per layer to
+// toggle it from the mouse, and a row that opens the layout viewer.
 //
 // Shown wherever the board is plugged in, subject to the modules map like
 // every other chip (Modules.allow).
@@ -75,24 +75,36 @@ Ui.Chip {
             }
         }
 
-        Ui.SectionLabel {
-            text: "Backlight"
-        }
+        // Scrolling anywhere over the section steps the backlight, as it does
+        // over the chip. The handler takes the wheel before the card's
+        // Flickable, so the popup does not scroll from under the pointer.
+        Column {
+            width: parent ? parent.width : 0
+            spacing: 6
 
-        Ui.PopupSlider {
-            rowKey: "level"
+            Ui.WheelSteps {
+                onStepped: (direction) => Qmk.adjust(direction * root.stepPercent)
+            }
 
-            stops: percentStops(root.stepPercent)
-            index: percentIndex(Qmk.percent, root.stepPercent)
-            onMoved: (index) => Qmk.set(stops[index])
-        }
+            Ui.SectionLabel {
+                text: "Backlight"
+            }
 
-        Ui.PopupToggle {
-            rowKey: "rgb"
+            Ui.PopupSlider {
+                rowKey: "level"
 
-            text: Qmk.rgbOn ? "RGB  " + Qmk.percent + "%" : "RGB  off"
-            checked: Qmk.rgbOn
-            onToggled: (value) => Qmk.setEnabled(value)
+                stops: percentStops(root.stepPercent)
+                index: percentIndex(Qmk.percent, root.stepPercent)
+                onMoved: (index) => Qmk.set(stops[index])
+            }
+
+            Ui.PopupToggle {
+                rowKey: "rgb"
+
+                text: Qmk.rgbOn ? "RGB  " + Qmk.percent + "%" : "RGB  off"
+                checked: Qmk.rgbOn
+                onToggled: (value) => Qmk.setEnabled(value)
+            }
         }
 
         Ui.SectionLabel {
