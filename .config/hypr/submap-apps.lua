@@ -32,13 +32,13 @@ local submap_options_per_key = {
 	e = make_submap_entry("google-messages", "GoogleMessages", { direct = true }),
 	f = make_submap_entry("freecad", "org.freecad.FreeCAD", { class = "org.freecad.FreeCAD" }),
 	i = make_submap_entry("inkscape", "org.inkscape.Inkscape", { class = "org.inkscape.Inkscape" }),
+	k = make_submap_entry("krita", "krita_png", { class = "krita" }),
 	l = make_submap_entry("moonlight", "com.moonlight_stream.Moonlight", { class = "com.moonlight_stream.Moonlight" }),
 	o = make_submap_entry("obsidian", "obsidian", { class = "md.obsidian.Obsidian" }),
 	s = make_submap_entry("spotify", "spotify-launcher", { class = "Spotify" }),
 	u = make_submap_entry("bambustudio", "com.bambulab.BambuStudio", { class = "BambuStudio" }),
 	y = make_submap_entry("yazi", "yazi", { direct = true }),
 	-- bottles apps
-	k = make_submap_entry("makera", "bottles-MakeraStudio-MakeraStudio", { title = "MakeraStudio" }),
 	p = make_submap_entry("photoshop", "bottles-Photoshop-2024-Photoshop", { title = "Adobe Photoshop 2024" }),
 	-- webapps
 	a = make_submap_entry("assistant", "HomeAssistant", { direct = true }),

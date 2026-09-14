@@ -105,6 +105,12 @@ hl.window_rule({
 	},
 	workspace = 7,
 })
+hl.window_rule({
+	match = {
+		class = "^(krita)$",
+	},
+	workspace = 7,
+})
 
 -- games 8
 hl.window_rule({
