@@ -22,13 +22,19 @@ Singleton {
     property string dmenuDir: ""
 
     // {text, detail, icon, id, line, search}: `search` is what fzf sees,
-    // `line` is what dmenu hands back.
-    property var items: []
+    // `line` is what dmenu hands back. The apps list is derived, not
+    // snapshotted: Quickshell fills DesktopEntries from the event loop after
+    // its first touch, so a page opened on a fresh shell would otherwise
+    // keep the empty first read.
+    readonly property var appItems: root.buildAppItems(DesktopEntries.applications.values, root.counts)
+    property var dmenuItems: []
+    readonly property var items: root.mode === "apps" ? root.appItems : root.dmenuItems
     property string query: ""
     // Indices into items, best first.
     property var matches: []
     property int selected: 0
     readonly property bool busy: matchTimer.running || matcher.running
+    // The query the last fzf run was for.
     property string matchFor: ""
 
     // Desktop entry id -> launches. Owned here and mirrored to the store: a
@@ -40,13 +46,26 @@ Singleton {
 
     function open() {
         root.screenName = Screens.focusedName;
-        matchTimer.stop();
         root.query = "";
-        root.matchFor = "";
-        root.matches = root.everything();
-        root.selected = 0;
         root.shown = true;
+        root.rematch();
         root.opened();
+    }
+
+    onItemsChanged: {
+        if (root.shown)
+            root.rematch();
+    }
+
+    function rematch() {
+        matchTimer.stop();
+        root.matchFor = "";
+        if (root.query === "") {
+            root.matches = root.everything();
+            root.selected = 0;
+        } else {
+            root.runMatch();
+        }
     }
 
     function dismiss() {
@@ -62,9 +81,6 @@ Singleton {
         root.answer("");
         root.mode = "apps";
         root.prompt = "APPS";
-        // Matches index into items, so they are cleared first.
-        root.matches = [];
-        root.items = root.appItems();
         root.open();
     }
 
@@ -87,7 +103,7 @@ Singleton {
         return out;
     }
 
-    readonly property var current: root.matches.length > 0 && root.selected < root.matches.length ? root.items[root.matches[root.selected]] : null
+    readonly property var current: (root.selected < root.matches.length ? root.items[root.matches[root.selected]] : null) || null
 
     function accept() {
         var item = root.current;
@@ -133,8 +149,7 @@ Singleton {
         Quickshell.execDetached(["sh", "-c", "printf '%s\\n' \"$1\" > \"$2\"", "_", line, fifo]);
     }
 
-    function appItems() {
-        var entries = DesktopEntries.applications.values;
+    function buildAppItems(entries, counts) {
         var out = [];
         for (var i = 0; i < entries.length; i++) {
             var entry = entries[i];
@@ -151,7 +166,7 @@ Singleton {
                 icon: entry.icon || "",
                 id: entry.id,
                 line: "",
-                count: root.counts[entry.id] || 0,
+                count: counts[entry.id] || 0,
                 search: [entry.name, entry.id, detail, entry.comment || "", keywords.join(" ")].join(" ")
             });
         }
@@ -181,17 +196,10 @@ Singleton {
     }
 
     onQueryChanged: {
-        var q = root.query;
-        if (q === "") {
-            matchTimer.stop();
-            root.matchFor = "";
-            root.matches = root.everything();
-            root.selected = 0;
-            return;
-        }
-        if (q === root.matchFor)
-            return;
-        matchTimer.restart();
+        if (root.query === "")
+            root.rematch();
+        else if (root.query !== root.matchFor)
+            matchTimer.restart();
     }
 
     Timer {
@@ -229,8 +237,9 @@ Singleton {
         // Process.exited carries a QProcess::ExitStatus that Quickshell does
         // not expose to QML, so qmllint cannot type the handler.
         onExited: { // qmllint disable signal-handler-parameters
-            var stale = root.matchFor !== root.query;
-            if (!stale) {
+            // A cleared query already has its list; a run for anything else
+            // is stale.
+            if (root.query !== "" && root.matchFor === root.query) {
                 var lines = matchOut.text.split("\n");
                 var out = [];
                 for (var i = 0; i < lines.length; i++) {
@@ -274,9 +283,8 @@ Singleton {
                     search: line
                 });
             }
+            root.dmenuItems = out;
             root.mode = "dmenu";
-            root.matches = [];
-            root.items = out;
             root.open();
         }
     }
