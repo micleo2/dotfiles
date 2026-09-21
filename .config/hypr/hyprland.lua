@@ -172,6 +172,19 @@ hl.gesture({
 	end,
 })
 
+-- Four-finger horizontal swipes cycle tabs in the focused app. Same down/up
+-- split as universal-clipboard.lua so the synthetic chord can't get stuck.
+local function swipe_shortcut(mods, key)
+	return function()
+		hl.dispatch(hl.dsp.send_key_state({ mods = mods, key = key, state = "down" }))
+		hl.timer(function()
+			hl.dispatch(hl.dsp.send_key_state({ mods = mods, key = key, state = "up" }))
+		end, { timeout = 50, type = "oneshot" })
+	end
+end
+hl.gesture({ fingers = 4, direction = "left", action = swipe_shortcut("CTRL", "Tab") })
+hl.gesture({ fingers = 4, direction = "right", action = swipe_shortcut("CTRL + SHIFT", "Tab") })
+
 ---------------------
 ---- KEYBINDINGS ----
 ---------------------
