@@ -52,7 +52,6 @@ sudo pacman -S --needed perl-file-mimeinfo
 
 # setup hyprland config files.
 ln -s ~/dotfiles/.config/hypr/ ~/.config/
-ln -s ~/dotfiles/ ~/.config/
 
 # app launcher + web app scripts
 mkdir -p ~/.local/bin

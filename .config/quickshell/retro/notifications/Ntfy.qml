@@ -6,8 +6,8 @@ import Quickshell.Io
 import ".."
 import "../services"
 
-// The server, topics and token are read from ntfy.json under the state dir
-// and never from the checkout; they still show in curl's /proc cmdline.
+// The server, topics and token are read from ntfy.json in the private
+// checkout and never from this one; they still show in curl's /proc cmdline.
 Singleton {
     id: root
 
@@ -105,7 +105,7 @@ Singleton {
     }
 
     JsonStore {
-        dir: Settings.stateDir
+        dir: Settings.privateDir + "/quickshell"
         name: "ntfy.json"
         onReady: root.loaded = true
 

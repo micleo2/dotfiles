@@ -16,6 +16,9 @@ Singleton {
     id: root
 
     readonly property string stateDir: (Quickshell.env("XDG_STATE_HOME") || (Quickshell.env("HOME") + "/.local/state")) + "/quickshell/retro"
+    // Shared private config (the dotfiles-private checkout), as opposed to
+    // the machine-written state above.
+    readonly property string privateDir: Quickshell.env("DOTFILES_PRIVATE") || (Quickshell.env("HOME") + "/dotfiles-private/common")
 
     property alias textSizePx: adapter.textSizePx
     property alias stayAwake: adapter.stayAwake

@@ -47,6 +47,10 @@ ln -sf ~/creative-synced/programming/arena/arena ~/.local/bin/
 
 # Setup dotfiles
 gh repo clone micleo2/dotfiles
+
+# Private half (addresses, hostnames, per-machine overrides) lives on the
+# Forgejo server; link.sh fills the public checkout's gitignored slots.
+git clone <forgejo>/mal/dotfiles-private ~/dotfiles-private && ~/dotfiles-private/link.sh
 mkdir ~/.config/nvim
 ln -s ~/dotfiles/.config/lazynvim ~/.config/nvim &&
   ln -sf ~/dotfiles/.config/fish/config.fish ~/.config/fish/config.fish &&
