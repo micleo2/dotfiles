@@ -30,6 +30,8 @@ Scope {
 
     Notifications_.Toasts {}
 
+    Notifications_.Ntfy {}
+
     Lock_.LockScreen {}
 
     Calc.CalcOverlay {}

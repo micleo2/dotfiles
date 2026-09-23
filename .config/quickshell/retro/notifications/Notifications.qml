@@ -142,7 +142,8 @@ Singleton {
             body: TextUtil.plain(notification.body),
             urgency: notification.urgency,
             expireTimeout: notification.expireTimeout,
-            transient: notification.transient === true
+            transient: notification.transient === true,
+            bypassDnd: notification.bypassDnd === true
         }, root.blocks);
     }
 
@@ -358,28 +359,8 @@ Singleton {
         // handler returns.
         notification.tracked = true;
 
-        var view = root.arm(notification);
-
-        // Dropped by a rule or a block: gone as if it never arrived. Logged
-        // because there is otherwise no trace of a block that turned out to
-        // be broader than it looked.
-        if (view.drop === true) {
-            console.info("notification dropped: app=" + notification.appName + " by=" + (view.blockedBy ? "block " + root.describeBlock(view.blockedBy) : "rule"));
-            root.drop(notification);
-            notification.dismiss();
+        if (!root.admit(notification))
             return;
-        }
-
-        // Silenced, by do-not-disturb or by a rule: straight to history.
-        // The transient hint means not worth looking back at, so not even
-        // there.
-        if (view.silent === true || (root.doNotDisturb && view.bypassDnd !== true)) {
-            if (!view.transient)
-                root.record(root.snapshot(notification, "silenced"));
-            root.drop(notification);
-            notification.dismiss();
-            return;
-        }
 
         notification.closed.connect(function (reason) {
             root.forget(notification, reason);
@@ -390,7 +371,70 @@ Singleton {
                 root.queueRefresh(notification);
             });
         }
+    }
+
+    // The gate every toast passes: rules, blocks, do-not-disturb. True once
+    // it is on screen.
+    function admit(notification) {
+        var view = root.arm(notification);
+
+        // Dropped by a rule or a block: gone as if it never arrived. Logged
+        // because there is otherwise no trace of a block that turned out to
+        // be broader than it looked.
+        if (view.drop === true) {
+            console.info("notification dropped: app=" + notification.appName + " by=" + (view.blockedBy ? "block " + root.describeBlock(view.blockedBy) : "rule"));
+            root.discard(notification);
+            return false;
+        }
+
+        // Silenced, by do-not-disturb or by a rule: straight to history.
+        // The transient hint means not worth looking back at, so not even
+        // there.
+        if (view.silent === true || (root.doNotDisturb && view.bypassDnd !== true)) {
+            if (!view.transient)
+                root.record(root.snapshot(notification, "silenced"));
+            root.discard(notification);
+            return false;
+        }
+
         root.popups = [notification].concat(root.popups);
+        return true;
+    }
+
+    // Off the books before it was shown. A posted object has no server to
+    // tell; its dismiss() would only log a close for a toast that never was.
+    function discard(notification) {
+        root.drop(notification);
+        if (notification.posted !== true)
+            notification.dismiss();
+    }
+
+    property int postSerial: 0
+
+    // A toast raised by the shell itself (the ntfy feed): the same plain
+    // shape withdraw() already runs through popups and lifetimes, through the
+    // same gate as a server notification. Null if it was kept off screen.
+    function post(fields) {
+        var posted = {
+            posted: true,
+            id: "post:" + (++root.postSerial),
+            appName: String(fields.appName || ""),
+            desktopEntry: String(fields.desktopEntry || ""),
+            summary: String(fields.summary || ""),
+            body: String(fields.body || ""),
+            urgency: fields.urgency === undefined ? NotificationUrgency.Normal : fields.urgency,
+            expireTimeout: fields.expireTimeout === undefined ? -1 : fields.expireTimeout,
+            transient: fields.transient === true,
+            bypassDnd: fields.bypassDnd === true,
+            actions: fields.actions || []
+        };
+        posted.dismiss = function () {
+            root.forget(posted, NotificationCloseReason.Dismissed);
+        };
+        posted.expire = function () {
+            root.forget(posted, NotificationCloseReason.Expired);
+        };
+        return root.admit(posted) ? posted : null;
     }
 
     // A replaces-id update lands as one signal per changed field; one rules
