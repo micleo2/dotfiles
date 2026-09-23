@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Pick an ssh host in the retro launcher and open it in kitty's ssh kitten.
 
-Hosts: $XDG_STATE_HOME/quickshell/retro/ssh-hosts, one target per line. A
+Hosts: $DOTFILES_PRIVATE/ssh-hosts (default ~/dotfiles-private/common), one
+target per line, shared between machines. A
 trailing `tmux` token attaches to (or creates) a tmux session named after
 the host instead of landing in a plain login shell.
 """
@@ -48,9 +49,8 @@ def parse_host(line: str) -> Host:
     return Host(line, ["-t", *target, "tmux", "new", "-A", "-s", session])
 
 
-def state_dir() -> Path:
-    base = os.environ.get("XDG_STATE_HOME") or str(Path.home() / ".local" / "state")
-    path = Path(base) / "quickshell" / "retro"
+def private_dir() -> Path:
+    path = Path(os.environ.get("DOTFILES_PRIVATE") or Path.home() / "dotfiles-private" / "common")
     path.mkdir(parents=True, exist_ok=True)
     return path
 
@@ -117,7 +117,7 @@ def main() -> int:
     )
     options = parser.parse_args()
 
-    host = pick(load_hosts(state_dir() / "ssh-hosts"))
+    host = pick(load_hosts(private_dir() / "ssh-hosts"))
     if host is None:
         return 1
     if options.print:
