@@ -1,3 +1,5 @@
+pragma Singleton
+
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -6,7 +8,7 @@ import "../services"
 
 // The server, topics and token are read from ntfy.json under the state dir
 // and never from the checkout; they still show in curl's /proc cmdline.
-Scope {
+Singleton {
     id: root
 
     readonly property string server: String(config.server || "").replace(/\/+$/, "")

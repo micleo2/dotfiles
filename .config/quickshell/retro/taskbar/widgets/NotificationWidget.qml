@@ -33,6 +33,14 @@ Ui.Chip {
         return urgency === NotificationUrgency.Low ? "info" : "mail";
     }
 
+    function ntfyState() {
+        if (!Ntfy.configured)
+            return "Not configured";
+        if (Ntfy.connected)
+            return "Connected";
+        return Ntfy.error !== "" ? "Error: " + Ntfy.error : "Connecting";
+    }
+
     Component.onCompleted: {
         if (root.primary)
             Notifications.panel = popup;
@@ -106,6 +114,32 @@ Ui.Chip {
         // The blocklist has no rows here on purpose: it is edited by hand in
         // notifications/blocks.json (or over IPC), and the store picks up
         // the edit live.
+
+        Ui.SectionLabel {
+            text: "ntfy"
+        }
+
+        Ui.PopupRow {
+            rowKey: "ntfy"
+
+            interactive: Ntfy.configured && !Ntfy.connected
+            glyph: Ntfy.connected ? "cloud_done" : "cloud_off"
+            text: root.ntfyState()
+            detail: Ntfy.configured && !Ntfy.connected ? "Retry" : ""
+            onClicked: Ntfy.reconnect()
+        }
+
+        Repeater {
+            model: Ntfy.connected ? Ntfy.topics : []
+
+            Ui.PopupRow {
+                required property string modelData
+
+                interactive: false
+                glyph: "tag"
+                text: modelData
+            }
+        }
 
         // The whole section is gone while nothing is being recorded; the
         // toggle above is the only trace of it.

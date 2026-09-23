@@ -2,4 +2,4 @@ module Notifications
 singleton Notifications 1.0 Notifications.qml
 Toasts 1.0 Toasts.qml
 LcdToast 1.0 LcdToast.qml
-Ntfy 1.0 Ntfy.qml
+singleton Ntfy 1.0 Ntfy.qml

@@ -30,7 +30,9 @@ Scope {
 
     Notifications_.Toasts {}
 
-    Notifications_.Ntfy {}
+    // A singleton loads on first reference, and the only other reader of
+    // Ntfy is the bell, which can be switched off; the stream runs regardless.
+    readonly property bool ntfy: Notifications_.Ntfy.configured
 
     Lock_.LockScreen {}
 
