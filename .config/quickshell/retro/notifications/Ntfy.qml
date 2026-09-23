@@ -6,14 +6,13 @@ import Quickshell.Io
 import ".."
 import "../services"
 
-// The server, topics and token are read from ntfy.json in the private
-// checkout and never from this one; they still show in curl's /proc cmdline.
+// The server and topics are read from ntfy.json in the private checkout
+// and never from this one; they still show in curl's /proc cmdline.
 Singleton {
     id: root
 
     readonly property string server: String(config.server || "").replace(/\/+$/, "")
     readonly property var topics: root.cleanTopics(config.topics)
-    readonly property string token: String(config.token || "")
     readonly property string endpoint: root.server !== "" && root.topics.length > 0 ? root.server + "/" + root.topics.join(",") : ""
     readonly property bool configured: root.endpoint !== ""
     property bool loaded: false
@@ -37,7 +36,6 @@ Singleton {
     }
 
     onEndpointChanged: root.reset()
-    onTokenChanged: root.reset()
 
     function reset() {
         root.since = "all";
@@ -114,7 +112,6 @@ Singleton {
 
             property string server: ""
             property var topics: []
-            property string token: ""
         }
     }
 
@@ -126,13 +123,7 @@ Singleton {
         // Offline, curl exits within a second every time; that is not a
         // broken command, so it is never given up on.
         maxShortExits: 1000000
-        command: {
-            var c = ["curl", "-sN", "--connect-timeout", "10"];
-            if (root.token !== "")
-                c.push("-H", "Authorization: Bearer " + root.token);
-            c.push(root.endpoint + "/json?since=" + root.since);
-            return c;
-        }
+        command: ["curl", "-sN", "--connect-timeout", "10", root.endpoint + "/json?since=" + root.since]
 
         stdout: SplitParser {
             onRead: (line) => root.handle(line)
