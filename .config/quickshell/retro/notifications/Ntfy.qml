@@ -81,7 +81,24 @@ Singleton {
         if (time < root.openedAt)
             return;
         var priority = Math.min(5, Math.max(1, Number(event.priority) || 3));
+        var body = String(event.message || "");
         var click = String(event.click || "");
+        // A server-side template can set the message but never click, so
+        // the Forgejo template ends its message with a "click: <url>" line
+        // instead. Only that labelled line is lifted out, into the click
+        // target and off the LCD; a URL that merely ends a message is text.
+        if (click === "") {
+            var lines = body.split("\n");
+            while (lines.length > 0 && lines[lines.length - 1].trim() === "")
+                lines.pop();
+            var last = lines.length > 0 ? lines[lines.length - 1].trim() : "";
+            var labelled = /^click:\s*(https?:\/\/\S+)$/.exec(last);
+            if (labelled) {
+                click = labelled[1];
+                lines.pop();
+                body = lines.join("\n");
+            }
+        }
         // Always a default action: without one invoke() falls back to
         // focusApp, whose substring match on a topic name like "main" can
         // land on an unrelated window.
@@ -89,7 +106,7 @@ Singleton {
             appName: String(event.topic || ""),
             desktopEntry: "ntfy",
             summary: String(event.title || ""),
-            body: String(event.message || ""),
+            body: body,
             urgency: priority <= 2 ? 0 : priority === 3 ? 1 : 2,
             bypassDnd: priority >= 5,
             actions: [{
