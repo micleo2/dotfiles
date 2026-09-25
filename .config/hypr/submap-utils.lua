@@ -30,6 +30,13 @@ local submap_options_per_key = {
 		label = "keymap",
 		exec_cmd = "qs -c retro ipc call keymap toggle",
 	},
+	-- speek: the syncthing selective-sync UI (~/oss/speek). Start its server as
+	-- the `speek` user unit if it isn't active (journalctl --user -u speek for
+	-- logs), then open/focus the webapp like the SUPER+A webapps.
+	e = {
+		label = "speek",
+		exec_cmd = "bash -c 'systemctl --user is-active -q speek || systemd-run --user --unit=speek --collect python3 ~/oss/speek/main.py --no-open; gtk-launch Speek'",
+	},
 }
 
 submap_builder.define_submap("utils", "SUPER+U", submap_options_per_key)
