@@ -27,7 +27,12 @@ end
 local submap_options_per_key = {
 	-- native apps
 	b = make_submap_entry("blender", "blender", { class = "blender" }),
-	c = make_submap_entry("chromium", "chromium", { direct = true }),
+	-- the one normal (non --app) window; a fresh one opens on workspace 4
+	c = {
+		label = "chromium",
+		desktop_file = "chromium",
+		exec_cmd = [[app-launch-or-focus '^chromium$' sh -c 'hyprctl dispatch "hl.dsp.focus({ workspace = 4 })" && gtk-launch chromium']],
+	},
 	d = make_submap_entry("discord", "discord", { class = "discord" }),
 	e = make_submap_entry("google-messages", "GoogleMessages", { direct = true }),
 	f = make_submap_entry("freecad", "org.freecad.FreeCAD", { class = "org.freecad.FreeCAD" }),
