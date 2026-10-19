@@ -17,6 +17,12 @@ show_symlink   = true
 scrolloff      = 5
 mouse_events   = [ "click", "scroll", "drag" ]
 
+[opener]
+inlyne = [{ run = "inlyne view %s1", orphan = true, desc = "Inlyne" }]
+
+[open]
+prepend_rules = [{ url = "*.md", use = ["inlyne", "edit"] }]
+
 # [preview]
 # wrap            = "no"
 # tab_size        = 2
