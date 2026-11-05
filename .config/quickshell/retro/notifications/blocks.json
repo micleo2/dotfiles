@@ -11,6 +11,10 @@
         {
             "app": "messenger",
             "text": "www.messenger.com"
+        },
+        {
+            "app": "Claude",
+            "text": "waiting for your input"
         }
     ]
 }
