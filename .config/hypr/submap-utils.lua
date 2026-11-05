@@ -37,6 +37,12 @@ local submap_options_per_key = {
 		label = "speek",
 		exec_cmd = "bash -c 'systemctl --user is-active -q speek || systemd-run --user --unit=speek --collect python3 ~/oss/speek/main.py --no-open; gtk-launch Speek'",
 	},
+	-- ntfyupload: pick files in a floating yazi and send each to the ntfy
+	-- `clipboard` topic; the server comes from the private ntfy.json.
+	u = {
+		label = "ntfy-upload",
+		exec_cmd = "ntfyupload",
+	},
 }
 
 submap_builder.define_submap("utils", "SUPER+U", submap_options_per_key)

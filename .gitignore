@@ -15,3 +15,6 @@ data
 .claude
 .opencode
 __pycache__
+
+# Installed from .config/yazi/package.toml by `ya pkg install`.
+.config/yazi/plugins/

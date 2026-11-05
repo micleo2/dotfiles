@@ -1,0 +1,38 @@
+#!/bin/bash
+# ntfyupload — attach files to the ntfy `clipboard` topic, one message each.
+# Files come from the arguments, or from a floating yazi chooser without any.
+# The server is `.server` in $DOTFILES_PRIVATE/quickshell/ntfy.json (default
+# ~/dotfiles-private/common), the same file the retro shell reads.
+# Deps: curl, jq, yazi, kitty, libnotify.
+
+topic=clipboard
+private=${DOTFILES_PRIVATE:-$HOME/dotfiles-private/common}
+server=$(jq -r '.server // empty' "$private/quickshell/ntfy.json" 2>/dev/null)
+shopt -s extglob
+server=${server%%+(/)}
+if [[ -z $server ]]; then
+	notify-send -u critical ntfyupload "no server in $private/quickshell/ntfy.json"
+	exit 1
+fi
+
+files=("$@")
+if ((${#files[@]} == 0)); then
+	chosen=$(mktemp)
+	trap 'rm -f "$chosen"' EXIT
+	# kitty blocks until yazi quits; the float rule matches the class prefix.
+	kitty --class kitty-float-ntfyupload yazi --chooser-file="$chosen"
+	mapfile -t files <"$chosen"
+fi
+
+failed=0
+for file in "${files[@]}"; do
+	[[ -f $file ]] || continue
+	name=$(basename -- "$file")
+	if curl -sSf -o /dev/null -T "$file" -H "Filename: $name" "$server/$topic"; then
+		notify-send ntfyupload "sent $name"
+	else
+		notify-send -u critical ntfyupload "upload failed: $name"
+		failed=1
+	fi
+done
+exit $failed

@@ -61,6 +61,7 @@ done
 
 ln -sf ~/dotfiles/scripts/retro-launcher ~/.local/bin/
 ln -sf ~/dotfiles/scripts/retro-ssh ~/.local/bin/
+ln -sf ~/dotfiles/scripts/ntfyupload ~/.local/bin/
 
 sudo pacman -S --needed hypridle
 systemctl --user enable --now hypridle.service
@@ -79,6 +80,8 @@ echo 'kitty.desktop' >~/.config/xdg-terminals.list
 
 # Install and setup yazi as the system file picker.
 sudo pacman -S --needed yazi ffmpeg 7zip jq poppler fd ripgrep fzf zoxide resvg imagemagick
+ln -s ~/dotfiles/.config/yazi/ ~/.config/
+ya pkg install
 paru -S xdg-desktop-portal-termfilechooser-hunkyburrito-git
 ln -s ~/dotfiles/.config/xdg-desktop-portal/ ~/.config/
 ln -s ~/dotfiles/.config/xdg-desktop-portal-termfilechooser/ ~/.config/
