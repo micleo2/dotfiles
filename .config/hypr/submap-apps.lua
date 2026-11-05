@@ -53,6 +53,7 @@ local submap_options_per_key = {
 	r = make_submap_entry("calendar", "Calendar", { direct = true }),
 	t = make_submap_entry("youtube", "YouTube", { direct = true }),
 	w = make_submap_entry("whatsapp", "WhatsApp", { direct = true }),
+	z = make_submap_entry("amazon", "Amazon", { direct = true }),
 }
 
 submap_builder.define_submap("apps", "SUPER+A", submap_options_per_key)
