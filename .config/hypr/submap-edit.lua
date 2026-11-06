@@ -8,7 +8,7 @@ local submap_builder = require("submap-builder")
 local submap_options_per_key = {
 	a = { label = "submap-apps.lua", exec_cmd = "kitty --class kitty-float-edit nvim ~/.config/hypr/submap-apps.lua" },
 	h = { label = "hyprland.lua", exec_cmd = "kitty --class kitty-float-edit nvim ~/.config/hypr/hyprland.lua" },
-	m = { label = "monitors.lua", exec_cmd = "kitty --class kitty-float-edit nvim ~/.config/hypr/monitors.lua" },
+	m = { label = "monitors.lua", exec_cmd = "kitty --class kitty-float-edit nvim ~/.config/hypr/local-monitors.lua" },
 }
 
 submap_builder.define_submap("edit", "SUPER+E", submap_options_per_key)

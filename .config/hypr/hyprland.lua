@@ -335,7 +335,11 @@ require("window-workspace-rules")
 -------------------
 ----- DISPLAY -----
 -------------------
-require("monitors")
+-- Per-machine displays, linked from dotfiles-private. Without it Hyprland
+-- gives every output its preferred mode with auto position and scale.
+if package.searchpath("local-monitors", package.path) then
+	require("local-monitors")
+end
 hl.env("QT_FONT_DPI", "192")
 -- Unscale XWayland to fix blurry applications
 hl.config({
