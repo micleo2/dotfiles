@@ -80,6 +80,10 @@ abbr --add uz unzip
 # --- VARIABLES
 set -Ux EDITOR nvim
 
+# DeepSeek Harness: disable OTel Session upload (any non-empty value).
+# Session-log upload and Desktop analytics are off in ~/.dsh/cordis.patch.yml.
+set -gx DSH_TELEMETRY_DISABLED 1
+
 # Setup zoxide
 # Never learn network mounts: a dead automount makes `zoxide query` stall
 # for 90s (see hypr SUPER+Z / SUPER+U,P). Overrides the $HOME-only default.
