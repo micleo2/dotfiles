@@ -1,0 +1,77 @@
+#!/usr/bin/env python3
+"""Install every web app in the dotfiles-private manifest.
+
+Usage: webapp-sync [--dry]
+Runs webapp-install --no-save for each app in webapps.toml (see
+webapps_manifest.py), with its icon from icons/, so re-running refreshes them.
+Installed web apps missing from the manifest are listed, never removed.
+  --dry    Print the webapp-install commands without running them.
+"""
+
+import argparse
+import os
+import shlex
+import subprocess
+import sys
+
+import webapps_manifest
+
+HERE = os.path.dirname(os.path.realpath(__file__))
+
+
+def install_command(name: str, fields: dict) -> list[str]:
+    icons = webapps_manifest.icon_files(name)
+    icon = icons[0] if icons else fields.get("icon", "")
+    cmd = [os.path.join(HERE, "webapp-install"), "--no-save"]
+    if fields.get("singleton") is False:
+        cmd.append("--singleton=0")
+    cmd += [name, fields["url"], icon, fields.get("exec", ""), fields.get("mime_types", "")]
+    return cmd
+
+
+def installed() -> list[str]:
+    out = subprocess.run(
+        [os.path.join(HERE, "webapp-remove"), "--list"], capture_output=True, text=True, check=False
+    ).stdout
+    return [line for line in out.splitlines() if line and line != "No web apps installed."]
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        prog="webapp-sync",
+        description="Install every web app in the dotfiles-private manifest.",
+    )
+    parser.add_argument("--dry", action="store_true", help="print the webapp-install commands without running them")
+    args = parser.parse_args()
+
+    apps = webapps_manifest.load()
+    if not apps:
+        print(f"No web apps in {webapps_manifest.MANIFEST}")
+        return 1
+
+    failed = []
+    for name, fields in apps.items():
+        if "url" not in fields:
+            print(f"Skipping {name}: no url")
+            failed.append(name)
+            continue
+        cmd = install_command(name, fields)
+        if args.dry:
+            print(shlex.join(cmd))
+            continue
+        if subprocess.run(cmd, check=False).returncode != 0:
+            failed.append(name)
+
+    unmanaged = [name for name in installed() if name not in apps]
+    if unmanaged:
+        print("Installed but not in the manifest (webapp-remove to drop, or re-run webapp-install to save):")
+        for name in unmanaged:
+            print(f"  {name}")
+    if failed:
+        print(f"Failed: {', '.join(failed)}", file=sys.stderr)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

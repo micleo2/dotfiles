@@ -1,28 +1,28 @@
 #!/usr/bin/env python3
 """Remove a web app desktop launcher (and its icon).
 
-Usage: webapp-remove [--dry] [--list] [name...]
+Usage: webapp-remove [--dry] [--list] [--keep-saved] [name...]
 Remove a web app desktop launcher (and its icon).
 Prints the removed file paths to stdout.
 With no name, lists all installed web apps and picks one interactively.
   --dry    Print the files that would be removed, without removing them.
   --list   List all installed web apps and exit.
+  --keep-saved  Leave the app in the dotfiles-private manifest
+                (webapps_manifest.py), so webapp-sync reinstalls it.
 """
 
 import argparse
 import os
-import re
 import shutil
 import subprocess
 import sys
 
+import webapps_manifest
+from webapps_manifest import safe_name
+
 ICON_DIR = os.path.expanduser("~/.local/share/icons/hicolor/256x256/apps")
 OLD_ICON_DIR = os.path.expanduser("~/.local/share/applications/icons")
 DESKTOP_DIR = os.path.expanduser("~/.local/share/applications")
-
-
-def safe_name(name: str) -> str:
-    return re.sub(r"^-+|-+$", "", re.sub(r"[^a-z0-9]+", "-", name.lower()))
 
 
 def die(msg: str) -> None:
@@ -71,6 +71,11 @@ def main() -> int:
     )
     parser.add_argument("--dry", action="store_true", help="print the files that would be removed, without removing them")
     parser.add_argument("--list", action="store_true", help="list all installed web apps and exit")
+    parser.add_argument(
+        "--keep-saved",
+        action="store_true",
+        help="leave the app in the dotfiles-private manifest, so webapp-sync reinstalls it",
+    )
     parser.add_argument("name", nargs="*", help="web app name (space-separated); omit to pick interactively")
     args = parser.parse_args()
 
@@ -99,23 +104,33 @@ def main() -> int:
     files = [
         f"{DESKTOP_DIR}/{app_name}.desktop",
         f"{ICON_DIR}/{icon_name}.png",
+        f"{ICON_DIR}/{icon_name}.svg",
         f"{ICON_DIR}/{app_name}.png",
         f"{OLD_ICON_DIR}/{app_name}.png",
     ]
     existing = [f for f in files if os.path.lexists(f)]
+    saved = webapps_manifest.load() if not args.keep_saved else {}
+    if app_name in saved:
+        existing += webapps_manifest.icon_files(app_name)
 
-    if not existing:
+    if not existing and app_name not in saved:
         print(f"Nothing to remove for {app_name}.")
         return 1
 
     if args.dry:
         for f in existing:
             print(f"Would remove: {f}")
+        if app_name in saved:
+            print(f"Would remove [{app_name}] from: {webapps_manifest.MANIFEST}")
         return 0
 
     for f in existing:
         os.remove(f)
         print(f"Removing: {f}")
+    if app_name in saved:
+        del saved[app_name]
+        webapps_manifest.save(saved)
+        print(f"Removed [{app_name}] from: {webapps_manifest.MANIFEST}")
     subprocess.run(
         ["update-desktop-database", DESKTOP_DIR],
         stdout=subprocess.DEVNULL,

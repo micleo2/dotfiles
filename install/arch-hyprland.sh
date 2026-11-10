@@ -55,7 +55,7 @@ ln -s ~/dotfiles/.config/hypr/ ~/.config/
 
 # app launcher + web app scripts
 mkdir -p ~/.local/bin
-for s in app-launch-or-focus webapp-install webapp-launch webapp-launch-or-focus webapp-remove; do
+for s in app-launch-or-focus webapp-install webapp-launch webapp-launch-or-focus webapp-remove webapp-sync; do
   ln -sf ~/dotfiles/scripts/apps/$s ~/.local/bin/
 done
 
