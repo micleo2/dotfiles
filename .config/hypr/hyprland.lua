@@ -5,8 +5,7 @@
 ---- AUTOSTART ----
 -------------------
 
--- Per-machine settings: local.lua when present, else the tracked defaults.
-local machine = package.searchpath("local", package.path) and require("local") or require("default-local")
+local lockscreen = require("private").load_host("lockscreen")
 
 -- Runs once per session (not on reload).
 hl.on("hyprland.start", function()
@@ -14,7 +13,7 @@ hl.on("hyprland.start", function()
 	-- 	"kitty +kitten panel -o clear_all_mouse_actions=no -o default_pointer_shape=arrow -o pointer_shape_when_dragging=arrow -o font_size=20 --edge=background ~/dotfiles/scripts/hypr/ttfx-background.sh"
 	-- )
 	-- The shell draws the wallpaper too, so nothing can show before the lock.
-	if machine.lock_on_start then
+	if lockscreen.lock_on_start then
 		hl.exec_cmd("RETRO_LOCK_ON_START=1 QT_FONT_DPI= qs -c retro")
 	else
 		hl.exec_cmd("QT_FONT_DPI= qs -c retro")
@@ -335,11 +334,8 @@ require("window-workspace-rules")
 -------------------
 ----- DISPLAY -----
 -------------------
--- Per-machine displays, linked from dotfiles-private. Without it Hyprland
--- gives every output its preferred mode with auto position and scale.
-if package.searchpath("local-monitors", package.path) then
-	require("local-monitors")
-end
+-- Per-machine displays, read from dotfiles-private.
+require("private").load_host("monitors")
 hl.env("QT_FONT_DPI", "192")
 -- Unscale XWayland to fix blurry applications
 hl.config({

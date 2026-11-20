@@ -1,8 +1,6 @@
 .DS_Store
 .config/fish/conf.d/work.fish
 .config/fish/conf.d/home.fish
-.config/hypr/local.lua
-.config/hypr/local-monitors.lua
 
 tt.*
 .tests
