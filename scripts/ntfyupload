@@ -1,12 +1,12 @@
 #!/bin/bash
 # ntfyupload — attach files to the ntfy `clipboard` topic, one message each.
 # Files come from the arguments, or from a floating yazi chooser without any.
-# The server is `.server` in $DOTFILES_PRIVATE/quickshell/ntfy.json (default
-# ~/dotfiles-private/common), the same file the retro shell reads.
+# The server is `.server` in $DOTFILES_PRIVATE/common/quickshell/ntfy.json
+# (default ~/dotfiles-private), the same file the retro shell reads.
 # Deps: curl, jq, yazi, kitty, libnotify.
 
 topic=clipboard
-private=${DOTFILES_PRIVATE:-$HOME/dotfiles-private/common}
+private=${DOTFILES_PRIVATE:-$HOME/dotfiles-private}/common
 server=$(jq -r '.server // empty' "$private/quickshell/ntfy.json" 2>/dev/null)
 shopt -s extglob
 server=${server%%+(/)}

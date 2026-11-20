@@ -1,6 +1,6 @@
 """The webapp manifest kept in dotfiles-private.
 
-$DOTFILES_PRIVATE/webapps/ (default ~/dotfiles-private/common/webapps) holds
+$DOTFILES_PRIVATE/common/webapps/ (default ~/dotfiles-private) holds
 webapps.toml, one table per app keyed by its desktop-file name, and
 icons/<safe-name>.<ext>. webapp-install and webapp-remove keep it current;
 webapp-sync installs from it.
@@ -16,7 +16,7 @@ import os
 import re
 import tomllib
 
-PRIVATE_DIR = os.environ.get("DOTFILES_PRIVATE") or os.path.expanduser("~/dotfiles-private/common")
+PRIVATE_DIR = os.path.join(os.environ.get("DOTFILES_PRIVATE") or os.path.expanduser("~/dotfiles-private"), "common")
 WEBAPPS_DIR = os.path.join(PRIVATE_DIR, "webapps")
 MANIFEST = os.path.join(WEBAPPS_DIR, "webapps.toml")
 ICONS_DIR = os.path.join(WEBAPPS_DIR, "icons")
