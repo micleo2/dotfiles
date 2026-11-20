@@ -60,7 +60,6 @@ for s in app-launch-or-focus webapp-install webapp-launch webapp-launch-or-focus
 done
 
 ln -sf ~/dotfiles/scripts/retro-launcher ~/.local/bin/
-ln -sf ~/dotfiles/scripts/retro-ssh ~/.local/bin/
 ln -sf ~/dotfiles/scripts/ntfyupload ~/.local/bin/
 
 sudo pacman -S --needed hypridle

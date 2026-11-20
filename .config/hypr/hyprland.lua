@@ -205,6 +205,7 @@ require("submap-layout")
 require("submap-edit")
 require("submap-topbar")
 require("submap-quickchat")
+require("private").load_common("ssh")
 -- SUPER + ? lists the submaps above with their activation keys; SUPER + /
 -- opens a searchable index of every entry in them. Both must come after the
 -- requires so every submap is registered.
