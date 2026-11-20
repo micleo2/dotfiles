@@ -58,16 +58,6 @@ Singleton {
         if (legacyPath !== "")
             return legacyPath;
 
-        // Classes we set ourselves extend the app's own one (kitty-ssh-<host>,
-        // kitty-float-btop), so drop trailing -segments until an icon exists.
-        const parts = application_name.split('-');
-        while (parts.length > 1) {
-            parts.pop();
-            const prefixPath = Quickshell.iconPath(parts.join('-'), true);
-            if (prefixPath !== "")
-                return prefixPath;
-        }
-
         return "";
     }
 
