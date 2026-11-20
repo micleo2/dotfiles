@@ -68,7 +68,7 @@ hl.window_rule({
 
 -- ssh sessions 5 (the SUPER+W submap in dotfiles-private common/hypr/ssh.lua)
 hl.window_rule({
-	match = { class = "^kitty-ssh-.*" },
+	match = { class = "^kitty$", title = "^ssh: .*" },
 	workspace = 5,
 })
 
