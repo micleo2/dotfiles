@@ -66,6 +66,12 @@ hl.window_rule({
 	workspace = 4,
 })
 
+-- ssh sessions 5 (the SUPER+W submap in dotfiles-private common/hypr/ssh.lua)
+hl.window_rule({
+	match = { class = "^kitty-ssh-.*" },
+	workspace = 5,
+})
+
 -- 3D creative work 6
 hl.window_rule({
 	match = {
