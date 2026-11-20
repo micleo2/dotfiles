@@ -66,12 +66,6 @@ hl.window_rule({
 	workspace = 4,
 })
 
--- ssh sessions 5 (the SUPER+W submap in dotfiles-private common/hypr/ssh.lua)
-hl.window_rule({
-	match = { class = "^kitty$", title = "^ssh: .*" },
-	workspace = 5,
-})
-
 -- 3D creative work 6
 hl.window_rule({
 	match = {
@@ -163,16 +157,6 @@ hl.window_rule({
 	match = { class = "hyprland-run" },
 	move = "20 monitor_h-120",
 	float = true,
-})
-
-hl.window_rule({
-	name = "kitty-float-utils",
-	-- class matching is RE2::FullMatch, so the pattern must consume the
-	-- whole class string ("kitty-float-btop").
-	match = { class = "^kitty-float.*" },
-	float = true,
-	center = true,
-	size = "1200 680",
 })
 
 -------------------------

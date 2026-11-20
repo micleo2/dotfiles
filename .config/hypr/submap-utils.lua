@@ -4,18 +4,9 @@
 -- driven by qalc underneath.
 local submap_builder = require("submap-builder")
 
--- Exec rules apply to the spawned process's own window, so btop and nvtop
--- float without a custom kitty class (which would cost kitty's icon and name
--- in the top bar).
-local function float_kitty(cmd)
-	return function()
-		hl.dispatch(hl.dsp.exec_cmd("kitty " .. cmd, { float = true, center = true, size = "1200 680" }))
-	end
-end
-
 local submap_options_per_key = {
-	b = { label = "btop", action = float_kitty("btop") },
-	n = { label = "nvtop", action = float_kitty("nvtop") },
+	b = { label = "btop", action = submap_builder.float("kitty btop") },
+	n = { label = "nvtop", action = submap_builder.float("kitty nvtop") },
 	-- copy-path: pick a zoxide directory in the shell's launcher (the SUPER+Z
 	-- list) and put it on the clipboard without a trailing newline.
 	p = {
@@ -44,7 +35,7 @@ local submap_options_per_key = {
 	-- `clipboard` topic; the server comes from the private ntfy.json.
 	u = {
 		label = "ntfy-upload",
-		exec_cmd = "ntfyupload",
+		action = submap_builder.float("ntfyupload"),
 	},
 }
 

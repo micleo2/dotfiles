@@ -19,8 +19,8 @@ files=("$@")
 if ((${#files[@]} == 0)); then
 	chosen=$(mktemp)
 	trap 'rm -f "$chosen"' EXIT
-	# kitty blocks until yazi quits; the float rule matches the class prefix.
-	kitty --class kitty-float-ntfyupload yazi --chooser-file="$chosen"
+	# kitty blocks until yazi quits. SUPER+U, u floats it with exec rules.
+	kitty yazi --chooser-file="$chosen"
 	mapfile -t files <"$chosen"
 fi
 
