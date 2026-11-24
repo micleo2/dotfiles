@@ -52,6 +52,16 @@
       "environment": {
         "HOPPER_LAUNCHER_PATH": "/opt/hopper/bin/Hopper"
       }
+    },
+    "solidcraft": {
+      "command": [
+        "solidcraft-cli",
+        "mcp",
+        "--allow-path",
+        "/home/mal/creative-synced/3d-printing"
+      ],
+      "enabled": true,
+      "type": "local"
     }
   }
 }
