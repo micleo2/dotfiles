@@ -40,7 +40,8 @@ local submap_options_per_key = {
 	l = make_submap_entry("moonlight", "com.moonlight_stream.Moonlight", { class = "com.moonlight_stream.Moonlight" }),
 	o = make_submap_entry("obsidian", "obsidian", { class = "md.obsidian.Obsidian" }),
 	s = make_submap_entry("spotify", "spotify-launcher", { class = "Spotify" }),
-	u = make_submap_entry("bambustudio", "com.bambulab.BambuStudio", { class = "BambuStudio" }),
+	u = make_submap_entry("orcaslicer", "com.orcaslicer.OrcaSlicer", { class = "orca-slicer" }),
+	x = make_submap_entry("solidcraft", "io.tangencylabs.solidcraft", { class = "io.tangencylabs.solidcraft" }),
 	y = make_submap_entry("yazi", "yazi", { direct = true }),
 	-- bottles apps
 	k = make_submap_entry("makera", "bottles-MakeraStudio-MakeraStudio", { title = "MakeraStudio" }),

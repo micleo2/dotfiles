@@ -81,7 +81,13 @@ hl.window_rule({
 })
 hl.window_rule({
 	match = {
-		class = "^(BambuStudio)$",
+		class = "^(orca-slicer)$",
+	},
+	workspace = 6,
+})
+hl.window_rule({
+	match = {
+		class = "^(io.tangencylabs.solidcraft)$",
 	},
 	workspace = 6,
 })
