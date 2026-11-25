@@ -40,19 +40,6 @@
     }
   },
   "mcp": {
-    "rea": {
-      "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "rea-agents@6.8.0",
-        "mcp"
-      ],
-      "enabled": true,
-      "environment": {
-        "HOPPER_LAUNCHER_PATH": "/opt/hopper/bin/Hopper"
-      }
-    },
     "solidcraft": {
       "command": [
         "solidcraft-cli",
