@@ -12,6 +12,21 @@ local submap_options_per_key = {
 	["SHIFT+R"] = { label = "toggle-recording-region", exec_cmd = "sleep 0.1 && gsr-ui-cli toggle-record-region" },
 	s = { label = "screenshot", exec_cmd = "sleep 0.1 && gsr-ui-cli take-screenshot" },
 	["SHIFT+S"] = { label = "screenshot-region", exec_cmd = "sleep 0.1 && gsr-ui-cli take-screenshot-region" },
+	w = { label = "screenshot-window", exec_cmd = "sleep 0.1 && ~/dotfiles/scripts/screenshot.sh window" },
+	-- CTRL variants: clipboard only, nothing saved to disk. gsr-ui has no
+	-- per-call switch for that, so these go through grim instead.
+	["CTRL+S"] = {
+		label = "screenshot-clipboard",
+		exec_cmd = "sleep 0.1 && ~/dotfiles/scripts/screenshot.sh screen --clipboard-only",
+	},
+	["CTRL+SHIFT+S"] = {
+		label = "screenshot-region-clipboard",
+		exec_cmd = "sleep 0.1 && ~/dotfiles/scripts/screenshot.sh region --clipboard-only",
+	},
+	["CTRL+W"] = {
+		label = "screenshot-window-clipboard",
+		exec_cmd = "sleep 0.1 && ~/dotfiles/scripts/screenshot.sh window --clipboard-only",
+	},
 }
 
 submap_builder.define_submap("screenshots", "SUPER+PRINT", submap_options_per_key)
