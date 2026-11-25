@@ -8,5 +8,10 @@ use = "walldmtd/blender-preview"
 rev = "5d824cb"
 hash = "cf3f2d8fab12595e6f09a6cca4734bf4"
 
+[[plugin.deps]]
+use = "yazi-rs/plugins:chmod"
+rev = "1ef5fe0"
+hash = "87472b05a8c420100f6a2b9cde1e7746"
+
 [flavor]
 deps = []
