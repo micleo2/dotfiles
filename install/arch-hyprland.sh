@@ -21,10 +21,12 @@ systemctl --user enable --now hyprpolkitagent.service
 #   wl-clipboard          wl-copy/wl-paste, behind SUPER+V and the cliphist watchers
 #   gtk3                  `gtk-launch`, how every SUPER+A entry starts its app
 #   playerctl, wireplumber  media and volume keys
-#   grim                  screen capture for scripts/ocr-region-select.sh
+#   grim, slurp           screen capture + region select for scripts/screenshot.sh and scripts/ocr-region-select.sh
+#   jq, libnotify         `hyprctl -j` parsing and `notify-send` in scripts/screenshot.sh
+#   tesseract, tesseract-data-eng  OCR engine + English data for scripts/ocr-region-select.sh
 #   wtype                 types Rocket League quick chats behind SUPER+N
 sudo pacman -S --needed quickshell cliphist libqalculate hyprpicker gpu-screen-recorder-ui \
-  wl-clipboard gtk3 playerctl wireplumber grim wtype
+  wl-clipboard gtk3 playerctl wireplumber grim slurp jq libnotify tesseract tesseract-data-eng wtype
 
 # from the AUR (paru is bootstrapped in arch-setup.sh):
 #   snappy-switcher  ALT+Tab switcher daemon
