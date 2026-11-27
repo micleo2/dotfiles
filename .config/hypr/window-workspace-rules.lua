@@ -61,10 +61,6 @@ hl.window_rule({
 	match = { title = ".*Home Assistant.*" },
 	workspace = 4,
 })
-hl.window_rule({
-	match = { class = ".*chrome-watch.*" },
-	workspace = 4,
-})
 
 -- 3D creative work 6
 hl.window_rule({
