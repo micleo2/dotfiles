@@ -197,7 +197,7 @@ local function C(key)
 	return "CTRL + " .. key
 end
 
-require("submap-apps")
+require("private").load_common("apps")
 require("submap-power")
 require("submap-screenshots")
 require("submap-utils")

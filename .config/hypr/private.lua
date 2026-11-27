@@ -44,6 +44,11 @@ function M.load_common(name)
 	return load(root .. "/common/hypr", name)
 end
 
+-- Path of <root>/common/hypr/<name>.lua, for opening it in an editor.
+function M.common_path(name)
+	return root .. "/common/hypr/" .. name .. ".lua"
+end
+
 -- Runs <root>/hosts/<hostname>/hypr/<name>.lua and returns its result.
 function M.load_host(name)
 	return load(root .. "/hosts/" .. hostname() .. "/hypr", name)
