@@ -22,25 +22,14 @@ hl.window_rule({
 	no_focus = true,
 })
 
--- Assign apps to workspaces.
+-- Assign apps to workspaces. Web apps and ssh windows are assigned in
+-- dotfiles-private (common/hypr/window-rules.lua), next to their definitions.
 
 -- communication 2
 hl.window_rule({
 	match = {
 		class = "^(discord)$",
 	},
-	workspace = 2,
-})
-hl.window_rule({
-	match = { class = ".*whatsapp.com.*" },
-	workspace = 2,
-})
-hl.window_rule({
-	match = { class = ".*messenger.com.*" },
-	workspace = 2,
-})
-hl.window_rule({
-	match = { class = ".*messages.google.com.*" },
 	workspace = 2,
 })
 
@@ -50,20 +39,6 @@ hl.window_rule({
 		class = "^(md.obsidian.Obsidian)$",
 	},
 	workspace = 3,
-})
-
--- utility apps 4
-hl.window_rule({
-	match = { class = ".*mail.google.com.*" },
-	workspace = 4,
-})
-hl.window_rule({
-	match = { title = ".*Home Assistant.*" },
-	workspace = 4,
-})
-hl.window_rule({
-	match = { class = ".*chrome-www.youtube.com.*" },
-	workspace = 4,
 })
 
 -- 3D creative work 6
@@ -155,6 +130,16 @@ hl.window_rule({
 		class = "^(Spotify)$",
 	},
 	workspace = 9,
+})
+
+-- Floating kitty windows: anything launched through submap-builder's
+-- kitty_float, or any kitty started with this title prefix.
+hl.window_rule({
+	name = "kitty-float",
+	match = { title = "^kitty-float: .*" },
+	float = true,
+	center = true,
+	size = "1200 680",
 })
 
 -- Hyprland-run windowrule

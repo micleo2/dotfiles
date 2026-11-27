@@ -173,19 +173,12 @@ function M.generate_helper_submap(activation_key)
 end
 
 -- An entry action that runs `cmd` with window rules for the windows it opens.
--- Hyprland hands exec rules down to child processes, so they also reach a
--- window opened by a wrapper (app-launch-or-focus) or a script (ntfyupload).
--- Unlike a class-matched window rule, nothing about the window changes, so
--- kitty keeps its own class, and with it its icon and name in the top bar.
-function M.exec_with_rules(cmd, rules)
-	return function()
-		hl.dispatch(hl.dsp.exec_cmd(cmd, rules))
-	end
-end
-
--- An entry action that runs `cmd` as a centered float.
-function M.float(cmd)
-	return M.exec_with_rules(cmd, { float = true, center = true, size = "1200 680" })
+-- An exec_cmd that runs `cmd` in a floating, centered kitty. The title prefix
+-- is what the kitty-float rule in window-workspace-rules.lua matches; a title
+-- match leaves kitty its own class, and with it its icon and name in the top
+-- bar. kitty --title pins the title, so `name` is all the window ever shows.
+function M.kitty_float(name, cmd)
+	return string.format("kitty --title 'kitty-float: %s' %s", name, cmd)
 end
 
 -- Fire the entry bound to `key` inside the submap opened by `activation_key`,

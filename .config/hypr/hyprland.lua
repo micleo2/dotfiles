@@ -331,6 +331,7 @@ hl.bind(
 )
 
 require("window-workspace-rules")
+require("private").load_common("window-rules")
 
 -------------------
 ----- DISPLAY -----

@@ -5,8 +5,8 @@
 local submap_builder = require("submap-builder")
 
 local submap_options_per_key = {
-	b = { label = "btop", action = submap_builder.float("kitty btop") },
-	n = { label = "nvtop", action = submap_builder.float("kitty nvtop") },
+	b = { label = "btop", exec_cmd = submap_builder.kitty_float("btop", "btop") },
+	n = { label = "nvtop", exec_cmd = submap_builder.kitty_float("nvtop", "nvtop") },
 	-- copy-path: pick a zoxide directory in the shell's launcher (the SUPER+Z
 	-- list) and put it on the clipboard without a trailing newline.
 	p = {
@@ -35,7 +35,7 @@ local submap_options_per_key = {
 	-- `clipboard` topic; the server comes from the private ntfy.json.
 	u = {
 		label = "ntfy-upload",
-		action = submap_builder.float("ntfyupload"),
+		exec_cmd = "ntfyupload",
 	},
 }
 
