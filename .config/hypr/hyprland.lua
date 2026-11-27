@@ -104,6 +104,8 @@ hl.config({
 	},
 	scrolling = {
 		fullscreen_on_one_column = true,
+		-- New columns take the full width instead of the default half.
+		column_width = 1.0,
 		direction = "right",
 		wrap_focus = true,
 	},
